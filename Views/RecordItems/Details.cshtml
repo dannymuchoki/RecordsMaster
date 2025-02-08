@@ -1,0 +1,15 @@
+@model RecordsMaster.Models.RecordItemModel
+
+<h2>Record Item Details</h2>
+
+<div>
+    <h3>CIS: @Model.CIS</h3>
+    <p>Barcode: @Model.BarCode</p>
+    <p>Record Type: @Model.RecordType</p>
+    <p>Box Number: @Model.BoxNumber</p>
+    <p>Digitized: @Model.Digitized</p>
+    <p>Closing Date: @Model.ClosingDate?.ToString("yyyy-MM-dd")</p>
+    <p>Destroy Date: @Model.DestroyDate?.ToString("yyyy-MM-dd")</p>
+</div>
+
+<a href="@Url.Action("Search", "RecordItems")" class="btn btn-secondary">Back to Search</a>

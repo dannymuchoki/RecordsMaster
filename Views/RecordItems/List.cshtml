@@ -1,0 +1,61 @@
+@model IEnumerable<RecordsMaster.Models.RecordItemModel>
+
+   @{
+       ViewData["Title"] = "Record Items";
+   }
+
+
+@if (!User.Identity.IsAuthenticated)
+{
+    <p>Access Denied</p>
+}
+else
+{
+
+    <h1>Record Items</h1>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>CIS</th>
+                <th>BarCode</th>
+                <th>Record Type</th>
+                <th>Box Number</th>
+                <th>Digitized</th>
+                <th>Closing Date</th>
+                <th>Destroy Date</th>
+                <th>Checked Out</th>
+                <th>Checked Out By</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CIS</td>
+                    <td>@item.BarCode</td>
+                    <td>@item.RecordType</td>
+                    <td>@item.BoxNumber</td>
+                    <td>@item.Digitized</td>
+                    <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if(item.DestroyDate.HasValue)
+                        {
+                            @item.DestroyDate.Value.ToString("yyyy-MM-dd")
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    </td>
+                    <td>
+                        @item.CheckedOut
+                    </td>
+                    <td>
+                        @item.CheckedOutBy
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+   }
