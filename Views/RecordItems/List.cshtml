@@ -1,9 +1,8 @@
 @model IEnumerable<RecordsMaster.Models.RecordItemModel>
 
-   @{
-       ViewData["Title"] = "Record Items";
-   }
-
+@{
+    ViewData["Title"] = "Record Items";
+}
 
 @if (!User.Identity.IsAuthenticated)
 {
@@ -11,7 +10,6 @@
 }
 else
 {
-
     <h1>Record Items</h1>
 
     <table class="table table-striped">
@@ -29,7 +27,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in Model.OrderBy(x => x.BarCode))
             {
                 <tr>
                     <td>@item.CIS</td>
@@ -48,14 +46,10 @@ else
                             <span>N/A</span>
                         }
                     </td>
-                    <td>
-                        @item.CheckedOut
-                    </td>
-                    <td>
-                        @item.CheckedOutBy
-                    </td>
+                    <td>@item.CheckedOut</td>
+                    <td>@item.CheckedOutBy</td>
                 </tr>
             }
         </tbody>
     </table>
-   }
+}
