@@ -35,7 +35,7 @@ namespace RecordsMaster.Data
                 {
                     ID =  new Guid("11111111-1111-1111-1111-111111111111"),
                     CIS = 1001,
-                    BarCode = "24-987654",
+                    BarCode = "24-98765",
                     RecordType = "Type A",
                     BoxNumber = 10,
                     Digitized = true,
@@ -46,7 +46,7 @@ namespace RecordsMaster.Data
                 {
                     ID = new Guid("22222222-2222-2222-2222-222222222222"),
                     CIS = 1002,
-                    BarCode = "24-987655",
+                    BarCode = "24-98766",
                     RecordType = "Type B",
                     BoxNumber = 20,
                     Digitized = false,

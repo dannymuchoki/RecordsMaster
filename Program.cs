@@ -23,7 +23,7 @@ public class Program
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
             dbContext.Database.Migrate(); // Apply migrations
-            //await SeedData.SeedDataAsync(dbContext, userManager); // Call the SeedData method
+            await SeedData.SeedDataAsync(dbContext, userManager); // Call the SeedData method
         }
 
         // Configure the HTTP request pipeline.

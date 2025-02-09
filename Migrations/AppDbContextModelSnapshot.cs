@@ -258,7 +258,7 @@ namespace RecordsMaster.Migrations
                         new
                         {
                             ID = new Guid("11111111-1111-1111-1111-111111111111"),
-                            BarCode = "24-987654",
+                            BarCode = "24-98765",
                             BoxNumber = 10,
                             CIS = 1001,
                             CheckedOut = false,
@@ -270,7 +270,7 @@ namespace RecordsMaster.Migrations
                         new
                         {
                             ID = new Guid("22222222-2222-2222-2222-222222222222"),
-                            BarCode = "24-987655",
+                            BarCode = "24-98766",
                             BoxNumber = 20,
                             CIS = 1002,
                             CheckedOut = false,

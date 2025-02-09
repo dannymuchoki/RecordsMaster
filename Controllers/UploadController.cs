@@ -176,15 +176,15 @@ namespace RecordsMaster.Controllers
 
             int newSequence = 1;
 
-            // If there is no previous barcode or it is empty, start at 000001.
+            // If there is no previous barcode or it is empty, start at 00001.
             if (string.IsNullOrEmpty(lastBarcode))
             {
                 newSequence = 1;
             }
             else
             {
-                // Expected format "YY-XXXXXX"
-                if (lastBarcode.Length >= 9)
+                // Expected format "YY-XXXXX" - 8 because the string is 8 characters long
+                if (lastBarcode.Length >= 8)
                 {
                     // Extract the two-digit year from the barcode.
                     if (int.TryParse(lastBarcode.Substring(0, 2), out int previousYear))
@@ -224,7 +224,7 @@ namespace RecordsMaster.Controllers
                 }
             }
 
-            string sequencePartFormatted = newSequence.ToString("D6");
+            string sequencePartFormatted = newSequence.ToString("D5");
             return $"{newYearPart}-{sequencePartFormatted}";
         }
     }

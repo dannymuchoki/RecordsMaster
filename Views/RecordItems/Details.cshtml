@@ -1,15 +1,33 @@
-@model RecordsMaster.Models.RecordItemModel
+@model IEnumerable<RecordsMaster.Models.RecordItemModel>
 
-<h2>Record Item Details</h2>
-
-<div>
-    <h3>CIS: @Model.CIS</h3>
-    <p>Barcode: @Model.BarCode</p>
-    <p>Record Type: @Model.RecordType</p>
-    <p>Box Number: @Model.BoxNumber</p>
-    <p>Digitized: @Model.Digitized</p>
-    <p>Closing Date: @Model.ClosingDate?.ToString("yyyy-MM-dd")</p>
-    <p>Destroy Date: @Model.DestroyDate?.ToString("yyyy-MM-dd")</p>
-</div>
-
+<h2>Record Items List</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>CIS</th>
+            <th>Barcode</th>
+            <th>Record Type</th>
+            <th>Box Number</th>
+            <th>Digitized</th>
+            <th>Closing Date</th>
+            <th>Destroy Date</th>
+            <th>Request This Reocrd</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.CIS</td>
+                <td>@item.BarCode</td>
+                <td>@item.RecordType</td>
+                <td>@item.BoxNumber</td>
+                <td>@(item.Digitized ? "Yes" : "No")</td>
+                <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
+                <td>@item.DestroyDate?.ToString("yyyy-MM-dd")</td>
+                <td><a href="#" class="btn btn-primary">Request</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
 <a href="@Url.Action("Search", "RecordItems")" class="btn btn-secondary">Back to Search</a>

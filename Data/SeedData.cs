@@ -12,7 +12,7 @@ namespace RecordsMaster.Data
     {
         public static async Task SeedDataAsync(AppDbContext context, UserManager<IdentityUser> userManager)
         {
-            await SeedUsersAsync(userManager);
+            await SeedUsersAsync(userManager); // Create the main admin user
         }
 
         private static async Task SeedUsersAsync(UserManager<IdentityUser> userManager)

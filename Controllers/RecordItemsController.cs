@@ -39,9 +39,13 @@ namespace RecordsMaster.Controllers
             {
                 return BadRequest("CIS value is required."); // Return 400 if no CIS is provided
             }
-
+            
+            // Only one search result
+            //var record = await _context.RecordItems
+                //.FirstOrDefaultAsync(r => r.CIS == cis);
             var record = await _context.RecordItems
-                .FirstOrDefaultAsync(r => r.CIS == cis);
+                .Where(r => r.CIS == cis)
+                .ToListAsync();
 
             if (record == null)
             {
