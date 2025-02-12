@@ -20,9 +20,10 @@ namespace RecordsMaster.Controllers
         // GET: RecordItems/List
         public async Task<IActionResult> List()
         {
-            // Fetch records asynchronously from the database
-            List<RecordItemModel> records = await _context.RecordItems.ToListAsync();
-
+            // Fetch records asynchronously including the CheckedOutTo user information.
+            List<RecordItemModel> records = await _context.RecordItems
+                                                    .Include(r => r.CheckedOutTo)
+                                                    .ToListAsync();
             return View(records); // Pass data to the view
         }
 

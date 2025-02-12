@@ -1,5 +1,4 @@
 @model IEnumerable<RecordsMaster.Models.RecordItemModel>
-
 @{
     ViewData["Title"] = "Record Items";
 }
@@ -11,7 +10,6 @@
 else
 {
     <h1>Record Items</h1>
-
     <table class="table table-striped">
         <thead>
             <tr>
@@ -31,32 +29,16 @@ else
             {
                 <tr>
                     <td>@item.CIS</td>
-                    <td>@item.BarCode</td>
+                    <td>@(item.BarCode ?? "N/A")</td>
                     <td>@item.RecordType</td>
-                    <td>@item.BoxNumber</td>
-                    <td>@item.Digitized</td>
-                    <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
+                    <td>@(item.BoxNumber.HasValue ? item.BoxNumber.ToString() : "N/A")</td>
+                    <td>@(item.Digitized ? "Yes" : "No")</td>
+                    <td>@(item.ClosingDate?.ToString("yyyy-MM-dd") ?? "N/A")</td>
                     <td>
-                        @if(item.DestroyDate.HasValue)
-                        {
-                            @item.DestroyDate.Value.ToString("yyyy-MM-dd")
-                        }
-                        else
-                        {
-                            <span>N/A</span>
-                        }
+                        @(item.DestroyDate.HasValue ? item.DestroyDate.Value.ToString("yyyy-MM-dd") : "N/A")
                     </td>
-                    <td>@item.CheckedOut</td>
-                                        <td>
-                        @if (item.CheckedOutTo != null)
-                        {
-                            @item.CheckedOutTo.UserName
-                        }
-                        else
-                        {
-                            <span>N/A</span>
-                        }
-                    </td>
+                    <td>@(item.CheckedOut ? "Yes" : "No")</td>
+                    <td>@(item.CheckedOutTo?.UserName ?? "N/A")</td>
                 </tr>
             }
         </tbody>
