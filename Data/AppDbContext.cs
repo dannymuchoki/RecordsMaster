@@ -1,39 +1,48 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RecordsMaster.Models;
+using System;
 
 namespace RecordsMaster.Data
 {
-    //AppDbContext is how to get to the database via the views.
-    public class AppDbContext : IdentityDbContext<IdentityUser>
+    // Now using ApplicationUser as the Identity user model.
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
-        //Call the DbContextOptions constructor and the options class
         public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options) { } //pass the options 
+            : base(options)
+        { }
 
-        // Only need one DbSet because there's only one model
-        public DbSet<RecordItemModel> RecordItems { get; set; } // Table for RecordItemModel entities. Use this in the controllers. C# tradition is that the DbSet property name is pluralized 
+        // Table for RecordItemModel entities.
+        public DbSet<RecordItemModel> RecordItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder); // Ensure Identity tables are configured correctly
+            // Call the base OnModelCreating to ensure Identity tables are configured.
+            base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<RecordItemModel>().HasKey(r => r.ID); // Define primary key
+            // Configure the RecordItemModel's primary key and properties.
+            modelBuilder.Entity<RecordItemModel>().HasKey(r => r.ID);
 
             modelBuilder.Entity<RecordItemModel>().Property(r => r.BarCode)
                 .IsRequired()
-                .HasMaxLength(100); // Match model constraints
+                .HasMaxLength(100);
 
             modelBuilder.Entity<RecordItemModel>().Property(r => r.RecordType)
                 .IsRequired()
                 .HasMaxLength(50);
 
-            // Seed test data
+            // Configure the one-to-many relationship:
+            // One ApplicationUser can have many RecordItemModel records checked out.
+            modelBuilder.Entity<RecordItemModel>()
+                .HasOne(r => r.CheckedOutTo)
+                .WithMany(u => u.CheckedOutRecords)
+                .HasForeignKey(r => r.CheckedOutToId);
+
+            // Seed test data for RecordItemModel (adjust or remove as needed).
             modelBuilder.Entity<RecordItemModel>().HasData(
                 new RecordItemModel
                 {
-                    ID =  new Guid("11111111-1111-1111-1111-111111111111"),
+                    ID = new Guid("11111111-1111-1111-1111-111111111111"),
                     CIS = 1001,
                     BarCode = "24-98765",
                     RecordType = "Type A",

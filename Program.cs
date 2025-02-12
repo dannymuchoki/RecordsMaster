@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using RecordsMaster.Data; //this is where AppDbContext lives.
+using RecordsMaster.Data;
+using RecordsMaster.Models; // For ApplicationUser
 
 public class Program
 {
@@ -11,19 +12,27 @@ public class Program
         // Add services to the container.
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-        builder.Services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<AppDbContext>();
+
+        // Use ApplicationUser with Identity and add role support TOOK TOO LONG TO WORK OUT OMG
+        builder.Services.AddDefaultIdentity<ApplicationUser>()
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<AppDbContext>();
+
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
 
-        // Apply migrations and seed data dynamically
+        // Apply migrations and seed data dynamically.
         using (var scope = app.Services.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             dbContext.Database.Migrate(); // Apply migrations
-            await SeedData.SeedDataAsync(dbContext, userManager); // Call the SeedData method
+
+            // Now pass the roleManager along with dbContext and userManager.
+            await SeedData.SeedDataAsync(dbContext, userManager, roleManager);
         }
 
         // Configure the HTTP request pipeline.
@@ -41,7 +50,6 @@ public class Program
         app.UseStaticFiles();
 
         app.UseRouting();
-
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -67,5 +75,3 @@ public class Program
         app.Run();
     }
 }
-
-

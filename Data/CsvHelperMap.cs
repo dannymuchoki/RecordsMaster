@@ -19,9 +19,8 @@ public sealed class CsvHelperMap : ClassMap<RecordItemModel>
         Map(m => m.Digitized).Index(4).TypeConverter<BooleanTypeConverter>();
         Map(m => m.ClosingDate).Index(5);
         Map(m => m.DestroyDate).Index(6);
-        //Map(m => m.CheckedOut).Index(7);
         Map(m => m.CheckedOut).Index(7).TypeConverter<BooleanTypeConverter>();
-        Map(m => m.CheckedOutBy).Index(8);
+        Map(m => m.CheckedOutTo).Ignore();
         
     }
 }

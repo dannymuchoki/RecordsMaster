@@ -53,26 +53,6 @@ namespace RecordsMaster.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RecordItems",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CIS = table.Column<int>(type: "INTEGER", nullable: false),
-                    BarCode = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    RecordType = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    BoxNumber = table.Column<int>(type: "INTEGER", nullable: true),
-                    Digitized = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ClosingDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    DestroyDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    CheckedOut = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CheckedOutBy = table.Column<string>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RecordItems", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -178,9 +158,34 @@ namespace RecordsMaster.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RecordItems",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CIS = table.Column<int>(type: "INTEGER", nullable: false),
+                    BarCode = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    RecordType = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    BoxNumber = table.Column<int>(type: "INTEGER", nullable: true),
+                    Digitized = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ClosingDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    DestroyDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CheckedOut = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CheckedOutToId = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RecordItems", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_RecordItems_AspNetUsers_CheckedOutToId",
+                        column: x => x.CheckedOutToId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.InsertData(
                 table: "RecordItems",
-                columns: new[] { "ID", "BarCode", "BoxNumber", "CIS", "CheckedOut", "CheckedOutBy", "ClosingDate", "DestroyDate", "Digitized", "RecordType" },
+                columns: new[] { "ID", "BarCode", "BoxNumber", "CIS", "CheckedOut", "CheckedOutToId", "ClosingDate", "DestroyDate", "Digitized", "RecordType" },
                 values: new object[,]
                 {
                     { new Guid("11111111-1111-1111-1111-111111111111"), "24-98765", 10, 1001, false, null, new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Type A" },
@@ -223,6 +228,11 @@ namespace RecordsMaster.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RecordItems_CheckedOutToId",
+                table: "RecordItems",
+                column: "CheckedOutToId");
         }
 
         /// <inheritdoc />

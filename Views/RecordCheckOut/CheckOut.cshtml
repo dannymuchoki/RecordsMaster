@@ -1,0 +1,81 @@
+@model RecordsMaster.Models.RecordItemModel
+
+@{
+    ViewData["Title"] = "Record Details";
+}
+
+<h2>Record Details</h2>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info">
+        @TempData["Message"]
+    </div>
+}
+
+<table class="table table-bordered">
+    <tr>
+        <th>CIS</th>
+        <td>@Model.CIS</td>
+    </tr>
+    <tr>
+        <th>Barcode</th>
+        <td>@Model.BarCode</td>
+    </tr>
+    <tr>
+        <th>Record Type</th>
+        <td>@Model.RecordType</td>
+    </tr>
+    <tr>
+        <th>Box Number</th>
+        <td>@Model.BoxNumber</td>
+    </tr>
+    <tr>
+        <th>Digitized</th>
+        <td>@(Model.Digitized ? "Yes" : "No")</td>
+    </tr>
+    <tr>
+        <th>Closing Date</th>
+        <td>@Model.ClosingDate?.ToString("yyyy-MM-dd")</td>
+    </tr>
+    <tr>
+        <th>Destroy Date</th>
+        <td>@Model.DestroyDate?.ToString("yyyy-MM-dd")</td>
+    </tr>
+    <tr>
+        <th>Status</th>
+        <td>@(Model.CheckedOut ? "Checked Out" : "Available")</td>
+    </tr>
+    @if (Model.CheckedOut && Model.CheckedOutTo != null)
+    {
+        <tr>
+            <th>Checked Out To</th>
+            <td>@Model.CheckedOutTo.UserName</td>
+        </tr>
+    }
+</table>
+
+@if (!Model.CheckedOut)
+{
+    <h3>Check Out this Record</h3>
+    <p>Do you want to check out this record?</p>
+    @using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <input type="submit" value="Check Out" class="btn btn-primary" />
+    }
+}
+else
+{
+    <h3>Check In this Record</h3>
+    <p>This record is currently checked out.</p>
+    @using (Html.BeginForm("CheckIn", "RecordCheckIn", new { id = Model.ID }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <input type="submit" value="Check In" class="btn btn-danger" />
+    }
+}
+
+<p class="m-2">
+    <a href="@Url.Action("Index", "RecordItems")" class="btn btn-secondary">Back to List</a>
+</p>

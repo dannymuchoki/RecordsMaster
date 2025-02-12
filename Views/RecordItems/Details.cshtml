@@ -1,6 +1,6 @@
 @model IEnumerable<RecordsMaster.Models.RecordItemModel>
 
-<h2>Record Items List</h2>
+<h2>Record Item Detail</h2>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -11,7 +11,7 @@
             <th>Digitized</th>
             <th>Closing Date</th>
             <th>Destroy Date</th>
-            <th>Request This Reocrd</th>
+            <th>Checkout This Record</th>
         </tr>
     </thead>
     <tbody>
@@ -25,7 +25,29 @@
                 <td>@(item.Digitized ? "Yes" : "No")</td>
                 <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
                 <td>@item.DestroyDate?.ToString("yyyy-MM-dd")</td>
-                <td><a href="#" class="btn btn-primary">Request</a></td>
+                <td>
+                    @if (!item.CheckedOut)
+                    {
+                        using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            <input type="submit" value="Checkout" class="btn btn-primary" />
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">Checked Out</span>
+                        //@* Only display the check in form to admin users *@
+                        //@if (User.IsInRole("Admin"))
+                        //{
+                            using (Html.BeginForm("CheckIn", "RecordCheckIn", new { id = item.ID }, FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="submit" value="Check in" class="btn btn-primary" />
+                            }
+                        //}
+                    }
+                </td>
             </tr>
         }
     </tbody>

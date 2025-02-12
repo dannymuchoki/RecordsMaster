@@ -23,7 +23,7 @@ else
                 <th>Closing Date</th>
                 <th>Destroy Date</th>
                 <th>Checked Out</th>
-                <th>Checked Out By</th>
+                <th>Checked Out To</th>
             </tr>
         </thead>
         <tbody>
@@ -47,7 +47,16 @@ else
                         }
                     </td>
                     <td>@item.CheckedOut</td>
-                    <td>@item.CheckedOutBy</td>
+                                        <td>
+                        @if (item.CheckedOutTo != null)
+                        {
+                            @item.CheckedOutTo.UserName
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
