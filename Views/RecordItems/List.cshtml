@@ -18,6 +18,7 @@ else
                 <th>Record Type</th>
                 <th>Box Number</th>
                 <th>Digitized</th>
+                <th>Location</th>
                 <th>Closing Date</th>
                 <th>Destroy Date</th>
                 <th>Checked Out</th>
@@ -33,6 +34,7 @@ else
                     <td>@item.RecordType</td>
                     <td>@(item.BoxNumber.HasValue ? item.BoxNumber.ToString() : "N/A")</td>
                     <td>@(item.Digitized ? "Yes" : "No")</td>
+                    <td>@(item.Location)</td>
                     <td>@(item.ClosingDate?.ToString("yyyy-MM-dd") ?? "N/A")</td>
                     <td>
                         @(item.DestroyDate.HasValue ? item.DestroyDate.Value.ToString("yyyy-MM-dd") : "N/A")

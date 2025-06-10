@@ -3,7 +3,7 @@
 }
  @if (User.Identity.IsAuthenticated){
 <form method="get" action="@Url.Action("SearchByCIS", "RecordItems")">
-    <div class="form-group m-1">
+    <div class="form-group m-1 p-2">
         <label for="CIS">Enter CIS:</label>
         <input type="number" name="cis" id="CIS" class="form-control" required />
     </div>

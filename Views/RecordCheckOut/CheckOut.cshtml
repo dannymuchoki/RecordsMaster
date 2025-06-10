@@ -67,12 +67,15 @@
 }
 else
 {
-    <h3>Check In this Record</h3>
-    <p>This record is currently checked out.</p>
-    @using (Html.BeginForm("CheckIn", "RecordCheckIn", new { id = Model.ID }, FormMethod.Post))
-    {
-        @Html.AntiForgeryToken()
-        <input type="submit" value="Check In" class="btn btn-danger" />
+    @if (User.IsInRole("Admin")){
+
+        <h3>Check In this Record</h3>
+        <p>This record is currently checked out.</p>
+        @using (Html.BeginForm("CheckIn", "RecordCheckIn", new { id = Model.ID }, FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="submit" value="Check In" class="btn btn-danger" />
+        }
     }
 }
 

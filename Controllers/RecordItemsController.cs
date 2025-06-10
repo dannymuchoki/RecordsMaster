@@ -38,17 +38,19 @@ namespace RecordsMaster.Controllers
         {
             if (cis == null)
             {
-                return BadRequest("CIS value is required."); // Return 400 if no CIS is provided
+                return BadRequest("CIS value is required."); // Return 400 if no CIS is provided, but the view manages this in HTML. Will not let user search without a number
             }
             
-            var record = await _context.RecordItems
+            // Turn the results into a list. 
+            var record = await _context.RecordItems 
                 .Where(r => r.CIS == cis)
                 .ToListAsync();
 
-            if (record == null)
+            if (record.Count == 0 || !record.Any())
             {
                 return View("NotFound"); // Return NotFound view if no record is found
             }
+            
 
             return View("Details", record); // Display the record details in the Details view
         }

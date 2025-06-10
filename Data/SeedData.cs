@@ -1,45 +1,36 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using RecordsMaster.Models;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace RecordsMaster.Data
 {
     public static class SeedData
     {
-        // Modify SeedDataAsync to accept a RoleManager, in addition to UserManager.
+        // Creates the admin user and test user.
         public static async Task SeedDataAsync(AppDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             // Seed roles before seeding users
             await SeedRolesAsync(roleManager);
-            await SeedUsersAsync(userManager);
+            await SeedUsersAsync(userManager);  // Creates the admin user
+            await SeedTestUserAsync(userManager); // Call to seed 'test-user'
         }
 
-        // Check for the existence of roles. Create ones that are missing.
         private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
         {
-            // Example role: "Admin"
             if (!await roleManager.RoleExistsAsync("Admin"))
             {
                 await roleManager.CreateAsync(new IdentityRole("Admin"));
             }
-
-            // add additional roles here if you want
-            // if (!await roleManager.RoleExistsAsync("User"))
-            // {
-            //     await roleManager.CreateAsync(new IdentityRole("User"));
-            // }
+            if (!await roleManager.RoleExistsAsync("User"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("User"));
+            }
         }
 
-        // Seed our admin user and assign the Admin role.
         private static async Task SeedUsersAsync(UserManager<ApplicationUser> userManager)
         {
             string defaultEmail = "admin@example.com";
             string defaultPassword = "Admin@123"; // Replace with a stronger password for production
 
-            // Check if the admin user exists.
             ApplicationUser adminUser = await userManager.FindByEmailAsync(defaultEmail);
             if (adminUser == null)
             {
@@ -48,14 +39,46 @@ namespace RecordsMaster.Data
                     UserName = defaultEmail,
                     Email = defaultEmail,
                     EmailConfirmed = true
-                    // The CheckedOutRecords navigation property is automatically instantiated
                 };
 
                 IdentityResult result = await userManager.CreateAsync(adminUser, defaultPassword);
                 if (result.Succeeded)
                 {
-                    // Assign the "Admin" role to the new user.
                     await userManager.AddToRoleAsync(adminUser, "Admin");
+                }
+            }
+        }
+
+        private static async Task SeedTestUserAsync(UserManager<ApplicationUser> userManager)
+        {
+            string testUserEmail = "test@example.com"; 
+            string testUserPassword = "Test@123"; // passwords can't have hyphens
+        
+            // Check if 'test-user@example.com' already exists
+            var existingUser = await userManager.FindByEmailAsync(testUserEmail);
+            if (existingUser == null)
+            {
+                var testUser = new ApplicationUser
+                {
+                    UserName = testUserEmail,
+                    Email = testUserEmail,
+                    EmailConfirmed = true
+                };
+
+                var result = await userManager.CreateAsync(testUser, testUserPassword);
+                // Assign the role
+                if (result.Succeeded)
+                {
+                    // assign the 'User' role:
+                    await userManager.AddToRoleAsync(testUser, "User");
+                }
+                else
+                {
+                    // Handle errors
+                    foreach (var error in result.Errors)
+                    {
+                        Console.WriteLine($"Error creating test user: {error.Description}");
+                    }
                 }
             }
         }

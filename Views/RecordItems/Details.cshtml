@@ -28,15 +28,27 @@
                 <td>
                     @if (!item.CheckedOut)
                     {
-                        using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
+                        if (User.IsInRole("Admin"))
                         {
-                            @Html.AntiForgeryToken()
-                            <input type="submit" value="Check out" class="btn btn-success" />
+                            using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                            <input type="submit" value="Check out" class="btn btn-primary" />
+                            }    
                         }
+                        if (User.IsInRole("User"))
+                        {
+                            using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                            <input type="submit" value="Request" class="btn btn-primary" />
+                            }    
+                        }
+
                     }
                     else
                     {
-                        <span class="text-muted">Checked Out</span>
+                        
                         //@* Only display the check in form to admin users *@
                         //@if (User.IsInRole("Admin"))
                         //{

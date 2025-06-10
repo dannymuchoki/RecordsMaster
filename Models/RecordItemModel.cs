@@ -23,6 +23,10 @@ namespace RecordsMaster.Models
         [StringLength(50)]
         public string RecordType { get; set; }
 
+        [Required]
+        [StringLength(128)]
+        public string Location { get; set; }
+
         [Range(1, int.MaxValue, ErrorMessage = "Box Number must be a positive integer.")]
         public int? BoxNumber { get; set; }
 
@@ -43,7 +47,7 @@ namespace RecordsMaster.Models
 
     }
 
-    // This class merges the ASP.NET Identity user with your custom properties, so just build the user with Identity user. 
+    // This class merges the ASP.NET Identity user with your custom properties, so just build the user with Identity user. No need to make a custom model. 
     public class ApplicationUser : IdentityUser
     {
         // Navigation property: one ApplicationUser can have many RecordItemModel records checked out.

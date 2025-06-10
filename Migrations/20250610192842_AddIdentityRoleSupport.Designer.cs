@@ -11,8 +11,8 @@ using RecordsMaster.Data;
 namespace RecordsMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250212015509_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250610192842_AddIdentityRoleSupport")]
+    partial class AddIdentityRoleSupport
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -248,6 +248,11 @@ namespace RecordsMaster.Migrations
                     b.Property<bool>("Digitized")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("RecordType")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -270,6 +275,7 @@ namespace RecordsMaster.Migrations
                             ClosingDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DestroyDate = new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Digitized = true,
+                            Location = "Records Room",
                             RecordType = "Type A"
                         },
                         new
@@ -282,6 +288,7 @@ namespace RecordsMaster.Migrations
                             ClosingDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DestroyDate = new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Digitized = false,
+                            Location = "Records Room",
                             RecordType = "Type B"
                         });
                 });

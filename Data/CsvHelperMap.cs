@@ -15,11 +15,12 @@ public sealed class CsvHelperMap : ClassMap<RecordItemModel>
         Map(m => m.CIS).Index(0);
         Map(m => m.BarCode).Index(1);
         Map(m => m.RecordType).Index(2);
-        Map(m => m.BoxNumber).Index(3);
-        Map(m => m.Digitized).Index(4).TypeConverter<BooleanTypeConverter>();
-        Map(m => m.ClosingDate).Index(5);
-        Map(m => m.DestroyDate).Index(6);
-        Map(m => m.CheckedOut).Index(7).TypeConverter<BooleanTypeConverter>();
+        Map(m => m.RecordType).Index(3);
+        Map(m => m.BoxNumber).Index(4);
+        Map(m => m.Digitized).Index(5).TypeConverter<BooleanTypeConverter>();
+        Map(m => m.ClosingDate).Index(6);
+        Map(m => m.DestroyDate).Index(7);
+        Map(m => m.CheckedOut).Index(8).TypeConverter<BooleanTypeConverter>();
         Map(m => m.CheckedOutTo).Ignore();
         
     }
