@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using RecordsMaster.Data;
 using RecordsMaster.Models; // For ApplicationUser
+// For ActiveDirectory  (below)
+//using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+// using Microsoft.Identity.Web; 
 
 public class Program
 {
@@ -17,6 +20,12 @@ public class Program
         builder.Services.AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();
+
+        // Add authentication with Microsoft Identity Web (Azure AD)
+        //builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+        //    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+
+        //builder.Services.AddAuthorization();
 
         builder.Services.AddControllersWithViews();
 

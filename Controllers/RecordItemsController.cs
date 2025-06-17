@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // For ToListAsync
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using RecordsMaster.Data;
 
 namespace RecordsMaster.Controllers
 {
+    [Authorize]
     public class RecordItemsController : Controller
     {
         private readonly AppDbContext _context;
@@ -40,9 +42,9 @@ namespace RecordsMaster.Controllers
             {
                 return BadRequest("CIS value is required."); // Return 400 if no CIS is provided, but the view manages this in HTML. Will not let user search without a number
             }
-            
+
             // Turn the results into a list. 
-            var record = await _context.RecordItems 
+            var record = await _context.RecordItems
                 .Where(r => r.CIS == cis)
                 .ToListAsync();
 
@@ -50,7 +52,7 @@ namespace RecordsMaster.Controllers
             {
                 return View("NotFound"); // Return NotFound view if no record is found
             }
-            
+
 
             return View("Details", record); // Display the record details in the Details view
         }

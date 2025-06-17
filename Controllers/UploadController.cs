@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using CsvHelper;
@@ -14,6 +15,7 @@ using System.Diagnostics;
 
 namespace RecordsMaster.Controllers
 {
+    [Authorize]
     public class UploadController : Controller
     {
         private readonly AppDbContext _context;

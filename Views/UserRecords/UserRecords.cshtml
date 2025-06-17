@@ -1,0 +1,46 @@
+@model IEnumerable<RecordsMaster.Models.RecordItemModel>
+
+@{
+    ViewData["Title"] = "My Records";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!Model.Any())
+{
+    <p>You have no records checked out.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>CIS</th>
+                <th>BarCode</th>
+                <th>Record Type</th>
+                <th>Location</th>
+                <th>Box Number</th>
+                <th>Digitized</th>
+                <th>Closing Date</th>
+                <th>Destroy Date</th>
+                <th>Checked Out</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var record in Model)
+        {
+            <tr>
+                <td>@record.CIS</td>
+                <td>@record.BarCode</td>
+                <td>@record.RecordType</td>
+                <td>@record.Location</td>
+                <td>@(record.BoxNumber.HasValue ? record.BoxNumber.ToString() : "-")</td>
+                <td>@(record.Digitized ? "Yes" : "No")</td>
+                <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                <td>@(record.DestroyDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                <td>@(record.CheckedOut ? "Yes" : "No")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
