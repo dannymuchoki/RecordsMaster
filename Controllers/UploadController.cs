@@ -100,10 +100,10 @@ namespace RecordsMaster.Controllers
                             var locationField = csv.GetField(3);
 
                             // Validation: the fifth column is a valid DateTime
-                            var dateField = csv.GetField(5);
+                            var dateField = csv.GetField(6);
                             if (!DateTime.TryParse(dateField, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
                             {
-                                rowErrors.Add($"Row {rowNumber} skipped: The fifth column item ('{dateField}') is not a valid date.");
+                                rowErrors.Add($"Row {rowNumber} skipped: The sixth column item ('{dateField}') is not a valid date.");
                                 rowNumber++;
                                 continue;
                             }
