@@ -1,17 +1,30 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using RecordsMaster.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RecordsMaster.Data
 {
     public static class SeedData
     {
-        // Creates the admin user and test user.
-        public static async Task SeedDataAsync(AppDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        // Seed roles and users, loading user info from configuration.
+        public static async Task SeedDataAsync(AppDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
             // Seed roles before seeding users
             await SeedRolesAsync(roleManager);
-            await SeedUsersAsync(userManager);  // Creates the admin user
-            await SeedTestUserAsync(userManager); // Call to seed 'test-user'
+
+            // Load user seed data from configuration
+            var userSeedData = configuration.GetSection("UserSeedData").Get<Dictionary<string, UserSeedInfo>>();
+
+            if (userSeedData != null)
+            {
+                foreach (var userEntry in userSeedData)
+                {
+                    var userInfo = userEntry.Value;
+                    await SeedUserAsync(userManager, userInfo.Email, userInfo.Password, userInfo.Role);
+                }
+            }
         }
 
         private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
@@ -26,58 +39,37 @@ namespace RecordsMaster.Data
             }
         }
 
-        private static async Task SeedUsersAsync(UserManager<ApplicationUser> userManager)
+        // Class to model user seed info
+        public class UserSeedInfo
         {
-            string defaultEmail = "admin@example.com";
-            string defaultPassword = "Admin@123"; // Replace with a stronger password for production
-
-            ApplicationUser adminUser = await userManager.FindByEmailAsync(defaultEmail);
-            if (adminUser == null)
-            {
-                adminUser = new ApplicationUser
-                {
-                    UserName = defaultEmail,
-                    Email = defaultEmail,
-                    EmailConfirmed = true
-                };
-
-                IdentityResult result = await userManager.CreateAsync(adminUser, defaultPassword);
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                }
-            }
+            public string Email { get; set; }
+            public string Password { get; set; }
+            public string Role { get; set; }
         }
 
-        private static async Task SeedTestUserAsync(UserManager<ApplicationUser> userManager)
+        private static async Task SeedUserAsync(UserManager<ApplicationUser> userManager, string email, string password, string role)
         {
-            string testUserEmail = "test@example.com"; 
-            string testUserPassword = "Test@123"; // passwords can't have hyphens
-        
-            // Check if 'test-user@example.com' already exists
-            var existingUser = await userManager.FindByEmailAsync(testUserEmail);
+            var existingUser = await userManager.FindByEmailAsync(email);
             if (existingUser == null)
             {
-                var testUser = new ApplicationUser
+                var newUser = new ApplicationUser
                 {
-                    UserName = testUserEmail,
-                    Email = testUserEmail,
+                    UserName = email,
+                    Email = email,
                     EmailConfirmed = true
                 };
 
-                var result = await userManager.CreateAsync(testUser, testUserPassword);
-                // Assign the role
+                var result = await userManager.CreateAsync(newUser, password);
                 if (result.Succeeded)
                 {
-                    // assign the 'User' role:
-                    await userManager.AddToRoleAsync(testUser, "User");
+                    await userManager.AddToRoleAsync(newUser, role);
                 }
                 else
                 {
-                    // Handle errors
+                    // Log errors if needed
                     foreach (var error in result.Errors)
                     {
-                        Console.WriteLine($"Error creating test user: {error.Description}");
+                        Console.WriteLine($"Error creating user {email}: {error.Description}");
                     }
                 }
             }

@@ -44,10 +44,7 @@ namespace RecordsMaster.Controllers
             List<RecordItemModel> validRecords = new List<RecordItemModel>();
 
             // Query the DB once to get the last saved barcode.
-            string lastBarcodeInDb = _context.RecordItems
-                                             .OrderByDescending(r => r.BarCode)
-                                             .Select(r => r.BarCode)
-                                             .FirstOrDefault();
+            string lastBarcodeInDb = _context.RecordItems.OrderByDescending(r => r.BarCode).Select(r => r.BarCode).FirstOrDefault();
 
             // We'll track the most recent barcode as we process the CSV.
             string lastBarcode = lastBarcodeInDb;
@@ -83,9 +80,9 @@ namespace RecordsMaster.Controllers
                                 continue;
                             }
 
-                            // Validation: record type must be "PS", "FC", or "EX"
+                            // Validation: record type must be "PS", "FC", "EX"
                             var recordTypeField = csv.GetField(2);
-                            List<string> validValues = new List<string> { "PS", "FC", "EX" };
+                            List<string> validValues = new List<string> { "PS", "FC", "EX", "FS" };
                             if (!validValues.Contains(recordTypeField))
                             {
                                 rowErrors.Add($"Row {rowNumber} error: '{recordTypeField}' is not a valid record type (FC, PS, or EX).");
@@ -96,6 +93,9 @@ namespace RecordsMaster.Controllers
                             {
                                 Debug.WriteLine($"The value is recognized: {recordTypeField}");
                             }
+
+                            // Location of the record
+                            var locationField = csv.GetField(3);
 
                             // Validation: the fifth column is a valid DateTime
                             var dateField = csv.GetField(5);

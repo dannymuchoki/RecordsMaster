@@ -11,7 +11,7 @@ using RecordsMaster.Data;
 namespace RecordsMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250610192842_AddIdentityRoleSupport")]
+    [Migration("20250617142020_AddIdentityRoleSupport")]
     partial class AddIdentityRoleSupport
     {
         /// <inheritdoc />

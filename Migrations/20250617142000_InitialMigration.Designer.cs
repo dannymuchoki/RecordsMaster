@@ -11,7 +11,7 @@ using RecordsMaster.Data;
 namespace RecordsMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250610192824_InitialMigration")]
+    [Migration("20250617142000_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />

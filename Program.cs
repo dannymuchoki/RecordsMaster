@@ -13,7 +13,7 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // Use ApplicationUser with Identity and add role support TOOK TOO LONG TO WORK OUT OMG
+        // Configure Identity with roles and ApplicationUser
         builder.Services.AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();
@@ -25,14 +25,16 @@ public class Program
         // Apply migrations and seed data dynamically.
         using (var scope = app.Services.CreateScope())
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var services = scope.ServiceProvider;
+            var dbContext = services.GetRequiredService<AppDbContext>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var configuration = builder.Configuration; // retrieve configuration
 
-            dbContext.Database.Migrate(); // Apply migrations
+            await dbContext.Database.MigrateAsync(); // Apply migrations asynchronously
 
-            // Now pass the roleManager along with dbContext and userManager.
-            await SeedData.SeedDataAsync(dbContext, userManager, roleManager);
+            // Call seed method, passing configuration
+            await SeedData.SeedDataAsync(dbContext, userManager, roleManager, configuration);
         }
 
         // Configure the HTTP request pipeline.
@@ -72,6 +74,6 @@ public class Program
             pattern: "Upload",
             defaults: new { controller = "Upload", action = "Upload" });
 
-        app.Run();
+        await app.RunAsync();
     }
 }
