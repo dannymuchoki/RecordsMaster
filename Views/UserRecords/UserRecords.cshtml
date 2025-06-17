@@ -23,7 +23,6 @@ else
                 <th>Digitized</th>
                 <th>Closing Date</th>
                 <th>Destroy Date</th>
-                <th>Checked Out</th>
             </tr>
         </thead>
         <tbody>
@@ -38,7 +37,6 @@ else
                 <td>@(record.Digitized ? "Yes" : "No")</td>
                 <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
                 <td>@(record.DestroyDate?.ToString("MM/dd/yyyy") ?? "-")</td>
-                <td>@(record.CheckedOut ? "Yes" : "No")</td>
             </tr>
         }
         </tbody>

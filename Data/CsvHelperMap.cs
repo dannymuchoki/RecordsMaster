@@ -4,8 +4,6 @@ using RecordsMaster.Data;
 using CsvHelper;
 using CsvHelper.TypeConversion;
 
-
-
 public sealed class CsvHelperMap : ClassMap<RecordItemModel>
 {
     public CsvHelperMap()

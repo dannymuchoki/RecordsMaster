@@ -79,6 +79,13 @@ else
     }
 }
 
+ @if (User.IsInRole("Admin"))
+ {
+    <p class="m-2">
+        <a href="@Url.Action("Index", "RecordItems")" class="btn btn-secondary">Back to List</a>
+    </p>
+    }
+
 <p class="m-2">
-    <a href="@Url.Action("Index", "RecordItems")" class="btn btn-secondary">Back to List</a>
+    <a href="@Url.Action("Search", "RecordItems")" class="btn btn-primary">Search</a>
 </p>

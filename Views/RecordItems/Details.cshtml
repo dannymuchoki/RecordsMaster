@@ -1,6 +1,6 @@
 @model IEnumerable<RecordsMaster.Models.RecordItemModel>
 
-<h2>Record Item Detail</h2>
+<h2>Record Detail</h2>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -12,6 +12,7 @@
             <th>Closing Date</th>
             <th>Destroy Date</th>
             <th>Checkout Status</th>
+            <th>Checked Out To</th> 
         </tr>
     </thead>
     <tbody>
@@ -33,31 +34,41 @@
                             using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
                             {
                                 @Html.AntiForgeryToken()
-                            <input type="submit" value="Check out" class="btn btn-primary" />
-                            }    
+                                <input type="submit" value="Check out" class="btn btn-primary" />
+                            }
                         }
                         if (User.IsInRole("User"))
                         {
                             using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
                             {
                                 @Html.AntiForgeryToken()
-                            <input type="submit" value="Request" class="btn btn-primary" />
-                            }    
+                                <input type="submit" value="Request" class="btn btn-primary" />
+                            }
                         }
-
                     }
                     else
                     {
-                        
-                        //@* Only display the check in form to admin users *@
-                        //@if (User.IsInRole("Admin"))
-                        //{
+                        // Show check-in button for admin users
+                        if (User.IsInRole("Admin"))
+                        {
                             using (Html.BeginForm("CheckIn", "RecordCheckIn", new { id = item.ID }, FormMethod.Post))
                             {
                                 @Html.AntiForgeryToken()
                                 <input type="submit" value="Check in" class="btn btn-primary" />
                             }
-                        //}
+                        }
+                        if (User.IsInRole("User"))
+                        {
+                            // Display the email of the user who checked out
+                            <p>Checked out</p>
+                        }
+                    }
+                </td>
+                <td>
+                    @if (item.CheckedOut)
+                    {
+                        // Show the email of the user who checked out, or N/A
+                        @(item.CheckedOutTo?.UserName ?? "N/A")
                     }
                 </td>
             </tr>

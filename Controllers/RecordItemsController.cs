@@ -46,6 +46,7 @@ namespace RecordsMaster.Controllers
             // Turn the results into a list. 
             var record = await _context.RecordItems
                 .Where(r => r.CIS == cis)
+                .Include(r => r.CheckedOutTo)
                 .ToListAsync();
 
             if (record.Count == 0 || !record.Any())

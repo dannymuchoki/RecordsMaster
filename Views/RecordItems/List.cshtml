@@ -3,7 +3,7 @@
     ViewData["Title"] = "Record Items";
 }
 
-@if (!User.Identity.IsAuthenticated)
+ @if (!User.IsInRole("Admin"))
 {
     <p>Access Denied</p>
 }

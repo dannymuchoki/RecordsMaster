@@ -99,7 +99,7 @@ namespace RecordsMaster.Controllers
                             // Location of the record
                             var locationField = csv.GetField(3);
 
-                            // Validation: the fifth column is a valid DateTime
+                            // Validation: the sixth column is a valid DateTime
                             var dateField = csv.GetField(6);
                             if (!DateTime.TryParse(dateField, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
                             {
