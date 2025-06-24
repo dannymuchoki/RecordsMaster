@@ -6,6 +6,9 @@ using System.Linq;
 using System.Collections.Generic;
 using RecordsMaster.Models;
 using RecordsMaster.Data;
+using RecordsMaster.Utilities;
+using Microsoft.Extensions.Configuration; // reads from appsettings.json
+
 
 namespace RecordsMaster.Controllers
 {
@@ -13,20 +16,16 @@ namespace RecordsMaster.Controllers
     public class RecordItemsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly int _pageSize;
 
-        public RecordItemsController(AppDbContext context)
+        public RecordItemsController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
-        }
 
-        // GET: RecordItems/List
-        public async Task<IActionResult> List()
-        {
-            // Fetch records asynchronously including the CheckedOutTo user information.
-            List<RecordItemModel> records = await _context.RecordItems
-                                                    .Include(r => r.CheckedOutTo)
-                                                    .ToListAsync();
-            return View(records); // Pass data to the view
+            _configuration = configuration;
+            // Gets the pagination value from appsettings.json (easier than hardcoding it here)
+            _pageSize = configuration.GetValue<int>("PaginationSettings:PageSize");
         }
 
         // GET: RecordItems/Search
@@ -56,6 +55,21 @@ namespace RecordsMaster.Controllers
 
 
             return View("Details", record); // Display the record details in the Details view
+        }
+
+        // Paginated list of records
+        public async Task<IActionResult> List(int pageNumber = 1)
+        {
+            int pageSize = 20; // Or any size you want
+
+            var recordsQuery = _context.RecordItems
+                .Include(r => r.CheckedOutTo)
+                .OrderBy(r => r.BarCode);
+
+            var pagedRecords = await PaginatedList<RecordItemModel>.CreateAsync(recordsQuery, pageNumber, pageSize);
+            
+
+            return View(pagedRecords); 
         }
     }
 }
