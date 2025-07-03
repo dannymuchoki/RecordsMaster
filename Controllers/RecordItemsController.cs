@@ -70,6 +70,14 @@ namespace RecordsMaster.Controllers
             return View("Details", record); // Display the record details in the Details view
         }
 
+        public async Task<IActionResult> Labels(int? pageNumber)
+        {
+            int pageSize = 21; // Avery 5962: 21 labels per page
+            var items = _context.RecordItems.OrderBy(r => r.BarCode); // or your preferred order
+            var pagedList = await PaginatedList<RecordItemModel>.CreateAsync(items, pageNumber ?? 1, pageSize);
+            return View(pagedList);
+        }
+
         // Paginated list of records (only visible to the Admin user)
         public async Task<IActionResult> List(int pageNumber = 1)
         {
