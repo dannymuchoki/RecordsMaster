@@ -10,6 +10,9 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
+        // Create a builder for the web application
+        // This is the entry point for the ASP.NET Core application.
+        // It sets up the configuration, services, and middleware for the application.
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
@@ -27,8 +30,9 @@ public class Program
 
         //builder.Services.AddAuthorization();
 
+        // Add MVC services to the container. This adds support for controllers and views, enabling MVC pattern.
         builder.Services.AddControllersWithViews();
-
+    
         var app = builder.Build();
 
         // Apply migrations and seed data dynamically.
@@ -38,7 +42,7 @@ public class Program
             var dbContext = services.GetRequiredService<AppDbContext>();
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-            var configuration = builder.Configuration; // retrieve configuration
+            var configuration = builder.Configuration; // retrieve configuration from appsettings.json
 
             await dbContext.Database.MigrateAsync(); // Apply migrations asynchronously
 
@@ -57,6 +61,7 @@ public class Program
             app.UseHsts();
         }
 
+        // Middleware to handle HTTPS redirection, static files, routing, authentication, and authorization.
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
@@ -64,6 +69,8 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
+        // Map controller routes
+        // This sets up the routing for the application, defining how URLs map to controllers and actions
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}")

@@ -15,10 +15,23 @@ namespace RecordsMaster.Controllers
     [Authorize]
     public class RecordItemsController : Controller
     {
+        // This was the first controller I wrote. It handles record item operations, such as searching and listing records.
+        // It uses Entity Framework Core to interact with the database and supports pagination.
+        // Dependencies:
+        // - AppDbContext: The database context for accessing RecordItemModel entities.
+        // - IConfiguration: Used to read settings from appsettings.json.
+        // - PaginatedList: A utility class for handling pagination of lists. (see Utilities/PaginatedList.cs)
+        // - RecordItemModel: The model representing a record item in the database.
+        // - ApplicationUser: Represents a user in the system, used for checking out records.
+        // https://learn.microsoft.com/en-us/ef/core/
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly int _pageSize;
 
+        // Constructor to inject dependencies
+        // AppDbContext is used to access the database, and IConfiguration is used to read settings from appsettings.json.
+        // The page size for pagination is also set from the configuration in appsettings.json.
+        // This allows for easy adjustments to pagination settings without changing the code.
         public RecordItemsController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
@@ -57,7 +70,7 @@ namespace RecordsMaster.Controllers
             return View("Details", record); // Display the record details in the Details view
         }
 
-        // Paginated list of records
+        // Paginated list of records (only visible to the Admin user)
         public async Task<IActionResult> List(int pageNumber = 1)
         {
             int pageSize = 20; // Or any size you want
