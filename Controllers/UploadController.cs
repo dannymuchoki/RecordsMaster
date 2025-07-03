@@ -30,7 +30,9 @@ namespace RecordsMaster.Controllers
         {
             return View();
         }
-
+        
+        // This controller adds new record items via a CSV file. 
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile file)
