@@ -33,41 +33,48 @@ namespace RecordsMaster.Controllers
         }
 
 
-        [Authorize]
-        [HttpPost]
-        public async Task<IActionResult> SetUserRole(string userId, string role)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user != null)
-            {
-                var currentRoles = await _userManager.GetRolesAsync(user);
+[Authorize]
+[HttpPost]
+public async Task<IActionResult> SetUserRole(string userId, string role)
+{
+    var user = await _userManager.FindByIdAsync(userId);
+    if (user != null)
+    {
+        var currentRoles = await _userManager.GetRolesAsync(user);
 
-                // If the user is in the Admin role and the requested role is "User", remove Admin and add User
-                if (currentRoles.Contains("Admin") && role == "User")
-                {
-                    await _userManager.RemoveFromRoleAsync(user, "Admin");
-                    await _userManager.AddToRoleAsync(user, "User");
-                }
-                // If the user is not in Admin, just ensure they are in User role
-                else if (role == "User")
-                {
-                    // Remove Admin if present, add User if not present
-                    if (currentRoles.Contains("Admin"))
-                        await _userManager.RemoveFromRoleAsync(user, "Admin");
-                    if (!currentRoles.Contains("User"))
-                        await _userManager.AddToRoleAsync(user, "User");
-                }
-                // If the role is Admin, add Admin and remove User
-                else if (role == "Admin")
-                {
-                    if (currentRoles.Contains("User"))
-                        await _userManager.RemoveFromRoleAsync(user, "User");
-                    if (!currentRoles.Contains("Admin"))
-                        await _userManager.AddToRoleAsync(user, "Admin");
-                }
-            }
-            return RedirectToAction(nameof(UserRoles));
+        if (role == "None")
+        {
+            // Remove both roles
+            if (currentRoles.Contains("Admin"))
+                await _userManager.RemoveFromRoleAsync(user, "Admin");
+            if (currentRoles.Contains("User"))
+                await _userManager.RemoveFromRoleAsync(user, "User");
         }
+        // If the user is in the Admin role and the requested role is "User", remove Admin and add User
+        else if (currentRoles.Contains("Admin") && role == "User")
+        {
+            await _userManager.RemoveFromRoleAsync(user, "Admin");
+            await _userManager.AddToRoleAsync(user, "User");
+        }
+        // If the user is not in Admin, just ensure they are in User role
+        else if (role == "User")
+        {
+            if (currentRoles.Contains("Admin"))
+                await _userManager.RemoveFromRoleAsync(user, "Admin");
+            if (!currentRoles.Contains("User"))
+                await _userManager.AddToRoleAsync(user, "User");
+        }
+        // If the role is Admin, add Admin and remove User
+        else if (role == "Admin")
+        {
+            if (currentRoles.Contains("User"))
+                await _userManager.RemoveFromRoleAsync(user, "User");
+            if (!currentRoles.Contains("Admin"))
+                await _userManager.AddToRoleAsync(user, "Admin");
+        }
+    }
+    return RedirectToAction(nameof(UserRoles));
+}
 
         public IActionResult Login() => View();
 

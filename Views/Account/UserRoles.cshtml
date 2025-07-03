@@ -49,6 +49,7 @@
                             <input type="hidden" name="userId" value="@item.User.Id" />
                             <button type="submit" name="role" value="User" class="btn btn-sm btn-primary" @(item.IsUserRole ? "disabled" : "")>Set as User</button>
                             <button type="submit" name="role" value="Admin" class="btn btn-sm btn-warning" @(item.IsAdminRole ? "disabled" : "")>Set as Admin</button>
+                            <button type="submit" name="role" value="None" class="btn btn-sm btn-danger" @((!item.IsUserRole && !item.IsAdminRole) ? "disabled" : "")>Remove Roles</button>
                         </form>
                     </td>
                 </tr>
