@@ -88,14 +88,15 @@ namespace RecordsMaster.Controllers
                                 continue;
                             }
 
-                            // Example: update the Location field from the third column if present
+                            // Example: update the Location field from the fifth column if present
                             if (csv.HeaderRecord != null && csv.HeaderRecord.Length > 2)
                             {
-                                var locationField = csv.GetField(2);
+                                var locationField = csv.GetField(5);
                                 if (!string.IsNullOrWhiteSpace(locationField))
                                 {
                                     record.Location = locationField;
                                 }
+                                
                             }
 
                             // Add more updates here as needed, e.g., record.RecordType = csv.GetField(3);
