@@ -11,6 +11,23 @@
 </form>
  }
  else{
-    <h1>...</h1>
+    <h2>Login</h2>
+
+    @if (TempData["LoginError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["LoginError"]</div>
+    }
+
+    <form method="post" action="/Account/Login">
+        <label>Email</label>
+        <input type="email" name="email" required />
+
+        <label>Password</label>
+        <input type="password" name="password" required />
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p>Don't have an account? <a href="/Account/Register">Register here</a></p>
  }
 
