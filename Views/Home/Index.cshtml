@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
- @if (User.Identity.IsAuthenticated){
+ @if (User.IsInRole("Admin") || User.IsInRole("User")){
 <form method="get" action="@Url.Action("SearchByCIS", "RecordItems")">
     <div class="form-group m-1 p-2">
         <label for="CIS">Enter CIS:</label>
@@ -11,6 +11,13 @@
 </form>
  }
  else{
+     @if (User.Identity.IsAuthenticated){
+        <h1>Welcome, @User.Identity.Name!</h1>
+        <p>You are logged in, but you do not have access to the search functionality.</p> 
+
+        }
+    else{
+
     <h2>Login</h2>
 
     @if (TempData["LoginError"] != null)
@@ -29,5 +36,8 @@
     </form>
 
     <p>Don't have an account? <a href="/Account/Register">Register here</a></p>
+    }
+
+
  }
 

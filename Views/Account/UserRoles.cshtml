@@ -1,0 +1,63 @@
+@model IEnumerable<(RecordsMaster.Models.ApplicationUser User, bool IsUserRole, bool IsAdminRole)>
+
+@{
+    ViewData["Title"] = "User Roles";
+}
+
+
+ @if (User.IsInRole("Admin")){
+        <h2>User Roles</h2>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Has 'User' Role?</th>
+                    <th>Has 'Admin' Role?</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.User.UserName</td>
+                    <td>@item.User.Email</td>
+                    <td>
+                        @if (item.IsUserRole)
+                        {
+                            <span class="text-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="text-danger">No</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.IsAdminRole)
+                        {
+                            <span class="text-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="text-danger">No</span>
+                        }
+                    </td>
+                    <td>
+                        <form asp-action="SetUserRole" asp-controller="Account" method="post" style="display:inline;">
+                            <input type="hidden" name="userId" value="@item.User.Id" />
+                            <button type="submit" name="role" value="User" class="btn btn-sm btn-primary" @(item.IsUserRole ? "disabled" : "")>Set as User</button>
+                            <button type="submit" name="role" value="Admin" class="btn btn-sm btn-warning" @(item.IsAdminRole ? "disabled" : "")>Set as Admin</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+
+    else {
+        <h2>Access Denied</h2>
+        <p>You do not have permission to view this page.</p>
+    }

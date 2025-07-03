@@ -1,19 +1,72 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using RecordsMaster.Models; // For ApplicationUser
 
 namespace RecordsMaster.Controllers
 {
+    // This controller handles user account management, including login, registration, and user roles. The views are in the Views/Account folder.
     public class AccountController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
-        
+
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+        }
+        // This action returns a view that lists all users and their roles.
+        // It uses a tuple to pair each user with a boolean indicating if they are in the "User" role.
+        // The view will display the user email and whether they are a regular user or not.
+        public async Task<IActionResult> UserRoles()
+        {
+            var users = _userManager.Users.ToList();
+            var model = new List<(ApplicationUser User, bool IsUserRole, bool IsAdminRole)>();
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                model.Add((user, roles.Contains("User"), roles.Contains("Admin")));
+            }
+            return View(model);
+        }
+
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> SetUserRole(string userId, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                var currentRoles = await _userManager.GetRolesAsync(user);
+
+                // If the user is in the Admin role and the requested role is "User", remove Admin and add User
+                if (currentRoles.Contains("Admin") && role == "User")
+                {
+                    await _userManager.RemoveFromRoleAsync(user, "Admin");
+                    await _userManager.AddToRoleAsync(user, "User");
+                }
+                // If the user is not in Admin, just ensure they are in User role
+                else if (role == "User")
+                {
+                    // Remove Admin if present, add User if not present
+                    if (currentRoles.Contains("Admin"))
+                        await _userManager.RemoveFromRoleAsync(user, "Admin");
+                    if (!currentRoles.Contains("User"))
+                        await _userManager.AddToRoleAsync(user, "User");
+                }
+                // If the role is Admin, add Admin and remove User
+                else if (role == "Admin")
+                {
+                    if (currentRoles.Contains("User"))
+                        await _userManager.RemoveFromRoleAsync(user, "User");
+                    if (!currentRoles.Contains("Admin"))
+                        await _userManager.AddToRoleAsync(user, "Admin");
+                }
+            }
+            return RedirectToAction(nameof(UserRoles));
         }
 
         public IActionResult Login() => View();
@@ -27,6 +80,8 @@ namespace RecordsMaster.Controllers
                 return RedirectToAction("Index", "Home");
             }
             ModelState.AddModelError("", "Invalid login attempt");
+
+
             return View();
         }
 
