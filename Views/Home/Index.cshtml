@@ -1,21 +1,69 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
- @if (User.IsInRole("Admin") || User.IsInRole("User")){
-<form method="get" action="@Url.Action("SearchByCIS", "RecordItems")">
-    <div class="form-group m-1 p-2">
-        <label for="CIS">Enter CIS:</label>
-        <input type="number" name="cis" id="CIS" class="form-control" required />
-    </div>
-    <button type="submit" class="btn btn-primary mx-auto">Search</button>
-</form>
+@model List<RecordsMaster.Models.RecordItemModel>
+
+ @if (User.IsInRole("Admin") || User.IsInRole("User"))
+ {
+    <form method="get" action="@Url.Action("SearchByCIS", "RecordItems")">
+        <div class="form-group m-1 p-2">
+            <label for="CIS">Enter CIS:</label>
+            <input type="number" name="cis" id="CIS" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary mx-auto">Search</button>
+    </form>
+
+    
+     @if (User.IsInRole("Admin"))
+     
+     {
+        @if (!Model.Any()){
+
+        }
+        else
+            {
+                <h5 class="mt-2">Requested Records</h5>
+
+                <table class="table table-striped"> 
+                    <thead>
+                    <tr>
+                        <th>CIS</th>
+                        <th>Barcode</th>
+                        <th>Record Type</th>
+                        <th>Box Number</th>
+                        <th>Digitized</th>
+                        <th>Closing Date</th>
+                        <th>Ready For Pickup</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                            { 
+                                <tr>
+                                    <td> <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@item.ID" asp-route-cis="@item.CIS">@item.CIS</a></td>
+                                    <td> @item.BarCode</td>
+                                    <td>@item.RecordType</td>
+                                    <td>@item.BoxNumber</td>
+                                    <td>@(item.Digitized ? "Yes" : "No")</td>
+                                    <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>  
+                                    <td>@item.ReadyForPickup</td>
+                                </tr>
+                                
+                            }
+                    </tbody>
+
+                </table>
+            }
+
+     }
  }
+
  else{
      @if (User.Identity.IsAuthenticated){
         <h1>Welcome, @User.Identity.Name!</h1>
         <p>You are logged in, but you do not have access to the search functionality.</p> 
 
-        }
+    }
     else{
 
     <h2>Login</h2>

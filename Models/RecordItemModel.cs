@@ -38,6 +38,10 @@ namespace RecordsMaster.Models
 
         public bool CheckedOut { get; set; }
 
+        public bool Requested { get; set; }
+
+        public bool ReadyForPickup { get; set; }
+
         // The foreign key property:
         public string? CheckedOutToId { get; set; }
 

@@ -27,7 +27,7 @@ namespace RecordsMaster.Controllers
         }
 
         // GET: RecordCheckOut/CheckOut/{id}?
-        public async Task<IActionResult> CheckOut(Guid? id)
+        public async Task<IActionResult> CheckOut(Guid? id, int cis)
         {
             if (id == null)
             {
@@ -46,6 +46,80 @@ namespace RecordsMaster.Controllers
 
             return View(recordItem);
         }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RequestRecord(Guid id)
+        {
+            var recordItem = await _context.RecordItems.FindAsync(id);
+            if (recordItem == null)
+            {
+                return NotFound();
+            }
+
+            // Optional: if already checked out, you might return an error message or redirect.
+            if (recordItem.CheckedOut)
+            {
+                TempData["Message"] = "Record is already checked out.";
+                return RedirectToAction(nameof(CheckOut), new { id });
+            }
+
+            // Get the current authenticated user.
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge(); // Forces the user to log in.
+            }
+
+            // Associate the record with the user and mark it as requested.
+            recordItem.Requested = true;
+            recordItem.CheckedOutToId = user.Id;
+            recordItem.CheckedOutTo = user;
+
+            _context.Update(recordItem);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Record requested.";
+            return RedirectToAction(nameof(CheckOut), new { id });
+        }
+
+       [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReadyForPickup(Guid id)
+        {
+            var recordItem = await _context.RecordItems.FindAsync(id);
+            if (recordItem == null)
+            {
+                return NotFound();
+            }
+
+            // Optional: if already checked out, you might return an error message or redirect.
+            if (recordItem.CheckedOut)
+            {
+                TempData["Message"] = "Record is already checked out.";
+                return RedirectToAction(nameof(CheckOut), new { id });
+            }
+
+            // Get the current authenticated user.
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Challenge(); // Forces the user to log in.
+            }
+
+            // Associate the record with the user and mark it as requested.
+            recordItem.Requested = true;
+            recordItem.ReadyForPickup = true;
+
+            _context.Update(recordItem);
+            await _context.SaveChangesAsync();
+
+            TempData["Message"] = "Record requested.";
+            return RedirectToAction(nameof(CheckOut), new { id });
+        }
+
 
         // POST: RecordItems/Checkout/{id}
         [HttpPost]
@@ -73,14 +147,14 @@ namespace RecordsMaster.Controllers
             }
 
             // Associate the record with the user and mark it as checked out.
+            recordItem.Requested = false;
+            recordItem.ReadyForPickup = false;
             recordItem.CheckedOut = true;
-            recordItem.CheckedOutToId = user.Id;
-            recordItem.CheckedOutTo = user;
 
             _context.Update(recordItem);
             await _context.SaveChangesAsync();
 
-            var subject = "Record Requested";
+            var subject = "Record is";
             var message = $@"
                 <p><strong>Record ID:</strong> {recordItem}</p>
                 <p><strong>Checked Out By:</strong> ({user.Email})</p>

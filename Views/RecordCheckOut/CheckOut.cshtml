@@ -55,37 +55,70 @@
     }
 </table>
 
-@if (!Model.CheckedOut)
+@if (Model.Requested)
 {
-    <h3>Check Out this Record</h3>
-    <p>Do you want to check out this record?</p>
-    @using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post))
+    @if (User.IsInRole("Admin"))
     {
-        @Html.AntiForgeryToken()
-        <input type="submit" value="Check Out" class="btn btn-primary" />
+        @if (!Model.Digitized)
+        {
+            @using (Html.BeginForm("ReadyForPickup", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post))
+            {
+            @if (!Model.ReadyForPickup)
+                { 
+                    @Html.AntiForgeryToken()
+                    <input type="submit" value="Ready For Pickup" class="btn btn-primary" />
+                }
+                else{
+                    <p>
+                        The user will have to Check out the record.
+                    </p>
+                }
+            }
+        }
+        else{
+            <p>This record has been digitized. The user will not need to get the physical record. </p>
+        }
     }
+    else{
+        @if (!Model.Digitized)
+        {
+             @if (!Model.ReadyForPickup){
+                <p> You will be notified when the record is ready</p>
+             }
+             else{
+                <p>The record is ready for pickup. Click 'Check Out'. </p>
+                @using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post)){
+                     @Html.AntiForgeryToken()
+                    <input type="submit" value="Check Out" class="btn btn-success" />                   
+                }
+             }
+            
+        }
+        else
+            {
+             <p>Digitized records can be accessed electronically.</p>
+            }
+    }
+
+
 }
 else
 {
     @if (User.IsInRole("Admin")){
 
-        <h3>Check In this Record</h3>
-        <p>This record is currently checked out.</p>
-        @using (Html.BeginForm("CheckIn", "RecordCheckIn", new { id = Model.ID }, FormMethod.Post))
+        @if (Model.CheckedOut)
         {
-            @Html.AntiForgeryToken()
-            <input type="submit" value="Check In" class="btn btn-danger" />
+            @using (Html.BeginForm("CheckIn", "RecordCheckIn", new { id = Model.ID }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="submit" value="Check In" class="btn btn-danger" />
+            }
         }
+
+
     }
 }
 
- @if (User.IsInRole("Admin"))
- {
-    <p class="m-2">
-        <a href="@Url.Action("Index", "RecordItems")" class="btn btn-secondary">Back to List</a>
-    </p>
-    }
-
-<p class="m-2">
+    <br/>
     <a href="@Url.Action("Search", "RecordItems")" class="btn btn-primary">Search</a>
-</p>
+

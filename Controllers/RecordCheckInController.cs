@@ -43,6 +43,8 @@ namespace RecordsMaster.Controllers
 
             // Reset the record's checkout properties.
             recordItem.CheckedOut = false;
+            recordItem.Requested = false;
+            recordItem.ReadyForPickup = false;
             recordItem.CheckedOutToId = null;
             recordItem.CheckedOutTo = null;
 

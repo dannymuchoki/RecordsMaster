@@ -11,7 +11,7 @@
             <th>Digitized</th>
             <th>Closing Date</th>
             <th>Destroy Date</th>
-            <th>Checkout Status</th>
+            <th>Request Record?</th>
             <th>Checked Out To</th> 
         </tr>
     </thead>
@@ -39,7 +39,7 @@
                         }
                         if (User.IsInRole("User"))
                         {
-                            using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
+                            using (Html.BeginForm("RequestRecord", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
                             {
                                 @Html.AntiForgeryToken()
                                 <input type="submit" value="Request" class="btn btn-primary" />

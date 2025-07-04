@@ -8,10 +8,11 @@
 
 @if (!Model.Any())
 {
-    <p>You have no records checked out.</p>
+    <p>You have no records requested or checked out.</p>
 }
 else
 {
+    <h5>Requested</h5>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -28,16 +29,55 @@ else
         <tbody>
         @foreach (var record in Model)
         {
+            @if (record.Requested)
+                {
+                <tr>
+                    <td><a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS">@record.CIS</a></td>
+                    <td>@record.BarCode</td>
+                    <td>@record.RecordType</td>
+                    <td>@record.Location</td>
+                    <td>@(record.BoxNumber.HasValue ? record.BoxNumber.ToString() : "-")</td>
+                    <td>@(record.Digitized ? "Yes" : "No")</td>
+                    <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                    <td>@(record.DestroyDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                </tr>
+                }
+
+        }
+        </tbody>
+    </table>
+
+        <h5>Checked out</h5>
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@record.CIS</td>
-                <td>@record.BarCode</td>
-                <td>@record.RecordType</td>
-                <td>@record.Location</td>
-                <td>@(record.BoxNumber.HasValue ? record.BoxNumber.ToString() : "-")</td>
-                <td>@(record.Digitized ? "Yes" : "No")</td>
-                <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
-                <td>@(record.DestroyDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                <th>CIS</th>
+                <th>BarCode</th>
+                <th>Record Type</th>
+                <th>Location</th>
+                <th>Box Number</th>
+                <th>Digitized</th>
+                <th>Closing Date</th>
+                <th>Destroy Date</th>
             </tr>
+        </thead>
+        <tbody>
+        @foreach (var record in Model)
+        {
+            @if (record.CheckedOut)
+                {
+                <tr>
+                    <td><a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS">@record.CIS</a></td>
+                    <td>@record.BarCode</td>
+                    <td>@record.RecordType</td>
+                    <td>@record.Location</td>
+                    <td>@(record.BoxNumber.HasValue ? record.BoxNumber.ToString() : "-")</td>
+                    <td>@(record.Digitized ? "Yes" : "No")</td>
+                    <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                    <td>@(record.DestroyDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                </tr>
+                }
+
         }
         </tbody>
     </table>

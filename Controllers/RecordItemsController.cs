@@ -70,6 +70,16 @@ namespace RecordsMaster.Controllers
             return View("Details", record); // Display the record details in the Details view
         }
 
+        public async Task<IActionResult> Details(int id)
+        {
+            var record = await _context.RecordItems.Where(r => r.CIS == id).ToListAsync();
+            if (record == null)
+            {
+                return NotFound();
+            }
+            return View("Details", record);
+        }
+
         public async Task<IActionResult> Labels(int? pageNumber)
         {
             int pageSize = 21; // Avery 5962: 21 labels per page

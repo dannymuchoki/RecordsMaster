@@ -250,10 +250,16 @@ namespace RecordsMaster.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("ReadyForPickup")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("RecordType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Requested")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("ID");
 
@@ -273,7 +279,9 @@ namespace RecordsMaster.Migrations
                             DestroyDate = new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Digitized = true,
                             Location = "Records Room",
-                            RecordType = "Type A"
+                            ReadyForPickup = false,
+                            RecordType = "Type A",
+                            Requested = false
                         },
                         new
                         {
@@ -286,7 +294,9 @@ namespace RecordsMaster.Migrations
                             DestroyDate = new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Digitized = false,
                             Location = "Records Room",
-                            RecordType = "Type B"
+                            ReadyForPickup = false,
+                            RecordType = "Type B",
+                            Requested = false
                         });
                 });
 

@@ -172,6 +172,8 @@ namespace RecordsMaster.Migrations
                     ClosingDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     DestroyDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CheckedOut = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Requested = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ReadyForPickup = table.Column<bool>(type: "INTEGER", nullable: false),
                     CheckedOutToId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -186,11 +188,11 @@ namespace RecordsMaster.Migrations
 
             migrationBuilder.InsertData(
                 table: "RecordItems",
-                columns: new[] { "ID", "BarCode", "BoxNumber", "CIS", "CheckedOut", "CheckedOutToId", "ClosingDate", "DestroyDate", "Digitized", "Location", "RecordType" },
+                columns: new[] { "ID", "BarCode", "BoxNumber", "CIS", "CheckedOut", "CheckedOutToId", "ClosingDate", "DestroyDate", "Digitized", "Location", "ReadyForPickup", "RecordType", "Requested" },
                 values: new object[,]
                 {
-                    { new Guid("11111111-1111-1111-1111-111111111111"), "24-98765", 10, 1001, false, null, new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Records Room", "Type A" },
-                    { new Guid("22222222-2222-2222-2222-222222222222"), "24-98766", 20, 1002, false, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, "Records Room", "Type B" }
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "24-98765", 10, 1001, false, null, new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Records Room", false, "Type A", false },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "24-98766", 20, 1002, false, null, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, "Records Room", false, "Type B", false }
                 });
 
             migrationBuilder.CreateIndex(
