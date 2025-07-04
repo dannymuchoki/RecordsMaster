@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecordsMaster.Data;
 using RecordsMaster.Models;
+using RecordsMaster.Services;
 
 namespace RecordsMaster.Controllers
 {
@@ -14,11 +15,15 @@ namespace RecordsMaster.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IConfiguration _config;
+        private readonly IEmailSender _emailSender;
 
-        public RecordCheckOutController(AppDbContext context, UserManager<ApplicationUser> userManager)
+        public RecordCheckOutController(AppDbContext context, UserManager<ApplicationUser> userManager, IEmailSender emailSender, IConfiguration config)
         {
             _context = context;
             _userManager = userManager;
+            _emailSender = emailSender;
+            _config = config;
         }
 
         // GET: RecordCheckOut/CheckOut/{id}?
@@ -74,6 +79,16 @@ namespace RecordsMaster.Controllers
 
             _context.Update(recordItem);
             await _context.SaveChangesAsync();
+
+            var subject = "Record Requested";
+            var message = $@"
+                <p><strong>Record ID:</strong> {recordItem}</p>
+                <p><strong>Checked Out By:</strong> ({user.Email})</p>
+                <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>";
+
+            // Check appsettings.json dictionary for the 'Notification' key. 
+            var adminEmail = _config["Notification:AdminEmail"];
+            await _emailSender.SendEmailAsync(adminEmail, subject, message);
 
             TempData["Message"] = "Record successfully checked out.";
             return RedirectToAction(nameof(CheckOut), new { id });

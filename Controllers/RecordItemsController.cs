@@ -81,7 +81,7 @@ namespace RecordsMaster.Controllers
         // Paginated list of records (only visible to the Admin user)
         public async Task<IActionResult> List(int pageNumber = 1)
         {
-            int pageSize = 20; // Or any size you want
+            int pageSize = 50; // Or any size you want
 
             var recordsQuery = _context.RecordItems
                 .Include(r => r.CheckedOutTo)

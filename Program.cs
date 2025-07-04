@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using RecordsMaster.Data;
 using RecordsMaster.Models; // For ApplicationUser
+using RecordsMaster.Services;
 // For ActiveDirectory  (below)
 //using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 // using Microsoft.Identity.Web; 
@@ -24,7 +25,11 @@ public class Program
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();
 
-        // Add authentication with Microsoft Identity Web (Azure AD)
+        // Add custom email sender service. Configuration is in appsettings.json 
+        builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+        
+
+        // Add authentication with Microsoft Identity Web (Azure AD). No idea if this works yet.
         //builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
         //    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 
