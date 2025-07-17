@@ -1,4 +1,4 @@
-# RecordsMaster  0.12
+# RecordsMaster  0.51
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
