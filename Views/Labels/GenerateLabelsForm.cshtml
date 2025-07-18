@@ -1,0 +1,26 @@
+
+@{
+    ViewData["Title"] = "Generate Labels";
+    var errorMessage = ViewData["ErrorMessage"] as string;
+}
+
+<h2>Generate Labels</h2>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @errorMessage
+    </div>
+}
+
+<form asp-action="GenerateLabels" method="get">
+    <div class="form-group">
+        <label for="start">Starting BarCode</label>
+        <input class="form-control" id="barcode_start" name="barcode_start" required />
+    </div>
+    <div class="form-group">
+        <label for="end">Ending Barcode</label>
+        <input class="form-control" id="barcode_end" name="barcode_end" required />
+    </div>
+    <button type="submit" class="btn btn-primary mt-1">Generate</button>
+</form>

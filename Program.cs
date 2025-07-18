@@ -95,6 +95,18 @@ public class Program
             pattern: "Upload",
             defaults: new { controller = "Upload", action = "Upload" });
 
+        app.MapControllerRoute(
+            name: "labels",
+            pattern: "labels/generate/{start?}/{end?}",
+            defaults: new { controller = "Labels", action = "GenerateLabels" });
+
+        app.MapControllerRoute(
+            name: "labelsForm",
+            pattern: "labels/form",
+            defaults: new { controller = "Labels", action = "GenerateLabelsForm" });
+
+
+
         await app.RunAsync();
     }
 }
