@@ -14,7 +14,7 @@ namespace RecordsMaster.Controllers
     {
         private readonly AppDbContext _context;
 
-        private static List<RecordItemModel>? _recordsToPrint;
+        //private static List<RecordItemModel>? _recordsToPrint;
         private static int _recordIndex;
 
         public LabelsController(AppDbContext context)

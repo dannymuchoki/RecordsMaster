@@ -95,7 +95,7 @@ namespace RecordsMaster.Controllers
 
             var recordsQuery = _context.RecordItems
                 .Include(r => r.CheckedOutTo)
-                .OrderBy(r => r.BarCode);
+                .OrderByDescending(r => r.BarCode);
 
             var pagedRecords = await PaginatedList<RecordItemModel>.CreateAsync(recordsQuery, pageNumber, pageSize);
             
