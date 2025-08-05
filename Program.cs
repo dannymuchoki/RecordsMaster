@@ -27,6 +27,9 @@ public class Program
 
         // Add custom email sender service. Configuration is in appsettings.json 
         builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+        // Print labels 
+        builder.Services.AddScoped<LabelPrintService>();
         
 
         // Add authentication with Microsoft Identity Web (Azure AD). No idea if this works yet.

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using RecordsMaster.Models;
 using RecordsMaster.Data;
+using RecordsMaster.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
@@ -20,8 +21,11 @@ namespace RecordsMaster.Controllers
     {
         private readonly AppDbContext _context;
 
-        public UploadController(AppDbContext context)
+        private readonly LabelPrintService _labelPrintService; 
+
+        public UploadController(AppDbContext context, LabelPrintService labelPrintService)
         {
+            _labelPrintService = labelPrintService;
             _context = context;
         }
 
@@ -99,7 +103,7 @@ namespace RecordsMaster.Controllers
                             }
 
                             // Location of the record
-                            var locationField = csv.GetField(3);
+                            var locationField = csv.GetField(4);
 
                             // Validation: the sixth column is a valid DateTime
                             var dateField = csv.GetField(6);
@@ -153,6 +157,10 @@ namespace RecordsMaster.Controllers
                 }
 
                 await _context.SaveChangesAsync();
+
+                // Print at upload
+                _labelPrintService.PrintLabels(validRecords);
+
                 return RedirectToAction("Index", "RecordItems");
             }
             catch (Exception ex)
