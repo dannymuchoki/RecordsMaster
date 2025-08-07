@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RecordsMaster.Models;
-using System;
+using System.IO;
+using RecordsMaster.Utilities;
 
 namespace RecordsMaster.Data
 {
@@ -14,6 +15,7 @@ namespace RecordsMaster.Data
 
         // Table for RecordItemModel entities.
         public DbSet<RecordItemModel> RecordItems { get; set; }
+        public DbSet<SeedHistory> SeedHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -38,13 +40,13 @@ namespace RecordsMaster.Data
                 .WithMany(u => u.CheckedOutRecords)
                 .HasForeignKey(r => r.CheckedOutToId);
 
-            // Seed test data for RecordItemModel (adjust or remove as needed).
+            /* Seed test data for RecordItemModel (adjust or remove as needed).
             modelBuilder.Entity<RecordItemModel>().HasData(
                 new RecordItemModel
                 {
                     ID = new Guid("11111111-1111-1111-1111-111111111111"),
                     CIS = 1001,
-                    BarCode = "24-98765",
+                    BarCode = "93-98765",
                     RecordType = "Type A",
                     Location = "Records Room",
                     BoxNumber = 10,
@@ -56,7 +58,7 @@ namespace RecordsMaster.Data
                 {
                     ID = new Guid("22222222-2222-2222-2222-222222222222"),
                     CIS = 1002,
-                    BarCode = "24-98766",
+                    BarCode = "93-98766",
                     RecordType = "Type B",
                     Location = "Records Room",
                     BoxNumber = 20,
@@ -64,7 +66,7 @@ namespace RecordsMaster.Data
                     ClosingDate = new DateTime(2024, 1, 1),
                     DestroyDate = new DateTime(2029, 1, 1)
                 }
-            );
+            ); */
         }
     }
 }

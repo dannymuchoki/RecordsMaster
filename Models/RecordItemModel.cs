@@ -6,6 +6,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace RecordsMaster.Models
 {
+
+    public class SeedHistory
+    {
+        public int Id { get; set; }
+        public string SeedType { get; set; }
+        public DateTime AppliedOn { get; set; }
+    }
     // foreign key property named CheckedOutTo.
     public class RecordItemModel
     {

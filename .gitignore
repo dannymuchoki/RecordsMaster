@@ -9,6 +9,7 @@
 *.db
 *.db-shm
 *.db-wal
+original_data.csv
 
 # Build results
 [Dd]ebug/

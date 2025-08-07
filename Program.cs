@@ -1,46 +1,31 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RecordsMaster.Data;
-using RecordsMaster.Models; // For ApplicationUser
+using RecordsMaster.Models;
 using RecordsMaster.Services;
-// For ActiveDirectory  (below)
-//using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-// using Microsoft.Identity.Web; 
+using RecordsMaster.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 public class Program
 {
     public static async Task Main(string[] args)
     {
-        // Create a builder for the web application
-        // This is the entry point for the ASP.NET Core application.
-        // It sets up the configuration, services, and middleware for the application.
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        // Configure Identity with roles and ApplicationUser
         builder.Services.AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();
 
-        // Add custom email sender service. Configuration is in appsettings.json 
         builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
-
-        // Print labels 
         builder.Services.AddScoped<LabelPrintService>();
-        
 
-        // Add authentication with Microsoft Identity Web (Azure AD). No idea if this works yet.
-        //builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-        //    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-
-        //builder.Services.AddAuthorization();
-
-        // Add MVC services to the container. This adds support for controllers and views, enabling MVC pattern.
+        // Add MVC services to the container.
         builder.Services.AddControllersWithViews();
-    
+
         var app = builder.Build();
 
         // Apply migrations and seed data dynamically.
@@ -52,10 +37,12 @@ public class Program
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var configuration = builder.Configuration; // retrieve configuration from appsettings.json
 
-            await dbContext.Database.MigrateAsync(); // Apply migrations asynchronously
+            await dbContext.Database.MigrateAsync();
 
-            // Call seed method, passing configuration
+            // Custom method for seeding data
             await SeedData.SeedDataAsync(dbContext, userManager, roleManager, configuration);
+            await SeedDatabase(dbContext);
+            
         }
 
         // Configure the HTTP request pipeline.
@@ -69,7 +56,6 @@ public class Program
             app.UseHsts();
         }
 
-        // Middleware to handle HTTPS redirection, static files, routing, authentication, and authorization.
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
@@ -77,12 +63,9 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // Map controller routes
-        // This sets up the routing for the application, defining how URLs map to controllers and actions
         app.MapControllerRoute(
             name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}")
-            .WithStaticAssets();
+            pattern: "{controller=Home}/{action=Index}/{id?}");
 
         app.MapControllerRoute(
             name: "records-list",
@@ -108,8 +91,59 @@ public class Program
             pattern: "labels/form",
             defaults: new { controller = "Labels", action = "GenerateLabelsForm" });
 
-
-
         await app.RunAsync();
+    }
+
+    private static async Task SeedDatabase(AppDbContext context)
+    {
+        if (!context.SeedHistories.Any(s => s.SeedType == "Initial"))
+        {
+            var projectDirectory = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
+            var csvFilePath = Path.Combine(projectDirectory, "file.csv");
+
+            if (File.Exists(csvFilePath))
+            {
+                var records = CsvRecordReader.ReadRecordsFromCsv(csvFilePath);
+                context.RecordItems.AddRange(records);
+            }
+            else
+            {
+                context.RecordItems.AddRange(new[]
+                {
+                    new RecordItemModel
+                    {
+                        ID = new Guid("11111111-1111-1111-1111-111111111111"),
+                        CIS = 1001,
+                        BarCode = "93-98765",
+                        RecordType = "Type A",
+                        Location = "Records Room",
+                        BoxNumber = 10,
+                        Digitized = true,
+                        ClosingDate = new DateTime(2023, 1, 1),
+                        DestroyDate = new DateTime(2028, 1, 1)
+                    },
+                    new RecordItemModel
+                    {
+                        ID = new Guid("22222222-2222-2222-2222-222222222222"),
+                        CIS = 1002,
+                        BarCode = "93-98766",
+                        RecordType = "Type B",
+                        Location = "Records Room",
+                        BoxNumber = 20,
+                        Digitized = false,
+                        ClosingDate = new DateTime(2024, 1, 1),
+                        DestroyDate = new DateTime(2029, 1, 1)
+                    }
+                });
+            }
+
+            context.SeedHistories.Add(new SeedHistory
+            {
+                SeedType = "Initial",
+                AppliedOn = DateTime.Now
+            });
+
+            await context.SaveChangesAsync();
+        }
     }
 }

@@ -1,0 +1,3 @@
+﻿CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate,CheckedOut,Requested,ReadyForPickup
+1001,93-98765,Type A,Records Room,10,true,2023-01-01,2028-01-01,false,false,false
+1002,93-98766,Type B,Records Room,20,false,2024-01-01,2029-01-01,false,false,false

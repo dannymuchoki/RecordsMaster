@@ -266,38 +266,24 @@ namespace RecordsMaster.Migrations
                     b.HasIndex("CheckedOutToId");
 
                     b.ToTable("RecordItems");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            ID = new Guid("11111111-1111-1111-1111-111111111111"),
-                            BarCode = "24-98765",
-                            BoxNumber = 10,
-                            CIS = 1001,
-                            CheckedOut = false,
-                            ClosingDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DestroyDate = new DateTime(2028, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Digitized = true,
-                            Location = "Records Room",
-                            ReadyForPickup = false,
-                            RecordType = "Type A",
-                            Requested = false
-                        },
-                        new
-                        {
-                            ID = new Guid("22222222-2222-2222-2222-222222222222"),
-                            BarCode = "24-98766",
-                            BoxNumber = 20,
-                            CIS = 1002,
-                            CheckedOut = false,
-                            ClosingDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DestroyDate = new DateTime(2029, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Digitized = false,
-                            Location = "Records Room",
-                            ReadyForPickup = false,
-                            RecordType = "Type B",
-                            Requested = false
-                        });
+            modelBuilder.Entity("RecordsMaster.Models.SeedHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AppliedOn")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SeedType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SeedHistories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
