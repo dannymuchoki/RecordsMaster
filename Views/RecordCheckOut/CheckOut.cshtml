@@ -77,6 +77,10 @@
         }
         else{
             <p>This record has been digitized. The user will not need to get the physical record. </p>
+                @using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post)){
+                     @Html.AntiForgeryToken()
+                    <input type="submit" value="Sent Digitally" class="btn btn-success" />                   
+                }
         }
     }
     else{

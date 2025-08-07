@@ -10,69 +10,88 @@
 }
 else
 {
-    <h1>Record Items</h1>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>CIS</th>
-                <th>BarCode</th>
-                <th>Record Type</th>
-                <th>Box Number</th>
-                <th>Digitized</th>
-                <th>Location</th>
-                <th>Closing Date</th>
-                <th>Destroy Date</th>
-                <th>Checked Out</th>
-                <th>Checked Out To</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.CIS</td>
-                    <td>@(item.BarCode ?? "N/A")</td>
-                    <td>@item.RecordType</td>
-                    <td>@(item.BoxNumber.HasValue ? item.BoxNumber.ToString() : "N/A")</td>
-                    <td>@(item.Digitized ? "Yes" : "No")</td>
-                    <td>@(item.Location)</td>
-                    <td>@(item.ClosingDate?.ToString("yyyy-MM-dd") ?? "N/A")</td>
-                    <td>@(item.DestroyDate.HasValue ? item.DestroyDate.Value.ToString("yyyy-MM-dd") : "N/A")</td>
-                    <td>@(item.CheckedOut ? "Yes" : "No")</td>
-                    <td>@(item.CheckedOutTo?.UserName ?? "N/A")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <h1>Records</h1>
+    <div class="form-group mt-3">
+        <label for="filterDropdown">Filter Records:</label>
+        <select id="filterDropdown" class="form-control">
+            <option value="all">All</option>
+            <option value="checkedOut">Checked Out Only</option>
+        </select>
+    </div>
+
+    <div id="recordsContainer">
+        @await Html.PartialAsync("_RecordsTable", Model)
+    </div>
 
     <!-- Pagination controls -->
-    @if (Model.TotalPages > 1)
-    {
-        <nav>
-            <ul class="pagination">
-                <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
-                    <a class="page-link" 
-                       asp-route-pageNumber="@(Model.PageIndex - 1)" 
-                       aria-disabled="@(Model.HasPreviousPage ? "false" : "true")">
-                       Previous
-                    </a>
-                </li>
-
-                @for (int i = 1; i <= Model.TotalPages; i++)
-                {
-                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                        <a class="page-link" asp-route-pageNumber="@i">@i</a>
+    <div id="paginationControls">
+        @if (Model.TotalPages > 1)
+        {
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                        <a class="page-link" 
+                           asp-route-pageNumber="@(Model.PageIndex - 1)" 
+                           aria-disabled="@(Model.HasPreviousPage ? "false" : "true")">
+                           Previous
+                        </a>
                     </li>
-                }
 
-                <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
-                    <a class="page-link" 
-                       asp-route-pageNumber="@(Model.PageIndex + 1)" 
-                       aria-disabled="@(Model.HasNextPage ? "false" : "true")">
-                       Next
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    }
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                            <a class="page-link" asp-route-pageNumber="@i">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                        <a class="page-link" 
+                           asp-route-pageNumber="@(Model.PageIndex + 1)" 
+                           aria-disabled="@(Model.HasNextPage ? "false" : "true")">
+                           Next
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+    <div id='downloadCsv'> 
+        <form asp-action="DownloadCsv" asp-controller="RecordItems" method="post" style="display:inline;">
+        <button type="submit" name="download" value="download" class="btn btn-sm btn-primary">Download All</button>
+    </form>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var filterDropdown = document.getElementById('filterDropdown');
+            var recordsContainer = document.getElementById('recordsContainer');
+            var paginationControls = document.getElementById('paginationControls');
+            var downloadCsvDiv = document.getElementById('downloadCsv');
+
+            filterDropdown.addEventListener('change', function () {
+                var filter = filterDropdown.value;
+                var xhr = new XMLHttpRequest();
+
+                xhr.open('GET', '@Url.Action("GetCheckedOutRecords", "RecordItems")?filter=' + filter, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                        recordsContainer.innerHTML = xhr.responseText;
+
+                        // Hide pagination controls and download csv when filtering.-- 
+                        if (filter === "checkedOut") {
+                            paginationControls.style.display = 'none';
+                            downloadCsvDiv.style.display = 'none';
+                        } else {
+                            paginationControls.style.display = 'block';
+                            downloadCsvDiv.style.display = 'block';
+                        }
+                    }
+                };
+
+                xhr.send();
+            });
+        });
+    </script>
 }

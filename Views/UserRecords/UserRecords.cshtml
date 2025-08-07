@@ -6,31 +6,31 @@
 
 <h2>@ViewData["Title"]</h2>
 
-@if (!Model.Any())
+@if (!Model.Any(record => record.Requested || record.CheckedOut))
 {
     <p>You have no records requested or checked out.</p>
 }
 else
 {
-    <h5>Requested</h5>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>CIS</th>
-                <th>BarCode</th>
-                <th>Record Type</th>
-                <th>Location</th>
-                <th>Box Number</th>
-                <th>Digitized</th>
-                <th>Closing Date</th>
-                <th>Destroy Date</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var record in Model)
-        {
-            @if (record.Requested)
-                {
+    if (Model.Any(record => record.Requested))
+    {
+        <h5>Requested</h5>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>CIS</th>
+                    <th>BarCode</th>
+                    <th>Record Type</th>
+                    <th>Location</th>
+                    <th>Box Number</th>
+                    <th>Digitized</th>
+                    <th>Closing Date</th>
+                    <th>Destroy Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var record in Model.Where(record => record.Requested))
+            {
                 <tr>
                     <td><a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS">@record.CIS</a></td>
                     <td>@record.BarCode</td>
@@ -41,32 +41,30 @@ else
                     <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
                     <td>@(record.DestroyDate?.ToString("MM/dd/yyyy") ?? "-")</td>
                 </tr>
-                }
-            
+            }
+            </tbody>
+        </table>
+    }
 
-        }
-        </tbody>
-    </table>
-
-        <h5>Checked out</h5>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>CIS</th>
-                <th>BarCode</th>
-                <th>Record Type</th>
-                <th>Location</th>
-                <th>Box Number</th>
-                <th>Digitized</th>
-                <th>Closing Date</th>
-                <th>Destroy Date</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var record in Model)
-        {
-            @if (record.CheckedOut)
-                {
+    if (Model.Any(record => record.CheckedOut))
+    {
+        <h5>Checked Out</h5>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>CIS</th>
+                    <th>BarCode</th>
+                    <th>Record Type</th>
+                    <th>Location</th>
+                    <th>Box Number</th>
+                    <th>Digitized</th>
+                    <th>Closing Date</th>
+                    <th>Destroy Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var record in Model.Where(record => record.CheckedOut))
+            {
                 <tr>
                     <td><a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS">@record.CIS</a></td>
                     <td>@record.BarCode</td>
@@ -77,9 +75,8 @@ else
                     <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
                     <td>@(record.DestroyDate?.ToString("MM/dd/yyyy") ?? "-")</td>
                 </tr>
-                }
-
-        }
-        </tbody>
-    </table>
+            }
+            </tbody>
+        </table>
+    }
 }

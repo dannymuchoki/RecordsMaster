@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore; // For ToListAsync
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text;
+using System.Globalization;
 using RecordsMaster.Models;
 using RecordsMaster.Data;
 using RecordsMaster.Utilities;
@@ -98,9 +100,76 @@ namespace RecordsMaster.Controllers
                 .OrderByDescending(r => r.BarCode);
 
             var pagedRecords = await PaginatedList<RecordItemModel>.CreateAsync(recordsQuery, pageNumber, pageSize);
-            
 
-            return View(pagedRecords); 
+
+            return View(pagedRecords);
         }
+
+        // Download the CSV
+        public IActionResult DownloadCsv()
+        {
+            var records = _context.RecordItems.ToList();
+            var csvString = GenerateCsv(records);
+
+            var fileName = $"RecordItems_{DateTime.Now:yyyyMMddHHmmss}.csv";
+            var fileBytes = Encoding.UTF8.GetBytes(csvString);
+            return File(fileBytes, "text/csv", fileName);
+        }
+
+        private string GenerateCsv(IEnumerable<RecordItemModel> records)
+        {
+            var csvBuilder = new StringBuilder();
+            csvBuilder.AppendLine("ID,CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate,CheckedOut,Requested,ReadyForPickup,CheckedOutToId");
+
+            foreach (var record in records)
+            {
+                csvBuilder.AppendLine(
+                    $"{record.ID}," +
+                    $"{record.CIS}," +
+                    $"{EscapeCsvValue(record.BarCode)}," +
+                    $"{EscapeCsvValue(record.RecordType)}," +
+                    $"{EscapeCsvValue(record.Location)}," +
+                    $"{record.BoxNumber}," +
+                    $"{record.Digitized}," +
+                    $"{record.ClosingDate?.ToString("o", CultureInfo.InvariantCulture)}," +
+                    $"{record.DestroyDate?.ToString("o", CultureInfo.InvariantCulture)}," +
+                    $"{record.CheckedOut}," +
+                    $"{record.Requested}," +
+                    $"{record.ReadyForPickup}," +
+                    $"{record.CheckedOutToId}");
+            }
+            return csvBuilder.ToString();
+        }
+
+        private string EscapeCsvValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            if (value.Contains(",") || value.Contains("\"") || value.Contains("\n"))
+            {
+                return $"\"{value.Replace("\"", "\"\"")}\"";
+            }
+
+            return value;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCheckedOutRecords(string filter)
+        
+        // To include CheckedOutTo you need to explicitly search for the user in this way. 
+        {
+            IQueryable<RecordItemModel> query = _context.RecordItems.Include(r => r.CheckedOutTo);
+
+            if (filter == "checkedOut")
+            {
+                query = query.Where(r => r.CheckedOut);
+            }
+
+            var records = await query.ToListAsync();
+
+            return PartialView("_RecordsTable", records);
+        }
+
     }
 }

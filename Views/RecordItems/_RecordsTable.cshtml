@@ -1,0 +1,35 @@
+@model IEnumerable<RecordsMaster.Models.RecordItemModel>
+
+<table class="table table-striped" id="recordsTable">
+    <thead>
+        <tr>
+            <th>CIS</th>
+            <th>BarCode</th>
+            <th>Record Type</th>
+            <th>Box Number</th>
+            <th>Digitized</th>
+            <th>Location</th>
+            <th>Closing Date</th>
+            <th>Destroy Date</th>
+            <th>Checked Out</th>
+            <th>Checked Out To</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.CIS</td>
+                <td>@(item.BarCode ?? "N/A")</td>
+                <td>@item.RecordType</td>
+                <td>@(item.BoxNumber.HasValue ? item.BoxNumber.ToString() : "N/A")</td>
+                <td>@(item.Digitized ? "Yes" : "No")</td>
+                <td>@(item.Location)</td>
+                <td>@(item.ClosingDate?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                <td>@(item.DestroyDate?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                <td>@(item.CheckedOut ? "Yes" : "No")</td>
+                <td>@(item.CheckedOutTo?.UserName ?? "N/A")</td>
+            </tr>
+        }
+    </tbody>
+</table>

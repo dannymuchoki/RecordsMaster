@@ -1,12 +1,10 @@
-@{
-    ViewData["Title"] = "Search Record Item by CIS";
-}
 
-<h2>Search Record Item by CIS</h2>
+
+<h2>Search</h2>
 
 <form method="get" action="@Url.Action("SearchByCIS", "RecordItems")">
     <div class="form-group m-1">
-        <label for="CIS">Enter CIS:</label>
+        <label for="CIS">Enter case number:</label>
         <input type="number" name="cis" id="CIS" class="form-control" required />
     </div>
     <button type="submit" class="btn btn-primary">Search</button>

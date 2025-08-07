@@ -12,6 +12,7 @@ namespace RecordsMaster.Models
         [Key]
         public Guid ID { get; set; }
 
+        // case numbers are no longer known as 'CIS' numbers but this convention remains. 
         [Required]
         public int CIS { get; set; }
 
