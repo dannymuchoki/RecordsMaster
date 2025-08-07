@@ -57,6 +57,9 @@ namespace RecordsMaster.Models
         [ForeignKey(nameof(CheckedOutToId))]
         public ApplicationUser? CheckedOutTo { get; set; }
 
+        [Required]
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+
     }
 
     // This class merges the ASP.NET Identity user with your custom properties, so just build the user with Identity user. No need to make a custom model. 

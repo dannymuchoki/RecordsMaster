@@ -186,7 +186,8 @@ namespace RecordsMaster.Migrations
                     CheckedOut = table.Column<bool>(type: "INTEGER", nullable: false),
                     Requested = table.Column<bool>(type: "INTEGER", nullable: false),
                     ReadyForPickup = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CheckedOutToId = table.Column<string>(type: "TEXT", nullable: true)
+                    CheckedOutToId = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedOn = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -239,6 +239,9 @@ namespace RecordsMaster.Migrations
                     b.Property<DateTime?>("ClosingDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("DestroyDate")
                         .HasColumnType("TEXT");
 

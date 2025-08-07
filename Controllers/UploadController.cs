@@ -52,7 +52,9 @@ namespace RecordsMaster.Controllers
             List<RecordItemModel> validRecords = new List<RecordItemModel>();
 
             // Query the DB once to get the last saved barcode.
-            string lastBarcodeInDb = _context.RecordItems.OrderByDescending(r => r.BarCode).Select(r => r.BarCode).FirstOrDefault();
+            //string lastBarcodeInDb = _context.RecordItems.OrderByDescending(r => r.BarCode).Select(r => r.BarCode).FirstOrDefault();
+
+            var lastBarcodeInDb = _context.RecordItems.OrderByDescending(r => r.CreatedOn).Select(r => r.BarCode).FirstOrDefault();
 
             // We'll track the most recent barcode as we process the CSV.
             string lastBarcode = lastBarcodeInDb;

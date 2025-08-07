@@ -11,7 +11,7 @@ using RecordsMaster.Data;
 namespace RecordsMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250807183611_InitialMigration")]
+    [Migration("20250807210450_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -240,6 +240,9 @@ namespace RecordsMaster.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("ClosingDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DestroyDate")
