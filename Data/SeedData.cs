@@ -42,9 +42,9 @@ namespace RecordsMaster.Data
         // Class to model user seed info
         public class UserSeedInfo
         {
-            public string Email { get; set; }
-            public string Password { get; set; }
-            public string Role { get; set; }
+            public required string Email { get; set; }
+            public required string Password { get; set; }
+            public required string Role { get; set; }
         }
 
         private static async Task SeedUserAsync(UserManager<ApplicationUser> userManager, string email, string password, string role)

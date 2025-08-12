@@ -54,7 +54,7 @@ namespace RecordsMaster.Controllers
         {
             if (cis == null)
             {
-                return BadRequest("CIS value is required."); // Return 400 if no CIS is provided, but the view manages this in HTML. Will not let user search without a number
+                return BadRequest("Case number is required."); // Return 400 if no CIS is provided, but the view manages this in HTML. Will not let user search without a number
             }
 
             // Turn the results into a list. 

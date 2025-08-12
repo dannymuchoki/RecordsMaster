@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecordsMaster.Models;
 using RecordsMaster.Data;
+using RecordsMaster.Services;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
@@ -13,14 +14,16 @@ namespace RecordsMaster.Controllers
     public class LabelsController : Controller
     {
         private readonly AppDbContext _context;
+        
+        private readonly PDFPrintService _pdfPrintService;
 
-        private static int _recordIndex;
-
-        public LabelsController(AppDbContext context)
+        public LabelsController(AppDbContext context, PDFPrintService pdfPrintService)
         {
-            
+
             _context = context;
+            _pdfPrintService = pdfPrintService;
             
+
         }
 
         // Action to return the view
@@ -70,64 +73,12 @@ namespace RecordsMaster.Controllers
                 return View("GenerateLabelsForm");
             }
 
-            // Generate PDF
-            using var document = new PrintDocument();
-            document.PrintPage += (sender, e) => PrintLabels(e, records);
-            document.PrinterSettings.PrinterName = "Microsoft Print to PDF";
-            document.PrinterSettings.PrintToFile = true;
-            document.PrinterSettings.PrintFileName = Path.Combine(Path.GetTempPath(), "labels.pdf");
+            var (pdfBytes, fileName) = _pdfPrintService.GenerateLabelsPdfForDownload(records);
 
-            document.Print();
-
-            var pdfBytes = System.IO.File.ReadAllBytes(document.PrinterSettings.PrintFileName);
-            return File(pdfBytes, "application/pdf", $"labels {barcode_start}-{barcode_end}.pdf");
+            // Return PDF file as download with filename "firstBarcode - lastBarcode.pdf"
+            return File(pdfBytes, "application/pdf", fileName);
+ 
         }
 
-        // This works on my computer, but might not work on a server. May need to use a library.  
-        private void PrintLabels(PrintPageEventArgs e, List<RecordItemModel> records)
-        {
-            float labelWidth = 4 * 100; // 4 inches
-            float labelHeight = 1.33f * 100; // 1.33 inches
-            float margin = 0.2f * 100; // 0.2 inches margin
-
-            int labelsPerRow = 2;
-            int labelsPerColumn = 7;
-            int labelsPerPage = labelsPerRow * labelsPerColumn;
-            
-            while (_recordIndex < records.Count)
-            {
-                int currentPageIndex = _recordIndex / labelsPerPage;
-                int startIndex = currentPageIndex * labelsPerPage;
-                int endIndex = Math.Min(startIndex + labelsPerPage, records.Count);
-                
-                int recordIndex = startIndex;
-
-                for (int row = 0; row < labelsPerColumn; row++)
-                {
-                    for (int col = 0; col < labelsPerRow; col++)
-                    {
-                        if (recordIndex >= endIndex)
-                            break;
-
-                        float x = margin + col * (labelWidth + margin);
-                        float y = margin + row * (labelHeight + margin);
-
-                        var record = records[recordIndex++];
-                        e.Graphics.DrawRectangle(Pens.Black, x, y, labelWidth, labelHeight);
-                        e.Graphics.DrawString($"CIS: {record.CIS}\nBarCode: {record.BarCode}\nRecordType: {record.RecordType}", new Font("Arial", 14), Brushes.Black, x + 10, y + 10);
-                    }
-                }
-
-                _recordIndex = endIndex;
-
-                if (_recordIndex < records.Count)
-                {
-                    e.HasMorePages = true;
-                    return;
-                }
-
-                e.HasMorePages = false;
-            }
-        }
     }
 }

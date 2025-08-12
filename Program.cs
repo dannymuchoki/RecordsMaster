@@ -21,7 +21,8 @@ public class Program
             .AddEntityFrameworkStores<AppDbContext>();
 
         builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
-        builder.Services.AddScoped<LabelPrintService>();
+        //builder.Services.AddScoped<LabelPrintService>(); // useful in development. Keep it around because PDFs were annoying to work out. 
+        builder.Services.AddScoped<PDFPrintService>();
 
         // Add MVC services to the container.
         builder.Services.AddControllersWithViews();
@@ -98,7 +99,8 @@ public class Program
     {
         if (!context.SeedHistories.Any(s => s.SeedType == "Initial"))
         {
-            var projectDirectory = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
+            //var projectDirectory = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
+            var projectDirectory = Directory.GetParent(AppContext.BaseDirectory)?.Parent?.Parent?.FullName?? AppContext.BaseDirectory;
             var csvFilePath = Path.Combine(projectDirectory, "file.csv");
 
             if (File.Exists(csvFilePath))

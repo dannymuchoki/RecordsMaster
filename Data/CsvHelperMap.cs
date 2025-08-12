@@ -27,7 +27,7 @@ public sealed class CsvHelperMap : ClassMap<RecordItemModel>
 // Custom converter to handle boolean values
 public class BooleanTypeConverter : BooleanConverter
 {
-    public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
+    public override object ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
     {
         if (string.IsNullOrEmpty(text))
         {
@@ -46,6 +46,7 @@ public class BooleanTypeConverter : BooleanConverter
             return false;
         }
 
-        return base.ConvertFromString(text, row, memberMapData);
+        var baseResult = base.ConvertFromString(text, row, memberMapData);
+        return baseResult ?? false;
     }
 }

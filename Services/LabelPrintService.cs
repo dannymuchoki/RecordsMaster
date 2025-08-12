@@ -3,9 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
+using System.Runtime.Versioning;
 
+
+// Only used to develop my understanding of PDFs in .NET - This only works when the server or computer supports Windows print to file. Useful for debugging printing labels on Windows machines without needing a library or Adobe. Call it as a service instead of PDFPrintService. 
 namespace RecordsMaster.Services
 {
+    [SupportedOSPlatform("windows")] // silences the  'This call site is reachable on all platforms. 'PrintDocument' is only supported on: 'windows' 6.1' warning.
     public class LabelPrintService
     {
         private int _recordIndex; // track page count
@@ -16,9 +20,9 @@ namespace RecordsMaster.Services
 
             PrintDocument printDoc = new PrintDocument();
             printDoc.PrintPage += (sender, e) => PrintPageHandler(e, records);
-            printDoc.Print(); 
+            printDoc.Print();
 
-            
+
         }
 
         private void PrintPageHandler(PrintPageEventArgs e, List<RecordItemModel> records)

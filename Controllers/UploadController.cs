@@ -21,11 +21,14 @@ namespace RecordsMaster.Controllers
     {
         private readonly AppDbContext _context;
 
-        private readonly LabelPrintService _labelPrintService; 
+        //private readonly LabelPrintService _labelPrintService; // To reactivate, make sure to uncomment the builder for this service (builder.Services.AddScoped<LabelPrintService>();)
 
-        public UploadController(AppDbContext context, LabelPrintService labelPrintService)
+        private readonly PDFPrintService _pdfPrintService;
+
+        public UploadController(AppDbContext context, PDFPrintService pdfPrintService)
         {
-            _labelPrintService = labelPrintService;
+            //_labelPrintService = labelPrintService; // Use pdfPrintService in production. 
+            _pdfPrintService = pdfPrintService;  // this has two functions - use GenerateLabelsPdfForDownload to create labels with helpful file names
             _context = context;
         }
 
@@ -160,10 +163,10 @@ namespace RecordsMaster.Controllers
 
                 await _context.SaveChangesAsync();
 
-                // Print at upload
-                _labelPrintService.PrintLabels(validRecords);
+                var (pdfBytes, fileName) = _pdfPrintService.GenerateLabelsPdfForDownload(validRecords);
 
-                return RedirectToAction("Index", "RecordItems");
+                // Return PDF file as download with filename "firstBarcode - lastBarcode.pdf"
+                return File(pdfBytes, "application/pdf", fileName);
             }
             catch (Exception ex)
             {
