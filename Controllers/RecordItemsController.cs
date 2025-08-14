@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Globalization;
 using RecordsMaster.Models;
 using RecordsMaster.Data;
@@ -49,27 +50,47 @@ namespace RecordsMaster.Controllers
             return View(); // This looks for Views/RecordItems/Search.cshtml
         }
 
-        // GET: RecordItems/SearchByCIS?cis=123
-        public async Task<IActionResult> SearchByCIS(int? cis)
+        // GET: RecordItems/SearchRecords allows searching by case number (CIS) or barcode. 
+        public async Task<IActionResult> SearchRecords(string? input)
         {
-            if (cis == null)
+            if (string.IsNullOrWhiteSpace(input))
             {
-                return BadRequest("Case number is required."); // Return 400 if no CIS is provided, but the view manages this in HTML. Will not let user search without a number
+                return BadRequest("Please enter a CIS or a BarCode.");
             }
 
-            // Turn the results into a list. 
-            var record = await _context.RecordItems
-                .Where(r => r.CIS == cis)
+            input = input.Trim();
+
+            var barcodePattern = @"^\d{2}-\d{5}$";
+            bool isBarcode = Regex.IsMatch(input, barcodePattern);
+
+            bool isCis = int.TryParse(input, out var cisValue);
+
+            if (!isBarcode && !isCis)
+            {
+                return BadRequest("Input must be a number (CIS) or a barcode in 'dd-ddddd' format.");
+            }
+
+            var query = _context.RecordItems
                 .Include(r => r.CheckedOutTo)
-                .ToListAsync();
+                .AsQueryable();
 
-            if (record.Count == 0 || !record.Any())
+            if (isBarcode)
             {
-                return View("NotFound"); // Return NotFound view if no record is found
+                query = query.Where(r => r.BarCode == input);
+            }
+            else
+            {
+                query = query.Where(r => r.CIS == cisValue);
             }
 
+            var records = await query.ToListAsync();
 
-            return View("Details", record); // Display the record details in the Details view
+            if (records.Count == 0)
+            {
+                return View("NotFound");
+            }
+
+            return View("Details", records);
         }
 
         public async Task<IActionResult> Details(int id)

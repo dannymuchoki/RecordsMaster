@@ -2,10 +2,10 @@
 
 <h2>Search</h2>
 
-<form method="get" action="@Url.Action("SearchByCIS", "RecordItems")">
+<form method="get" action="@Url.Action("SearchRecords", "RecordItems")">
     <div class="form-group m-1">
         <label for="CIS">Enter case number:</label>
-        <input type="number" name="cis" id="CIS" class="form-control" required />
+        <input name="cis" id="CIS" class="form-control" required />
     </div>
     <button type="submit" class="btn btn-primary">Search</button>
 </form>

@@ -5,14 +5,27 @@
 
  @if (User.IsInRole("Admin") || User.IsInRole("User"))
  {
-    <form method="get" action="@Url.Action("SearchByCIS", "RecordItems")">
-        <div class="form-group m-1 p-2">
-            <label for="CIS">Enter CIS:</label>
-            <input type="number" name="cis" id="CIS" class="form-control" required />
-        </div>
-        <button type="submit" class="btn btn-primary mx-auto">Search</button>
-    </form>
+<form method="get" action="@Url.Action("SearchRecords", "RecordItems")" onsubmit="return validateInput()">
+    <div class="form-group m-1 p-2">
+        <label for="Input">Enter Case number or bar code:</label>
+        <input name="input" id="Input" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary mx-auto">Search</button>
+</form>
+@section Scripts {
+    <script>
+        function validateInput() {
+            const input = document.getElementById('Input').value;
 
+            if (!input) {
+                alert('Please enter a CIS or BarCode.');
+                return false; // Prevent form submission if input is empty
+            }
+
+            return true; // Allow form submission
+        }
+    </script>
+}
     
      @if (User.IsInRole("Admin"))
      
