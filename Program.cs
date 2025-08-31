@@ -139,6 +139,7 @@ public class Program
                 });
             }
 
+            // Sets up the initial seeding of the database. See the SeedHistory class in RecordItemModel.cs
             context.SeedHistories.Add(new SeedHistory
             {
                 SeedType = "Initial",

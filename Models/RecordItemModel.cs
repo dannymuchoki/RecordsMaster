@@ -10,7 +10,7 @@ namespace RecordsMaster.Models
     public class SeedHistory
     {
         public int Id { get; set; }
-        public string SeedType { get; set; }
+        public required string SeedType { get; set; }
         public DateTime AppliedOn { get; set; }
     }
     // foreign key property named CheckedOutTo.
@@ -21,7 +21,7 @@ namespace RecordsMaster.Models
 
         // case numbers are no longer known as 'CIS' numbers but this convention remains. 
         [Required]
-        public string CIS { get; set; }
+        public required string CIS { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -29,11 +29,11 @@ namespace RecordsMaster.Models
 
         [Required]
         [StringLength(50)]
-        public string RecordType { get; set; }
+        public required string RecordType { get; set; }
 
         [Required]
         [StringLength(128)]
-        public string Location { get; set; }
+        public string? Location { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Box Number must be a positive integer.")]
         public int? BoxNumber { get; set; }

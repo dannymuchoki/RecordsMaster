@@ -162,7 +162,14 @@ namespace RecordsMaster.Controllers
 
             // Check appsettings.json dictionary for the 'Notification' key. 
             var adminEmail = _config["Notification:AdminEmail"];
-            //await _emailSender.SendEmailAsync(adminEmail, subject, message); commented out because has not been tested. Ignore the warning error. 
+            try
+            {
+                await _emailSender.SendEmailAsync(adminEmail, subject, message);
+            }
+            catch
+            {
+                Console.WriteLine(message);
+            }
 
             TempData["Message"] = "Record successfully checked out. Bring this page to receive the record.";
             return RedirectToAction(nameof(CheckOut), new { id });
