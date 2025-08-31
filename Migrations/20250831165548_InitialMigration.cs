@@ -175,7 +175,7 @@ namespace RecordsMaster.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CIS = table.Column<int>(type: "INTEGER", nullable: false),
+                    CIS = table.Column<string>(type: "TEXT", nullable: false),
                     BarCode = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     RecordType = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Location = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),

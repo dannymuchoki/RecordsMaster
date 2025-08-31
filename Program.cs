@@ -115,7 +115,7 @@ public class Program
                     new RecordItemModel
                     {
                         ID = new Guid("11111111-1111-1111-1111-111111111111"),
-                        CIS = 1001,
+                        CIS = "1001",
                         BarCode = "93-98765",
                         RecordType = "Type A",
                         Location = "Records Room",
@@ -127,7 +127,7 @@ public class Program
                     new RecordItemModel
                     {
                         ID = new Guid("22222222-2222-2222-2222-222222222222"),
-                        CIS = 1002,
+                        CIS = "1002D",
                         BarCode = "93-98766",
                         RecordType = "Type B",
                         Location = "Records Room",

@@ -62,11 +62,12 @@ namespace RecordsMaster.Controllers
 
                         while (csv.Read())
                         {
-                            string cisField = csv.GetField(0);
-                            string barcodeField = csv.GetField(1);
+                            string cisField = csv.GetField(0)!;
+                            string barcodeField = csv.GetField(1)!;
 
                             if (!int.TryParse(cisField, out int cis))
                             {
+                                // CIS field is a string in the database, but is required to be an integer.
                                 rowErrors.Add($"Row {rowNumber}: CIS '{cisField}' is not a valid integer.");
                                 rowNumber++;
                                 continue;
@@ -80,7 +81,8 @@ namespace RecordsMaster.Controllers
                             }
 
                             // Find the record by CIS and BarCode
-                            var record = _context.RecordItems.FirstOrDefault(r => r.CIS == cis && r.BarCode == barcodeField);
+                            var record = _context.RecordItems.FirstOrDefault(r => r.CIS == cisField && r.BarCode == barcodeField);
+                            
                             if (record == null)
                             {
                                 rowErrors.Add($"Row {rowNumber}: No record found with CIS '{cis}' and BarCode '{barcodeField}'.");

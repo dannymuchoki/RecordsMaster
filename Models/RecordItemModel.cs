@@ -21,7 +21,7 @@ namespace RecordsMaster.Models
 
         // case numbers are no longer known as 'CIS' numbers but this convention remains. 
         [Required]
-        public int CIS { get; set; }
+        public string CIS { get; set; }
 
         [Required]
         [StringLength(100)]

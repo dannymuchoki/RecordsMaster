@@ -85,7 +85,7 @@ namespace RecordsMaster.Controllers
                         while (csv.Read())
                         {
                             // Validation: first column must be integer
-                            string firstField = csv.GetField(0);
+                            string firstField = csv.GetField(0)!;
                             if (!int.TryParse(firstField, out _))
                             {
                                 rowErrors.Add($"Row {rowNumber} error: The first column value ('{firstField}') is not a valid integer.");
@@ -94,7 +94,7 @@ namespace RecordsMaster.Controllers
                             }
 
                             // Validation: record type must be "PS", "FC", "EX"
-                            var recordTypeField = csv.GetField(2);
+                            var recordTypeField = csv.GetField(2)!;
                             List<string> validValues = new List<string> { "PS", "FC", "EX", "FS" };
                             if (!validValues.Contains(recordTypeField))
                             {

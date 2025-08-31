@@ -11,7 +11,7 @@ using RecordsMaster.Data;
 namespace RecordsMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250807210511_AddIdentityRoleSupport")]
+    [Migration("20250831165622_AddIdentityRoleSupport")]
     partial class AddIdentityRoleSupport
     {
         /// <inheritdoc />
@@ -230,8 +230,9 @@ namespace RecordsMaster.Migrations
                     b.Property<int?>("BoxNumber")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CIS")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("CIS")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("CheckedOut")
                         .HasColumnType("INTEGER");

@@ -227,8 +227,9 @@ namespace RecordsMaster.Migrations
                     b.Property<int?>("BoxNumber")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("CIS")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("CIS")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("CheckedOut")
                         .HasColumnType("INTEGER");

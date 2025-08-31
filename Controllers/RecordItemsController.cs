@@ -55,7 +55,8 @@ namespace RecordsMaster.Controllers
         {
             if (string.IsNullOrWhiteSpace(input))
             {
-                return BadRequest("Please enter a CIS or a BarCode.");
+                //return BadRequest("Please enter a case number or a bar code.");
+                return View("NotFound");
             }
 
             input = input.Trim();
@@ -63,13 +64,17 @@ namespace RecordsMaster.Controllers
             var barcodePattern = @"^\d{2}-\d{5}$";
             bool isBarcode = Regex.IsMatch(input, barcodePattern);
 
-            bool isCis = int.TryParse(input, out var cisValue);
+            /* bool isCis = int.TryParse(input, out var cisValue);
 
             if (!isBarcode && !isCis)
-            {
-                return BadRequest("Input must be a number (CIS) or a barcode in 'dd-ddddd' format.");
-            }
+                {
+                    return BadRequest("Input must be a number (CIS) or a barcode in 'dd-ddddd' format.");
 
+                    1002D
+                    1002D
+                    10002D
+            }
+            */
             var query = _context.RecordItems
                 .Include(r => r.CheckedOutTo)
                 .AsQueryable();
@@ -80,7 +85,7 @@ namespace RecordsMaster.Controllers
             }
             else
             {
-                query = query.Where(r => r.CIS == cisValue);
+                query = query.Where(r => r.CIS == input);
             }
 
             var records = await query.ToListAsync();
@@ -93,7 +98,7 @@ namespace RecordsMaster.Controllers
             return View("Details", records);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(string id)
         {
             var record = await _context.RecordItems.Where(r => r.CIS == id).ToListAsync();
             if (record == null)
