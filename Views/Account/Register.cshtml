@@ -15,3 +15,12 @@
 </form>
 
 <p>Already have an account? <a href="/Account/Login">Login here</a></p>
+
+<h2>Reset password</h2>
+<form method="post" action="@Url.Action("ResetPassword", "PasswordReset")">
+    <div class="form-group m-1">
+        <label for="Email adddress">Enter email address</label>
+        <input name="email" id="email" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>

@@ -86,17 +86,38 @@
         <div class="alert alert-danger">@TempData["LoginError"]</div>
     }
 
-    <form method="post" action="/Account/Login">
-        <label>Email</label>
-        <input type="email" name="email" required />
+    <form asp-controller="Account" asp-action="Login" method="post">
+        <div class="form-group p-1">
+            <label>Email</label>
+            <input type="email" name="email" required  class="form-control"/>
 
-        <label>Password</label>
-        <input type="password" name="password" required />
+            <label>Password</label>
+            <input type="password" name="password" required  class="form-control" /> <br/>
 
-        <button type="submit">Login</button>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </div>
     </form>
 
-    <p>Don't have an account? <a href="/Account/Register">Register here</a></p>
+    <p>
+        Don't have an account? <a href="/Account/Register">Register here</a>
+    </p>
+
+   
+    <h5>Reset password</h5>
+    <form asp-controller="PasswordReset" asp-action="ResetPassword" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-group p-1">
+            <input type="email" name="Email" id="PasswordResetEmail" class="form-control" required placeholder="Enter your email address" />
+        </div>
+        <button type="submit" class="btn btn-primary">Go</button>
+    </form>
+
+    if (TempData["PasswordResetMessage"] != null) 
+        { 
+            <div class="alert alert-info">@ViewData["PasswordResetMessage"]</div> 
+        }
+                
+    
     }
 
 

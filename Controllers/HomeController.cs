@@ -25,6 +25,12 @@ public class HomeController : Controller
                 .Where(r => r.Requested)
                 .ToListAsync();
 
+            // The PasswordResetController sends messages to the index view.
+            if (TempData.ContainsKey("PasswordResetMessage"))
+            {
+                ViewData["PasswordResetMessage"] = TempData["PasswordResetMessage"];
+            }
+
             return View("Index", requestedRecords);
         }
 
