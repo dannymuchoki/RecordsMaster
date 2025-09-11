@@ -36,5 +36,28 @@ namespace RecordsMaster.Controllers
             //return View(userRecords);
             return View("UserRecords", userRecords);
         }
+
+        public async Task<IActionResult> AdminViewUserRecords(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email address is required.");
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var userRecords = await _context.RecordItems
+                .Include(r => r.CheckedOutTo)
+                .Where(r => r.CheckedOutToId == user.Id)
+                .ToListAsync();
+
+            return View("UserRecords", userRecords);
+        }
     }
 }

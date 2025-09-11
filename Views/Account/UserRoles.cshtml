@@ -1,18 +1,17 @@
 @model IEnumerable<(RecordsMaster.Models.ApplicationUser User, bool IsUserRole, bool IsAdminRole)>
 
 @{
-    ViewData["Title"] = "User Roles";
+    ViewData["Title"] = "Manage Users";
 }
 
 
  @if (User.IsInRole("Admin")){
-        <h2>User Roles</h2>
+        <h2>Users</h2>
 
         <table class="table">
             <thead>
                 <tr>
-                    <th>User Name</th>
-                    <th>Email</th>
+                    <th>User</th>
                     <th>Has 'User' Role?</th>
                     <th>Has 'Admin' Role?</th>
                     <th>Actions</th>
@@ -22,8 +21,9 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.User.UserName</td>
-                    <td>@item.User.Email</td>
+                    <td>  
+                        <a asp-area="" asp-controller="UserRecords" asp-action="AdminViewUserRecords" asp-route-email="@item.User.Email"> @item.User.Email</a>      
+                    </td>
                     <td>
                         @if (item.IsUserRole)
                         {

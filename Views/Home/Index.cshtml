@@ -5,34 +5,36 @@
 
  @if (User.IsInRole("Admin") || User.IsInRole("User"))
  {
-<form method="get" action="@Url.Action("SearchRecords", "RecordItems")" onsubmit="return validateInput()">
-    <div class="form-group m-1 p-2">
-        <label for="Input">Enter Case number or bar code:</label>
-        <input name="input" id="Input" class="form-control" required />
-    </div>
-    <button type="submit" class="btn btn-primary mx-auto">Search</button>
-</form>
-@section Scripts {
-    <script>
-        function validateInput() {
-            const input = document.getElementById('Input').value;
+    <form method="get" action="@Url.Action("SearchRecords", "RecordItems")" onsubmit="return validateInput()">
+        <div class="form-group m-1 p-2">
+            <label for="Input">Enter Case number or bar code:</label>
+            <input name="input" id="Input" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary mx-auto">Search</button>
+    </form>
+    @section Scripts 
+    {
+        <script>
+            function validateInput() {
+                const input = document.getElementById('Input').value;
 
-            if (!input) {
-                alert('Please enter a CIS or BarCode.');
-                return false; // Prevent form submission if input is empty
+                if (!input) {
+                    alert('Please enter a CIS or BarCode.');
+                    return false; // Prevent form submission if input is empty
+                }
+                return true; // Allow form submission
             }
-
-            return true; // Allow form submission
-        }
-    </script>
-}
+        </script>
+    }
     
-     @if (User.IsInRole("Admin"))
+    
+    @if (User.IsInRole("Admin"))
      
      {
-        @if (!Model.Any()){
-
-        }
+        @if (!Model.Any())
+            {
+               <!-- intentionally blank --> 
+            }
         else
             {
                 <h5 class="mt-2">Requested Records</h5>
@@ -40,7 +42,7 @@
                 <table class="table table-striped"> 
                     <thead>
                     <tr>
-                        <th>CIS</th>
+                        <th>Case#</th>
                         <th>Barcode</th>
                         <th>Record Type</th>
                         <th>Box Number</th>
@@ -67,55 +69,87 @@
 
                 </table>
             }
-
      }
- }
+    
+    @if (User.IsInRole("User"))
+        {
+            if (Model.Any(record => record.ReadyForPickup))
+            {  
+                        <h5 class='text-center'>Ready for pickup</h5>
+                        <p class='text-center'>Please clink the Case# link to check the record out. We will package the record for you to collect, or have it deliverd to you.</p>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Case#</th>
+                                    <th>BarCode</th>
+                                    <th>Record Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        @foreach (var record in Model.Where(record => record.Requested))
+                            {
+                                <tr>
+                                    <td><a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS">@record.CIS</a></td>
+                                    <td>@record.BarCode</td>
+                                    <td>@record.RecordType</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+        }
+     
+}
 
- else{
-     @if (User.Identity.IsAuthenticated){
-        <h1>Welcome, @User.Identity.Name!</h1>
-        <p>You are logged in, but you do not have access to the search functionality.</p> 
-
-    }
-    else{
-
-    <h2>Login</h2>
-
-    @if (TempData["LoginError"] != null)
+else
     {
-        <div class="alert alert-danger">@TempData["LoginError"]</div>
-    }
+        @if (User.Identity.IsAuthenticated)
+        {
+            <h1>Welcome, @User.Identity.Name!</h1>
+            <p>You are logged in, but you do not have access to the search functionality.</p> 
 
-    <form asp-controller="Account" asp-action="Login" method="post">
-        <div class="form-group p-1">
-            <label>Email</label>
-            <input type="email" name="email" required  class="form-control"/>
+        }
+        
+        else
+        {
 
-            <label>Password</label>
-            <input type="password" name="password" required  class="form-control" /> <br/>
+        <h2>Login</h2>
 
-            <button type="submit" class="btn btn-primary">Login</button>
-        </div>
-    </form>
+         @if (TempData["LoginError"] != null)
+            {
+                <div class="alert alert-danger">@TempData["LoginError"]</div>
+            }
 
-    <p>
-        Don't have an account? <a href="/Account/Register">Register here</a>
-    </p>
+            <form asp-controller="Account" asp-action="Login" method="post">
+                <div class="form-group p-1">
+                    <label>Email</label>
+                    <input type="email" name="email" required  class="form-control"/>
+
+                    <label>Password</label>
+                    <input type="password" name="password" required  class="form-control" /> <br/>
+
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+            </form>
+
+            <p>
+                Don't have an account? <a href="/Account/Register">Register here</a>
+            </p>
 
    
-    <h5>Reset password</h5>
-    <form asp-controller="PasswordReset" asp-action="ResetPassword" method="post">
-        @Html.AntiForgeryToken()
-        <div class="form-group p-1">
-            <input type="email" name="Email" id="PasswordResetEmail" class="form-control" required placeholder="Enter your email address" />
-        </div>
-        <button type="submit" class="btn btn-primary">Go</button>
-    </form>
+            <h5>Reset password</h5>
+            <form asp-controller="PasswordReset" asp-action="ResetPassword" method="post">
+                @Html.AntiForgeryToken()
+                <div class="form-group p-1">
+                    <input type="email" name="Email" id="PasswordResetEmail" class="form-control" required placeholder="Enter your email address" />
+                </div>
+                <button type="submit" class="btn btn-primary">Go</button>
+            </form>
 
-    if (TempData["PasswordResetMessage"] != null) 
-        { 
-            <div class="alert alert-info">@ViewData["PasswordResetMessage"]</div> 
-        }
+        if (TempData["PasswordResetMessage"] != null) 
+            { 
+                <div class="alert alert-info">@ViewData["PasswordResetMessage"]</div> 
+            }
                 
     
     }

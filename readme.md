@@ -19,9 +19,9 @@
 This will create the SQLite database with the admin user, a test user, and the seeded information. 
 
 # App overall
-The app runs on one model (RecordItemsModel) tied to the default ApplicationUser. It has nine controllers. The controllers, as the name suggests, control the contexts visible to the viewers in the Views.
+The app runs on one model (RecordItemsModel) tied to the default ApplicationUser. It has ten controllers. The controllers, as the name suggests, control the contexts visible to the viewers in the Views.
 
-Note that each controller has a corresponding view in the 'Views' directory. 
+Note that, other than the PasswordReset controller, each controller has a corresponding view in the 'Views' directory. 
 
 ## 'Services' directory contains:
 1. The untested email sender classes.
@@ -30,3 +30,6 @@ Note that each controller has a corresponding view in the 'Views' directory.
 ## 'Utilities' directory contains:
 1. A class that reads CSV files
 2. A class that implements rudimentary pagination in the 'List' view of all records. Pagination is controlled by a key in the appsettings.json file 
+
+## Password Resets:
+- The password reset controller checks if a user's email address is registered. If so, it generates a new strong password for the user's account and sends it to the user via email. In testing mode when you may not have a SMTP server set up, the email will print in console. 
