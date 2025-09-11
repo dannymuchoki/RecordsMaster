@@ -23,6 +23,8 @@ The app runs on one model (RecordItemsModel) tied to the default ApplicationUser
 
 Note that, other than the PasswordReset controller, each controller has a corresponding view in the 'Views' directory. 
 
+Admin users can see what each user has requested or checked out via the 'Manage Users' page. Click on the username hyperlink to access the user's record view.
+
 ## 'Services' directory contains:
 1. The untested email sender classes.
 2. Two PDF printing services - one for development in Windows, the other cross-plaform. 
