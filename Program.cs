@@ -16,6 +16,16 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+        /*
+                 // For SQL Server.                
+                // Make sure to add <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+               // to the RecordsMaster.csproj. (It's already there in the repo version)
+               
+        builder.Services.AddDbContext<AppDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
+
+        */
+
         builder.Services.AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();
