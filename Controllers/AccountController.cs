@@ -11,11 +11,13 @@ namespace RecordsMaster.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IConfiguration _config;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+             _config = config;
         }
         // This action returns a view that lists all users and their roles.
         // It uses a tuple to pair each user with a boolean indicating if they are in the "User" role.
@@ -23,6 +25,8 @@ namespace RecordsMaster.Controllers
         public async Task<IActionResult> UserRoles()
         {
             var users = _userManager.Users.ToList();
+            var adminEmail = _config["Notification:AdminEmail"];
+            ViewBag.AdminEmail = adminEmail; // used in the UserRoles.cshtml view.
             var model = new List<(ApplicationUser User, bool IsUserRole, bool IsAdminRole)>();
             foreach (var user in users)
             {
@@ -39,8 +43,10 @@ namespace RecordsMaster.Controllers
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)
+            
             {
                 var currentRoles = await _userManager.GetRolesAsync(user);
+
 
                 if (role == "None")
                 {

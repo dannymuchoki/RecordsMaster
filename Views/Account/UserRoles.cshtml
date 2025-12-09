@@ -1,3 +1,4 @@
+@using SQLitePCL
 @model IEnumerable<(RecordsMaster.Models.ApplicationUser User, bool IsUserRole, bool IsAdminRole)>
 
 @{
@@ -45,9 +46,11 @@
                         }
                     </td>
                     <td>
-                        @if (item.User.Email == "admin@example.com")
+                        @if (item.User.Email == ViewBag.AdminEmail)
                         {
-
+                            <p> 
+                                This user's permissions cannot be modified. 
+                            </p>
                         }
                         else{
                         <form asp-action="SetUserRole" asp-controller="Account" method="post" style="display:inline;">

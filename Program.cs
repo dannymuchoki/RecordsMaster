@@ -13,18 +13,30 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+         /*
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-        /*
-                 // For SQL Server.                
-                // Make sure to add <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-               // to the RecordsMaster.csproj. (It's already there in the repo version)
                
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
 
+                             // For SQL Server.                
+                // Make sure to add <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+               // to the RecordsMaster.csproj. (It's already there in the repo version)
+
         */
+        
+        // Use SQLite in development. Use SqlServer in Prod. 
+        if (builder.Environment.IsDevelopment())
+            {
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+            }
+            else if (builder.Environment.IsProduction())
+            {
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
+            }
 
         builder.Services.AddDefaultIdentity<ApplicationUser>()
             .AddRoles<IdentityRole>()

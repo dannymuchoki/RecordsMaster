@@ -2,8 +2,9 @@
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
-1. If you like, modify the default admin and user parameters in the 'UserSeedData' key. The default admin user is hard-coded into the UserRoles.cshtml view to avoid accidental self-nerfing. Make sure to change it!
-2. You will need to enter a SMTP server in appsettings for email to work (this is untested)
+1. If you like, modify the default admin and user parameters in the 'UserSeedData' key. 
+2. The default admin user is referenced the UserRoles.cshtml view. This is done to avoid accidental self-nerfing!
+3. You will need to enter a SMTP server in appsettings for email to work (this is untested)
 
 # Rename 'original_data_template.csv' to 'original_data.csv' if you want to populate the table at initial migration.
 0. Otherwise, the seeded data in Program.cs will populate the table. 
