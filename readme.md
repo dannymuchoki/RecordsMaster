@@ -1,4 +1,4 @@
-# RecordsMaster  1.1
+# RecordsMaster  1.2
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
@@ -17,10 +17,10 @@
 4. dotnet build
 5. dotnet run
 
-This will create the SQLite database with the admin user, a test user, and the seeded information. 
+This will create the SQLite database with the admin user, a test user, and the seeded information. Check the ASPNETCORE_ENVIRONMENT variables in launchSettings.json. When in 'Development' the default database is SQLite. When in 'Production' the database will be SQL. 
 
 # App overall
-The app runs on one model (RecordItemsModel) tied to the default ApplicationUser. It has ten controllers. The controllers, as the name suggests, control the contexts visible to the viewers in the Views.
+The app runs on one model (RecordItemsModel) tied to the default ApplicationUser. It has ten controllers. The controllers, as the name suggests, control what the user sees in the views.
 
 Note that, other than the PasswordReset controller, each controller has a corresponding view in the 'Views' directory. 
 
