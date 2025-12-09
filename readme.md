@@ -2,8 +2,8 @@
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
-1. If you like, modify the default admin and user parameters in the 'UserSeedData' key. 
-2. The default admin user is referenced the UserRoles.cshtml view. This is done to avoid accidental self-nerfing!
+1. Modify the default admin and user parameters in the 'UserSeedData' key. 
+2. The default admin user is referenced the UserRoles.cshtml view. This is done to avoid accidental self-nerfing the admin. Admin user will see "this user's permissions cannot be modified".
 3. You will need to enter a SMTP server in appsettings for email to work (this is untested)
 
 # Rename 'original_data_template.csv' to 'original_data.csv' if you want to populate the table at initial migration.
@@ -33,6 +33,12 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 ## 'Utilities' directory contains:
 1. A class that reads CSV files
 2. A class that implements rudimentary pagination in the 'List' view of all records. Pagination is controlled by a key in the appsettings.json file 
+
+## 'Data' directory contains:
+1. I'll be honest, other than AppDbContext, I can't remember why I split Utilities and Data.
+2. This is where you can find AppDbContext - this is mostly ORM stuff that runs at initial migration. 
+3. 'SeedTestData' used to be part of AppDbContext. Now it sets up the admin users and the first seeded data. 
+4. 'CsvHelperMap' helps map uploaded .csv data to the model. You can use it to reconstruct the order of columns in the .csv file. It is also easier than managing the data in the controllers. This feels more like a utility but oh well. 
 
 ## Password Resets:
 - The password reset controller checks if a user's email address is registered. If so, it generates a new strong password for the user's account and sends it to the user via email. In testing mode when you may not have a SMTP server set up, the email will print in console. 

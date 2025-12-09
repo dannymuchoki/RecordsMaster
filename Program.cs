@@ -65,6 +65,7 @@ public class Program
             // Custom method for seeding data
             await SeedData.SeedDataAsync(dbContext, userManager, roleManager, configuration);
             await SeedDatabase(dbContext);
+            // btw, SeedData is in the Data directory. 
             
         }
 
