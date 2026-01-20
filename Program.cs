@@ -122,8 +122,7 @@ public class Program
     {
         if (!context.SeedHistories.Any(s => s.SeedType == "Initial"))
         {
-            //var projectDirectory = Directory.GetParent(AppContext.BaseDirectory).Parent.Parent.Parent.FullName;
-            var projectDirectory = Directory.GetParent(AppContext.BaseDirectory)?.Parent?.Parent?.FullName?? AppContext.BaseDirectory;
+            var projectDirectory = Directory.GetCurrentDirectory();
             var csvFilePath = Path.Combine(projectDirectory, "file.csv");
 
             if (File.Exists(csvFilePath))

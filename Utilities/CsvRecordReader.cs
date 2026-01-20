@@ -21,6 +21,8 @@ namespace RecordsMaster.Utilities
                 MissingFieldFound = null
             });
 
+            csv.Context.RegisterClassMap<CsvHelperMap>();
+
             foreach (var record in csv.GetRecords<RecordItemModel>())
             {
                 record.ID = Guid.NewGuid(); // Generate GUID for each record

@@ -29,7 +29,7 @@ namespace RecordsMaster.Controllers
         // https://learn.microsoft.com/en-us/ef/core/
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly int _pageSize;
+        private readonly int _appsettingsPageSize;
 
         // Constructor to inject dependencies
         // AppDbContext is used to access the database, and IConfiguration is used to read settings from appsettings.json.
@@ -41,7 +41,7 @@ namespace RecordsMaster.Controllers
 
             _configuration = configuration;
             // Gets the pagination value from appsettings.json (easier than hardcoding it here)
-            _pageSize = configuration.GetValue<int>("PaginationSettings:PageSize");
+            _appsettingsPageSize = configuration.GetValue<int>("PaginationSettings:PageSize");
         }
 
         // GET: RecordItems/Search
@@ -64,17 +64,6 @@ namespace RecordsMaster.Controllers
             var barcodePattern = @"^\d{2}-\d{5}$";
             bool isBarcode = Regex.IsMatch(input, barcodePattern);
 
-            /* bool isCis = int.TryParse(input, out var cisValue);
-
-            if (!isBarcode && !isCis)
-                {
-                    return BadRequest("Input must be a number (CIS) or a barcode in 'dd-ddddd' format.");
-
-                    1002D
-                    1002D
-                    10002D
-            }
-            */
             var query = _context.RecordItems
                 .Include(r => r.CheckedOutTo)
                 .AsQueryable();
@@ -110,7 +99,7 @@ namespace RecordsMaster.Controllers
 
         public async Task<IActionResult> Labels(int? pageNumber)
         {
-            int pageSize = 21; // Avery 5962: 21 labels per page
+            int pageSize = 21; // Avery 5962: 21 labels per page. Leave this alone. 
             var items = _context.RecordItems.OrderBy(r => r.BarCode); // or your preferred order
             var pagedList = await PaginatedList<RecordItemModel>.CreateAsync(items, pageNumber ?? 1, pageSize);
             return View(pagedList);
@@ -119,11 +108,11 @@ namespace RecordsMaster.Controllers
         // Paginated list of records (only visible to the Admin user)
         public async Task<IActionResult> List(int pageNumber = 1)
         {
-            int pageSize = 50; // Or any size you want
+            int pageSize = _appsettingsPageSize; // from appsettings.json
 
             var recordsQuery = _context.RecordItems
                 .Include(r => r.CheckedOutTo)
-                .OrderByDescending(r => r.BarCode);
+                .OrderByDescending(r => r.CreatedOn);
 
             var pagedRecords = await PaginatedList<RecordItemModel>.CreateAsync(recordsQuery, pageNumber, pageSize);
 

@@ -6,8 +6,8 @@
 2. The default admin user is referenced the UserRoles.cshtml view. This is done to avoid accidental self-nerfing the admin. Admin user will see "this user's permissions cannot be modified".
 3. You will need to enter a SMTP server in appsettings for email to work (this is untested)
 
-# Rename 'original_data_template.csv' to 'original_data.csv' if you want to populate the table at initial migration.
-0. Otherwise, the seeded data in Program.cs will populate the table. 
+# Rename 'original_data_template.csv' to 'file.csv' if you want to populate the table at initial migration.
+0. Otherwise, the placeholder seeded data in Program.cs will populate the table. 
 
 # When changing the model, or running for the first time, do these things:
 0. dotnet ef migrations add InitialMigration 

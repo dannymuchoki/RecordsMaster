@@ -37,12 +37,11 @@ else
                         </a>
                     </li>
 
-                    @for (int i = 1; i <= Model.TotalPages; i++)
-                    {
-                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                            <a class="page-link" asp-route-pageNumber="@i">@i</a>
-                        </li>
-                    }
+                    <li class='page-item disabled'>
+                        <span class='page-link'>
+                            Page @Model.PageIndex of @Model.TotalPages
+                        </span>
+                    </li>
 
                     <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
                         <a class="page-link" 
@@ -72,9 +71,18 @@ else
 
             filterDropdown.addEventListener('change', function () {
                 var filter = filterDropdown.value;
-                var xhr = new XMLHttpRequest();
 
-                xhr.open('GET', '@Url.Action("GetCheckedOutRecords", "RecordItems")?filter=' + filter, true);
+                if (filter === 'all'){
+                    paginationControls.style.display = 'block';
+                    downloadCsvDiv.style.display = 'block';
+                    window.location.reload();
+                    return;
+                }
+
+                var xhr = new XMLHttpRequest();
+                var url = '@Url.Action("GetCheckedOutRecords","RecordItems")?filter=' +encodeURIComponent(filter);
+
+                xhr.open('GET', url, true;
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                         recordsContainer.innerHTML = xhr.responseText;
@@ -86,6 +94,7 @@ else
                         } else {
                             paginationControls.style.display = 'block';
                             downloadCsvDiv.style.display = 'block';
+                            
                         }
                     }
                 };
