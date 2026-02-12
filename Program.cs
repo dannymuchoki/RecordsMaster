@@ -29,6 +29,10 @@ public class Program
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();
 
+        builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
+            opt.TokenLifespan = TimeSpan.FromHours(1)); // Reset token is valid for one hour
+
+
         builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
         //builder.Services.AddScoped<LabelPrintService>(); // useful in development. Keep it around because PDFs were annoying to work out. 
         builder.Services.AddScoped<PDFPrintService>();

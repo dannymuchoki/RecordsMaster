@@ -1,6 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,16 +14,14 @@ namespace RecordsMaster.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<PasswordResetController> _logger;
-        private readonly IConfiguration _config;
         private readonly IEmailSender _emailSender;
 
         // Slightly inspired by the RecordCheckoutController
-        public PasswordResetController(UserManager<ApplicationUser> userManager, ILogger<PasswordResetController> logger, IEmailSender emailSender, IConfiguration config)
+        public PasswordResetController(UserManager<ApplicationUser> userManager, ILogger<PasswordResetController> logger, IEmailSender emailSender)
         {
             _userManager = userManager;
             _logger = logger;
             _emailSender = emailSender;
-            _config = config;
         }
 
         public class PasswordResetViewModel
@@ -37,6 +35,28 @@ namespace RecordsMaster.Controllers
             public string? Message { get; set; }
         }
 
+        public class ConfirmPasswordResetViewModel
+        {
+            [Required]
+            public string UserId { get; set; } = string.Empty;
+
+            [Required]
+            public string Token { get; set; } = string.Empty;
+
+            [Required]
+            [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
+            [DataType(DataType.Password)]
+            [Display(Name = "New Password")]
+            public string NewPassword { get; set; } = string.Empty;
+
+            [DataType(DataType.Password)]
+            [Display(Name = "Confirm New Password")]
+            [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
+            public string ConfirmPassword { get; set; } = string.Empty;
+
+            public string? Message { get; set; }
+        }
+
         [HttpGet]
         public IActionResult ResetPassword()
         {
@@ -44,7 +64,7 @@ namespace RecordsMaster.Controllers
         }
 
         /*
-            This changes a user's password and sends it to the registered email address. 
+            This generates a one-time password reset token and sends a reset link to the registered email address.
         */
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -52,7 +72,6 @@ namespace RecordsMaster.Controllers
         {
             if (!ModelState.IsValid)
             {
-
                 return RedirectToAction("Index", "Home");
             }
 
@@ -60,112 +79,120 @@ namespace RecordsMaster.Controllers
             var user = await _userManager.FindByEmailAsync(email);
             if (user != null)
             {
-                string newPassword = GenerateStrongPassword(16);
-
                 try
                 {
-                    bool hasPassword = await _userManager.HasPasswordAsync(user);
-                    if (hasPassword)
-                    {
-                        var removeResult = await _userManager.RemovePasswordAsync(user);
-                        if (!removeResult.Succeeded)
-                        {
-                            _logger.LogError("Failed to remove existing password for user {Email}: {Errors}",
-                                email, string.Join("; ", removeResult.Errors));
-                            model.Message = "Failed to reset password.";
-                            TempData["PasswordResetMessage"] = model.Message;
-                            return RedirectToAction("Index", "Home"); 
-                        }
-                    }
+                    // Generate password reset token
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-                    var addResult = await _userManager.AddPasswordAsync(user, newPassword);
+                    // Build the reset link
+                    var resetLink = Url.Action(
+                        "ConfirmPasswordReset",
+                        "PasswordReset",
+                        new { userId = user.Id, token = token },
+                        protocol: Request.Scheme
+                    );
 
-                    if (!addResult.Succeeded)
-                    {
-                        _logger.LogError("Failed to set new password for user {Email}: {Errors}",
-                            email, string.Join("; ", addResult.Errors));
-                        model.Message = "Failed to reset password.";
-                        TempData["PasswordResetMessage"] = model.Message;
-
-                        return RedirectToAction("Index", "Home"); 
-                    }
-
-                    // Email the new password
-                    var subject = "Your new password";
+                    // Email the reset link
+                    var subject = "Password Reset Request";
                     var message = $@"
-                        <p><strong>Your new password:</strong> {newPassword}</p>
-                        <p>Delete this email after updating your password manager.</p>";
+                        <p>A password reset has been requested for your account.</p>
+                        <p>Click the link below to reset your password. This link is valid for a limited time and can only be used once:</p>
+                        <p><a href='{resetLink}'>Reset Password</a></p>
+                        <p>If you did not request this password reset, please ignore this email.</p>";
 
-                    var adminEmail = _config["Notification:AdminEmail"];
                     try
                     {
-                        await _emailSender.SendEmailAsync(adminEmail, subject, message);
+                        await _emailSender.SendEmailAsync(email, subject, message);
+                        _logger.LogInformation("Password reset link sent to {Email}", email);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        _logger.LogError(ex, "Failed to send password reset email to {Email}", email);
                         Console.WriteLine(message);
                     }
-
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Exception while resetting password for {Email}", email);
-                    model.Message = "An error occurred while resetting the password.";
-
+                    _logger.LogError(ex, "Exception while generating password reset token for {Email}", email);
+                    model.Message = "An error occurred while processing the password reset request.";
                     TempData["PasswordResetMessage"] = model.Message;
-
-                    return RedirectToAction("Index", "Home"); 
+                    return RedirectToAction("Index", "Home");
                 }
             }
 
             // Never tell the requestor whether the user exists.
-            model.Message = "If the user exists, a password reset has been processed.";
-
+            model.Message = "If the user exists, a password reset link has been sent to the email address.";
             TempData["PasswordResetMessage"] = model.Message;
 
-            return RedirectToAction("Index", "Home"); 
+            return RedirectToAction("Index", "Home");
         }
 
-        private static string GenerateStrongPassword(int length = 16)
+        [HttpGet]
+        public async Task<IActionResult> ConfirmPasswordReset(string userId, string token)
         {
-            const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const string lower = "abcdefghijklmnopqrstuvwxyz";
-            const string digits = "0123456789";
-            const string specials = "!@#$%^&*()-_=+[]{};:,.?/";
-
-            string allChars = upper + lower + digits + specials;
-
-            char[] pwd = new char[length];
-            using (var rng = RandomNumberGenerator.Create())
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
             {
-                pwd[0] = upper[GetRandomInt(rng, upper.Length)];
-                pwd[1] = lower[GetRandomInt(rng, lower.Length)];
-                pwd[2] = digits[GetRandomInt(rng, digits.Length)];
-                pwd[3] = specials[GetRandomInt(rng, specials.Length)];
-
-                for (int i = 4; i < length; i++)
-                {
-                    pwd[i] = allChars[GetRandomInt(rng, allChars.Length)];
-                }
-
-                // Shuffle
-                for (int i = 0; i < pwd.Length; i++)
-                {
-                    int j = GetRandomInt(rng, pwd.Length);
-                    var temp = pwd[i];
-                    pwd[i] = pwd[j];
-                    pwd[j] = temp;
-                }
+                TempData["PasswordResetMessage"] = "Invalid password reset link.";
+                return RedirectToAction("Index", "Home");
             }
 
-            return new string(pwd);
-
-            int GetRandomInt(RandomNumberGenerator rng, int max)
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
             {
-                byte[] buffer = new byte[4];
-                rng.GetBytes(buffer);
-                uint rnd = BitConverter.ToUInt32(buffer, 0);
-                return (int)(rnd % (uint)max);
+                TempData["PasswordResetMessage"] = "Invalid password reset link.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var model = new ConfirmPasswordResetViewModel
+            {
+                UserId = userId,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmPasswordReset(ConfirmPasswordResetViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                model.Message = "Invalid password reset request.";
+                return View(model);
+            }
+
+            // Reset the password using the token
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.NewPassword);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("Password successfully reset for user {UserId}", model.UserId);
+                TempData["PasswordResetMessage"] = "Your password has been successfully reset. You can now log in with your new password.";
+                return RedirectToAction("Index", "Home");
+            }
+            else
+            {
+                _logger.LogWarning("Failed to reset password for user {UserId}: {Errors}",
+                    model.UserId, string.Join("; ", result.Errors.Select(e => e.Description)));
+
+                // Check if the token is invalid or expired
+                if (result.Errors.Any(e => e.Code == "InvalidToken"))
+                {
+                    model.Message = "The password reset link has expired or is invalid. Please request a new password reset.";
+                }
+                else
+                {
+                    model.Message = "Failed to reset password: " + string.Join("; ", result.Errors.Select(e => e.Description));
+                }
+
+                return View(model);
             }
         }
     }

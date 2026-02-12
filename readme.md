@@ -25,16 +25,14 @@ This will put the binaries in a /publish directory right in the root directory.
 
 If in development, make sure to uncomment this in csjproj.   
     
-<Content Include="testdb.db">
-    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-  </Content>
+> <Content Include="testdb.db">
+>    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+>  </Content>
 
 This will create the SQLite database with the admin user, a test user, and the seeded information. Check the ASPNETCORE_ENVIRONMENT variables in launchSettings.json. When in 'Development' the default database is SQLite. When in 'Production' the database will be SQL. 
 
 # App overall
-The app runs on one model (RecordItemsModel) tied to the default ApplicationUser. It has ten controllers. The controllers, as the name suggests, control what the user sees in the views.
-
-Note that, other than the PasswordReset controller, each controller has a corresponding view in the 'Views' directory. 
+The app runs on one model (RecordItemsModel) tied to the default ApplicationUser. It has ten controllers. The controllers, as the name suggests, control what the user sees in the views. Each controller has a corresponding view in the 'Views' directory. 
 
 Admin users can see what each user has requested or checked out via the 'Manage Users' page. Click on the username hyperlink to access the user's record view.
 
@@ -51,6 +49,4 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 2. This is where you can find AppDbContext - this is mostly ORM stuff that runs at initial migration. 
 3. 'SeedTestData' used to be part of AppDbContext. Now it sets up the admin users and the first seeded data. 
 4. 'CsvHelperMap' helps map uploaded .csv data to the model. You can use it to reconstruct the order of columns in the .csv file. It is also easier than managing the data in the controllers. This feels more like a utility but oh well. 
-
-## Password Resets:
-- The password reset controller checks if a user's email address is registered. If so, it generates a new strong password for the user's account and sends it to the user via email. In testing mode when you may not have a SMTP server set up, the email will print in console. 
+ 
