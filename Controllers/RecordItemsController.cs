@@ -171,8 +171,8 @@ namespace RecordsMaster.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetCheckedOutRecords(string filter)
-        
-        // To include CheckedOutTo you need to explicitly search for the user in this way. 
+
+        // To include CheckedOutTo you need to explicitly search for the user in this way.
         {
             IQueryable<RecordItemModel> query = _context.RecordItems.Include(r => r.CheckedOutTo);
 
@@ -184,6 +184,26 @@ namespace RecordsMaster.Controllers
             var records = await query.ToListAsync();
 
             return PartialView("_RecordsTable", records);
+        }
+
+        // GET: RecordItems/CheckoutHistory/{id}
+        // Displays the checkout history for a specific record
+        public async Task<IActionResult> CheckoutHistory(Guid id)
+        {
+            var record = await _context.RecordItems
+                .Include(r => r.CheckoutHistoryRecords)
+                    .ThenInclude(ch => ch.User)
+                .FirstOrDefaultAsync(r => r.ID == id);
+
+            if (record == null)
+            {
+                return NotFound();
+            }
+
+            ViewData["RecordCIS"] = record.CIS;
+            ViewData["RecordBarCode"] = record.BarCode;
+
+            return View(record.CheckoutHistoryRecords.OrderByDescending(ch => ch.CheckedOutDate).ToList());
         }
 
     }

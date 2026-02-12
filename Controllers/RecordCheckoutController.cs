@@ -150,7 +150,19 @@ namespace RecordsMaster.Controllers
             recordItem.Requested = false;
             recordItem.ReadyForPickup = false;
             recordItem.CheckedOut = true;
+            recordItem.CheckedOutToId = user.Id;
+            recordItem.CheckedOutTo = user;
 
+            // Create a checkout history record
+            var checkoutHistory = new CheckoutHistory
+            {
+                RecordItemId = recordItem.ID,
+                UserId = user.Id,
+                CheckedOutDate = DateTime.UtcNow,
+                ReturnedDate = null
+            };
+
+            _context.CheckoutHistory.Add(checkoutHistory);
             _context.Update(recordItem);
             await _context.SaveChangesAsync();
 

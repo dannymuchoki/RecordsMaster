@@ -41,6 +41,18 @@ namespace RecordsMaster.Controllers
                 return RedirectToAction("CheckOut", "RecordCheckOut", new { id });
             }
 
+            // Update the checkout history to record the return date
+            var checkoutHistory = await _context.CheckoutHistory
+                .Where(ch => ch.RecordItemId == id && ch.ReturnedDate == null)
+                .OrderByDescending(ch => ch.CheckedOutDate)
+                .FirstOrDefaultAsync();
+
+            if (checkoutHistory != null)
+            {
+                checkoutHistory.ReturnedDate = DateTime.UtcNow;
+                _context.Update(checkoutHistory);
+            }
+
             // Reset the record's checkout properties.
             recordItem.CheckedOut = false;
             recordItem.Requested = false;

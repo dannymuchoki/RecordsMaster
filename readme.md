@@ -1,4 +1,4 @@
-# RecordsMaster  1.3
+# RecordsMaster  1.5
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
@@ -34,7 +34,12 @@ If in development, make sure to uncomment this in RecordsMaster.csjproj.
 This will create the SQLite database with the admin user, a test user, and the seeded information. Check the ASPNETCORE_ENVIRONMENT variables in launchSettings.json. When in 'Development' the default database is SQLite. When in 'Production' the database will be SQL. 
 
 # App overall
-The app runs on one model (RecordItemsModel) tied to the default ApplicationUser. It has ten controllers. The controllers, as the name suggests, control what the user sees in the views. Each controller has a corresponding view in the 'Views' directory. 
+The app runs on two models 
+1. RecordItemsModel tied to the default ApplicationUser. 
+2. CheckOutHistory which tracks when a record was checked in and out
+3. The default ApplicationUser (so you don't need to create a model for the users)
+
+The app has ten controllers. The controllers, as the name suggests, control what the user sees in the views. Each controller has a corresponding view in the 'Views' directory. 
 
 Admin users can see what each user has requested or checked out via the 'Manage Users' page. Click on the username hyperlink to access the user's record view.
 

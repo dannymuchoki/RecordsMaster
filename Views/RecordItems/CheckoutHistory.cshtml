@@ -1,0 +1,89 @@
+@model IEnumerable<RecordsMaster.Models.CheckoutHistory>
+
+@{
+    ViewData["Title"] = "Checkout History";
+    var recordCIS = ViewData["RecordCIS"] as string;
+    var recordBarCode = ViewData["RecordBarCode"] as string;
+}
+
+<h2>Checkout History</h2>
+
+<div class="mb-3">
+    <p><strong>Case#:</strong> @recordCIS</p>
+    <p><strong>Barcode:</strong> @(recordBarCode ?? "N/A")</p>
+</div>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Checked Out Date</th>
+                <th>Returned Date</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@(item.User?.UserName ?? item.UserId)</td>
+                    <td>@item.CheckedOutDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        @if (item.ReturnedDate.HasValue)
+                        {
+                            @item.ReturnedDate.Value.ToString("yyyy-MM-dd HH:mm")
+                        }
+                        else
+                        {
+                            <span class="badge badge-warning">Currently Checked Out</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.ReturnedDate.HasValue)
+                        {
+                            var duration = item.ReturnedDate.Value - item.CheckedOutDate;
+                            if (duration.TotalDays >= 1)
+                            {
+                                @($"{(int)duration.TotalDays} day{((int)duration.TotalDays != 1 ? "s" : "")}")
+                            }
+                            else if (duration.TotalHours >= 1)
+                            {
+                                @($"{(int)duration.TotalHours} hour{((int)duration.TotalHours != 1 ? "s" : "")}")
+                            }
+                            else
+                            {
+                                @($"{(int)duration.TotalMinutes} minute{((int)duration.TotalMinutes != 1 ? "s" : "")}")
+                            }
+                        }
+                        else
+                        {
+                            var duration = DateTime.UtcNow - item.CheckedOutDate;
+                            if (duration.TotalDays >= 1)
+                            {
+                                @($"{(int)duration.TotalDays} day{((int)duration.TotalDays != 1 ? "s" : "")} (ongoing)")
+                            }
+                            else if (duration.TotalHours >= 1)
+                            {
+                                @($"{(int)duration.TotalHours} hour{((int)duration.TotalHours != 1 ? "s" : "")} (ongoing)")
+                            }
+                            else
+                            {
+                                @($"{(int)duration.TotalMinutes} minute{((int)duration.TotalMinutes != 1 ? "s" : "")} (ongoing)")
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        <p>No checkout history available for this record.</p>
+    </div>
+}
+
+<a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Back to Search</a>

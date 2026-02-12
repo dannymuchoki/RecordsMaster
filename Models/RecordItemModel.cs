@@ -13,6 +13,31 @@ namespace RecordsMaster.Models
         public required string SeedType { get; set; }
         public DateTime AppliedOn { get; set; }
     }
+
+    // Good idea to keep track of who checked out what. 
+    public class CheckoutHistory
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public Guid RecordItemId { get; set; }
+
+        [Required]
+        public required string UserId { get; set; }
+
+        [Required]
+        public DateTime CheckedOutDate { get; set; }
+
+        public DateTime? ReturnedDate { get; set; }
+
+        // Navigation property to the user
+        [ForeignKey(nameof(UserId))]
+        public ApplicationUser? User { get; set; }
+
+        // Navigation property to the record
+        [ForeignKey(nameof(RecordItemId))]
+        public RecordItemModel? RecordItem { get; set; }
+    }
     // foreign key property named CheckedOutTo.
     public class RecordItemModel
     {
@@ -59,6 +84,9 @@ namespace RecordsMaster.Models
 
         [Required]
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+
+        // Navigation property: history of all checkouts and returns for this record
+        public ICollection<CheckoutHistory> CheckoutHistoryRecords { get; set; } = new List<CheckoutHistory>();
 
     }
 

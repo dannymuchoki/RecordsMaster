@@ -16,6 +16,7 @@ namespace RecordsMaster.Data
         // Table for RecordItemModel entities.
         public DbSet<RecordItemModel> RecordItems { get; set; }
         public DbSet<SeedHistory> SeedHistories { get; set; }
+        public DbSet<CheckoutHistory> CheckoutHistory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,6 +40,19 @@ namespace RecordsMaster.Data
                 .HasOne(r => r.CheckedOutTo)
                 .WithMany(u => u.CheckedOutRecords)
                 .HasForeignKey(r => r.CheckedOutToId);
+
+            // Configure CheckoutHistory relationships
+            modelBuilder.Entity<CheckoutHistory>()
+                .HasOne(ch => ch.RecordItem)
+                .WithMany(r => r.CheckoutHistoryRecords)
+                .HasForeignKey(ch => ch.RecordItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CheckoutHistory>()
+                .HasOne(ch => ch.User)
+                .WithMany()
+                .HasForeignKey(ch => ch.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

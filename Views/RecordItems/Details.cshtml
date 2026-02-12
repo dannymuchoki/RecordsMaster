@@ -18,8 +18,9 @@
             else{
                 <th>Request Record?</th>
             }
-            
-            <th>Checked Out To</th> 
+
+            <th>Checked Out To</th>
+            <th>History</th>
         </tr>
     </thead>
     <tbody>
@@ -77,6 +78,9 @@
                         // Show the email of the user who checked out, or N/A
                         @(item.CheckedOutTo?.UserName ?? "N/A")
                     }
+                </td>
+                <td>
+                    <a href="@Url.Action("CheckoutHistory", "RecordItems", new { id = item.ID })" class="btn btn-sm btn-info">View History</a>
                 </td>
             </tr>
         }
