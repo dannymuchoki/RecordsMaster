@@ -23,11 +23,13 @@ To publish:
 
 This will put the binaries in a /publish directory right in the root directory. 
 
-If in development, make sure to uncomment this in csjproj.   
-    
-> <Content Include="testdb.db">
->    <CopyToPublishDirectory>Always</CopyToPublishDirectory>
->  </Content>
+If in development, make sure to uncomment this in RecordsMaster.csjproj.   
+
+ ```   
+  <Content Include="testdb.db">
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+  </Content>
+```
 
 This will create the SQLite database with the admin user, a test user, and the seeded information. Check the ASPNETCORE_ENVIRONMENT variables in launchSettings.json. When in 'Development' the default database is SQLite. When in 'Production' the database will be SQL. 
 
