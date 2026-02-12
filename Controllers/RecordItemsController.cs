@@ -100,7 +100,7 @@ namespace RecordsMaster.Controllers
         public async Task<IActionResult> Labels(int? pageNumber)
         {
             int pageSize = 21; // Avery 5962: 21 labels per page. Leave this alone. 
-            var items = _context.RecordItems.OrderBy(r => r.BarCode); // or your preferred order
+            var items = _context.RecordItems.OrderBy(r => r.BarCode); // or your preferred order, but really leave this alone. 
             var pagedList = await PaginatedList<RecordItemModel>.CreateAsync(items, pageNumber ?? 1, pageSize);
             return View(pagedList);
         }

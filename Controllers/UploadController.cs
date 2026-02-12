@@ -165,14 +165,53 @@ namespace RecordsMaster.Controllers
 
                 var (pdfBytes, fileName) = _pdfPrintService.GenerateLabelsPdfForDownload(validRecords);
 
-                // Return PDF file as download with filename "firstBarcode - lastBarcode.pdf"
-                return File(pdfBytes, "application/pdf", fileName);
+                // Save PDF to temp directory
+                var tempFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp");
+                if (!Directory.Exists(tempFolder))
+                {
+                    Directory.CreateDirectory(tempFolder);
+                }
+
+                var tempFilePath = Path.Combine(tempFolder, fileName);
+                await System.IO.File.WriteAllBytesAsync(tempFilePath, pdfBytes);
+
+                // Store the filename and success message in TempData for the List view
+                TempData["PdfFileName"] = fileName;
+                TempData["SuccessMessage"] = $"Successfully uploaded {validRecords.Count} record(s).";
+
+                // Redirect to the RecordItems List view
+                return RedirectToAction("List", "RecordItems");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("file", $"An error occurred while uploading the file: {ex.Message}");
                 return View();
             }
+        }
+
+        // GET: Upload/DownloadPdf
+        [HttpGet]
+        public IActionResult DownloadPdf(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+            {
+                return NotFound();
+            }
+
+            var tempFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "temp");
+            var filePath = Path.Combine(tempFolder, fileName);
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound();
+            }
+
+            var fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+            // Optionally delete the file after reading
+            System.IO.File.Delete(filePath);
+
+            return File(fileBytes, "application/pdf", fileName);
         }
 
         /// <summary>

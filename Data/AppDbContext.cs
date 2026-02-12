@@ -39,34 +39,6 @@ namespace RecordsMaster.Data
                 .HasOne(r => r.CheckedOutTo)
                 .WithMany(u => u.CheckedOutRecords)
                 .HasForeignKey(r => r.CheckedOutToId);
-
-            /* Seed test data for RecordItemModel (adjust or remove as needed).
-            modelBuilder.Entity<RecordItemModel>().HasData(
-                new RecordItemModel
-                {
-                    ID = new Guid("11111111-1111-1111-1111-111111111111"),
-                    CIS = 1001,
-                    BarCode = "93-98765",
-                    RecordType = "Type A",
-                    Location = "Records Room",
-                    BoxNumber = 10,
-                    Digitized = true,
-                    ClosingDate = new DateTime(2023, 1, 1),
-                    DestroyDate = new DateTime(2028, 1, 1)
-                },
-                new RecordItemModel
-                {
-                    ID = new Guid("22222222-2222-2222-2222-222222222222"),
-                    CIS = 1002,
-                    BarCode = "93-98766",
-                    RecordType = "Type B",
-                    Location = "Records Room",
-                    BoxNumber = 20,
-                    Digitized = false,
-                    ClosingDate = new DateTime(2024, 1, 1),
-                    DestroyDate = new DateTime(2029, 1, 1)
-                }
-            ); */
         }
     }
 }

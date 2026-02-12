@@ -12,20 +12,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-         /*
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-               
-        builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
-
-                             // For SQL Server.                
-                // Make sure to add <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-               // to the RecordsMaster.csproj. (It's already there in the repo version)
-
-        */
-        
         // Use SQLite in development. Use SqlServer in Prod. 
         if (builder.Environment.IsDevelopment())
             {
@@ -34,6 +20,7 @@ public class Program
             }
             else if (builder.Environment.IsProduction())
             {
+                // Make sure you have the rights to run migrations and create tables on this server
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
             }

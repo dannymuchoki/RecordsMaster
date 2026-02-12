@@ -73,6 +73,7 @@ _ReSharper*/
 
 # Temporary ASP.NET files
 Temp/
+wwwroot/temp/
 
 # .NET Core files
 project.lock.json
