@@ -34,7 +34,7 @@ If in development, make sure to uncomment this in RecordsMaster.csjproj.
 This will create the SQLite database with the admin user, a test user, and the seeded information. Check the ASPNETCORE_ENVIRONMENT variables in launchSettings.json. When in 'Development' the default database is SQLite. When in 'Production' the database will be SQL. 
 
 # App overall
-The app runs on two models 
+The app runs on two models (and the default ApplicationUser) 
 1. RecordItemsModel tied to the default ApplicationUser. 
 2. CheckOutHistory which tracks when a record was checked in and out
 3. The default ApplicationUser (so you don't need to create a model for the users)
