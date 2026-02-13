@@ -46,6 +46,10 @@
         <th>Status</th>
         <td>@(Model.CheckedOut ? "Checked Out" : "Available")</td>
     </tr>
+    <tr>
+        <th>History</th>
+        <td><a href="@Url.Action("CheckoutHistory", "RecordItems", new { id = Model.ID })" class="btn btn btn-info m-1">View History</a></td>
+    </tr>
     @if (Model.CheckedOut && Model.CheckedOutTo != null)
     {
         <tr>
@@ -54,6 +58,8 @@
         </tr>
     }
 </table>
+
+
 
 @if (Model.Requested)
 {
@@ -124,5 +130,5 @@ else
 }
 
     <br/>
-    <a href="@Url.Action("Search", "RecordItems")" class="btn btn-primary">Search</a>
+   <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Back to Search</a>
 

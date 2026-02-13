@@ -100,7 +100,7 @@ else
                 var xhr = new XMLHttpRequest();
                 var url = '@Url.Action("GetCheckedOutRecords","RecordItems")?filter=' +encodeURIComponent(filter);
 
-                xhr.open('GET', url, true;
+                xhr.open('GET', url, true);
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                         recordsContainer.innerHTML = xhr.responseText;

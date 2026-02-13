@@ -20,7 +20,16 @@
         {
             <tr>
                 <td>@item.CIS</td>
-                <td>@(item.BarCode ?? "N/A")</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.BarCode))
+                    {
+                        <a href="@Url.Action("SearchRecords", "RecordItems", new { input = item.BarCode })">@item.BarCode</a>
+                    }
+                    else
+                    {
+                        <text>N/A</text>
+                    }
+                </td>
                 <td>@item.RecordType</td>
                 <td>@(item.BoxNumber.HasValue ? item.BoxNumber.ToString() : "N/A")</td>
                 <td>@(item.Digitized ? "Yes" : "No")</td>

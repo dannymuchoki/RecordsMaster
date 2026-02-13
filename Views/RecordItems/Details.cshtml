@@ -47,11 +47,19 @@
                         }
                         if (User.IsInRole("User"))
                         {
-                            using (Html.BeginForm("RequestRecord", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
+                            @if (!item.Requested)
                             {
-                                @Html.AntiForgeryToken()
-                                <input type="submit" value="Request" class="btn btn-primary" />
+                                using (Html.BeginForm("RequestRecord", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <input type="submit" value="Request" class="btn btn-primary" />
+                                }
                             }
+                            else
+                            {
+                                <p>Already requested.</p>
+                            }
+                            
                         }
                     }
                     else
