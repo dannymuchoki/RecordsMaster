@@ -14,18 +14,32 @@ else
 
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
-            @if (TempData["PdfFileName"] != null)
+        var hasPdf = TempData["PdfFileName"] != null;
+        var pdfFileName = TempData["PdfFileName"] as string;
+        var successMessage = TempData["SuccessMessage"] as string;
+
+        // Keep TempData for the next request so the download button persists through page reloads
+        TempData.Keep("PdfFileName");
+        TempData.Keep("SuccessMessage");
+
+        <div class="alert alert-success @(hasPdf ? "" : "alert-dismissible") fade show" role="alert" id="pdfAlert">
+            @successMessage
+            @if (hasPdf)
             {
                 <br />
-                <a href="@Url.Action("DownloadPdf", "Upload", new { fileName = TempData["PdfFileName"] })" class="btn btn-primary mt-2">
+                <a href="@Url.Action("DownloadPdf", "Upload", new { fileName = pdfFileName })" class="btn btn-primary mt-2">
                     Download Labels PDF
                 </a>
+                <button type="button" class="btn btn-sm btn-secondary mt-2 ml-2" id="dismissPdfAlert">
+                    Dismiss
+                </button>
             }
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+            @if (!hasPdf)
+            {
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            }
         </div>
     }
 
@@ -119,6 +133,34 @@ else
 
                 xhr.send();
             });
+
+            // Handle PDF alert dismiss button
+            var dismissPdfAlertBtn = document.getElementById('dismissPdfAlert');
+            if (dismissPdfAlertBtn) {
+                dismissPdfAlertBtn.addEventListener('click', function () {
+                    // Get CSRF token
+                    var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    var tokenValue = token ? token.value : '';
+
+                    // Make AJAX call to clear TempData
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '@Url.Action("ClearPdfAlert", "RecordItems")', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                            // Hide the alert
+                            var pdfAlert = document.getElementById('pdfAlert');
+                            if (pdfAlert) {
+                                pdfAlert.style.display = 'none';
+                            }
+                        }
+                    };
+
+                    // Send CSRF token in request body
+                    xhr.send('__RequestVerificationToken=' + encodeURIComponent(tokenValue));
+                });
+            }
         });
     </script>
 }

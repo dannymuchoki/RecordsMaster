@@ -11,8 +11,8 @@ using RecordsMaster.Data;
 namespace RecordsMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260212222225_AddCheckoutHistoryTracking")]
-    partial class AddCheckoutHistoryTracking
+    [Migration("20260213154532_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

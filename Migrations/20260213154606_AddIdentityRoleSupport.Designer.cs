@@ -11,8 +11,8 @@ using RecordsMaster.Data;
 namespace RecordsMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260212221444_AddCheckoutHistory")]
-    partial class AddCheckoutHistory
+    [Migration("20260213154606_AddIdentityRoleSupport")]
+    partial class AddIdentityRoleSupport
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -383,7 +383,7 @@ namespace RecordsMaster.Migrations
                     b.HasOne("RecordsMaster.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("RecordItem");

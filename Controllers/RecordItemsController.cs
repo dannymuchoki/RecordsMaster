@@ -206,5 +206,15 @@ namespace RecordsMaster.Controllers
             return View(record.CheckoutHistoryRecords.OrderByDescending(ch => ch.CheckedOutDate).ToList());
         }
 
+        // POST: RecordItems/ClearPdfAlert
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ClearPdfAlert()
+        {
+            TempData.Remove("PdfFileName");
+            TempData.Remove("SuccessMessage");
+            return Ok();
+        }
+
     }
 }
