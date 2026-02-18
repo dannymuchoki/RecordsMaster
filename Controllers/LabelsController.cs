@@ -27,9 +27,40 @@ namespace RecordsMaster.Controllers
         }
 
         // Action to return the view
-        public IActionResult GenerateLabelsForm()
+        public async Task<IActionResult> GenerateLabelsForm()
         {
+            var recentUploadDates = await _context.RecordItems
+                .GroupBy(r => r.CreatedOn.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Date)
+                .Take(10)
+                .ToListAsync();
+
+            ViewBag.RecentUploadDates = recentUploadDates;
             return View();
+        }
+
+        public async Task<IActionResult> GenerateLabelsByDate(DateTime date)
+        {
+            var records = await _context.RecordItems
+                .Where(r => r.CreatedOn.Date == date.Date)
+                .OrderBy(r => r.BarCode)
+                .ToListAsync();
+
+            if (records.Count == 0)
+            {
+                ViewBag.RecentUploadDates = await _context.RecordItems
+                    .GroupBy(r => r.CreatedOn.Date)
+                    .Select(g => new { Date = g.Key, Count = g.Count() })
+                    .OrderByDescending(x => x.Date)
+                    .Take(10)
+                    .ToListAsync();
+                ViewData["ErrorMessage"] = $"No records found for {date:MM/dd/yyyy}.";
+                return View("GenerateLabelsForm");
+            }
+
+            var (pdfBytes, fileName) = _pdfPrintService.GenerateLabelsPdfForDownload(records);
+            return File(pdfBytes, "application/pdf", fileName);
         }
 
         // Generate the labels PDF. OMG THIS TOOK FOREVER TO FIGURE OUT

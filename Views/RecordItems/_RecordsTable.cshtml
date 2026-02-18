@@ -34,8 +34,8 @@
                 <td>@(item.BoxNumber.HasValue ? item.BoxNumber.ToString() : "N/A")</td>
                 <td>@(item.Digitized ? "Yes" : "No")</td>
                 <td>@(item.Location)</td>
-                <td>@(item.ClosingDate?.ToString("yyyy-MM-dd") ?? "N/A")</td>
-                <td>@(item.DestroyDate?.ToString("yyyy-MM-dd") ?? "N/A")</td>
+                <td>@(item.ClosingDate?.ToString("MM/dd/yyyy") ?? "N/A")</td>
+                <td>@(item.DestroyDate?.ToString("MM/dd/yyyy") ?? "N/A")</td>
                 <td>@(item.CheckedOut ? "Yes" : "No")</td>
                 <td>@(item.CheckedOutTo?.UserName ?? "N/A")</td>
             </tr>

@@ -87,6 +87,46 @@ namespace RecordsMaster.Controllers
             return View("Details", records);
         }
 
+        public async Task<IActionResult> CaseWorkerSearch(string? input, DateTime? closingDate)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return View("NotFound");
+            }
+
+            input = input.Trim();
+
+            var barcodePattern = @"^\d{2}-\d{5}$";
+            bool isBarcode = Regex.IsMatch(input, barcodePattern);
+
+            if (!isBarcode && closingDate == null)
+            {
+                return View("NotFound");
+            }
+
+            var query = _context.RecordItems
+                .Include(r => r.CheckedOutTo)
+                .AsQueryable();
+
+            if (isBarcode)
+            {
+                query = query.Where(r => r.BarCode == input);
+            }
+            else
+            {
+                query = query.Where(r => r.CIS == input && r.ClosingDate.HasValue && r.ClosingDate.Value.Date == closingDate!.Value.Date);
+            }
+
+            var records = await query.ToListAsync();
+
+            if (records.Count == 0)
+            {
+                return View("NotFound");
+            }
+
+            return View("Details", records);
+        }
+
         public async Task<IActionResult> Details(string id)
         {
             var record = await _context.RecordItems.Where(r => r.CIS == id).ToListAsync();

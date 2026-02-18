@@ -87,11 +87,6 @@ public class Program
             pattern: "{controller=Home}/{action=List}");
 
         app.MapControllerRoute(
-            name: "search",
-            pattern: "Search/{cis?}",
-            defaults: new { controller = "RecordItems", action = "Search" });
-
-        app.MapControllerRoute(
             name: "upload",
             pattern: "Upload",
             defaults: new { controller = "Upload", action = "Upload" });

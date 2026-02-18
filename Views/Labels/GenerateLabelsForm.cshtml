@@ -24,3 +24,30 @@
     </div>
     <button type="submit" class="btn btn-primary mt-1">Generate</button>
 </form>
+
+@if (ViewBag.RecentUploadDates != null)
+{
+    <h4 class="mt-4">Recent Upload Dates</h4>
+    <table class="table table-sm table-bordered w-auto">
+        <thead>
+            <tr>
+                <th>Date Uploaded</th>
+                <th>Records</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ViewBag.RecentUploadDates)
+            {
+                <tr>
+                    <td>@item.Date.ToString("MM/dd/yyyy")</td>
+                    <td>@item.Count</td>
+                    <td>
+                        <a href="@Url.Action("GenerateLabelsByDate", "Labels", new { date = item.Date.ToString("yyyy-MM-dd") })"
+                           class="btn btn-sm btn-outline-primary">Download Labels</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

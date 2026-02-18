@@ -3,34 +3,31 @@
 }
 @model List<RecordsMaster.Models.RecordItemModel>
 
- @if (User.IsInRole("Admin") || User.IsInRole("User"))
- {
-    <form method="get" action="@Url.Action("SearchRecords", "RecordItems")" onsubmit="return validateInput()">
-        <div class="form-group m-1 p-2">
-            <label for="Input">Enter Case number or bar code:</label>
-            <input name="input" id="Input" class="form-control" required />
-        </div>
-        <button type="submit" class="btn btn-primary mx-auto">Search</button>
-    </form>
-    @section Scripts 
-    {
-        <script>
-            function validateInput() {
-                const input = document.getElementById('Input').value;
-
-                if (!input) {
-                    alert('Please enter a CIS or BarCode.');
-                    return false; // Prevent form submission if input is empty
-                }
-                return true; // Allow form submission
-            }
-        </script>
-    }
-    
-    
     @if (User.IsInRole("Admin"))
+    {
+        <form method="get" action="@Url.Action("SearchRecords", "RecordItems")" onsubmit="return validateInput()">
+            <div class="form-group m-1 p-2">
+                <label for="Input">Enter Case number or bar code:</label>
+                <input name="input" id="Input" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-primary mx-auto">Search</button>
+        </form>
+        @section Scripts 
+        {
+            <script>
+                function validateInput() {
+                    const input = document.getElementById('Input').value;
+
+                    if (!input) {
+                        alert('Please enter a CIS or BarCode.');
+                        return false; // Prevent form submission if input is empty
+                    }
+                    return true; // Allow form submission
+                }
+            </script>
+        }
+    
      
-     {
         @if (!Model.Any())
             {
                <!-- intentionally blank --> 
@@ -69,10 +66,43 @@
 
                 </table>
             }
-     }
-    
-    @if (User.IsInRole("User"))
+         
+    }
+
+    else if (User.IsInRole("User"))
         {
+        <form method="get" action="@Url.Action("CaseWorkerSearch", "RecordItems")" onsubmit="return validateCaseWorkerInput()">
+            <div class="form-group m-1 p-2">
+                <label for="CaseWorkerInput">Enter Case number or barcode (YY-DDDDD):</label>
+                <input name="input" id="CaseWorkerInput" class="form-control" required />
+                <label for="ClosingDate">Enter closing date (not required if searching by barcode)</label>
+                <input name="closingDate" id="ClosingDate" type="date" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary mx-auto">Search</button>
+        </form>
+        @section Scripts
+        {
+            <script>
+                function validateCaseWorkerInput() {
+                    const input = document.getElementById('CaseWorkerInput').value.trim();
+                    const closingDate = document.getElementById('ClosingDate').value;
+                    const barcodePattern = /^\d{2}-\d{5}$/;
+
+                    if (!input) {
+                        alert('Please enter a CIS or BarCode.');
+                        return false;
+                    }
+
+                    if (!barcodePattern.test(input) && !closingDate) {
+                        alert('Please enter a closing date when searching by case number.');
+                        return false;
+                    }
+
+                    return true;
+                }
+            </script>
+        }
+
             if (Model.Any(record => record.ReadyForPickup))
             {  
                         <h5 class='text-center'>Ready for pickup</h5>
@@ -98,16 +128,17 @@
                     </table>
                 }
         }
-     
-}
 
 else
     {
         @if (User.Identity.IsAuthenticated)
         {
-            <h1>Welcome, @User.Identity.Name!</h1>
-            <p>You are logged in, but you do not have access to the search functionality.</p> 
+            @if (!User.IsInRole("Admin") || (!User.IsInRole("User"))) 
+            {
+                <h1>Welcome, @User.Identity.Name!</h1>
+                    <p>You are logged in, but you do not have access to the search functionality.</p> 
 
+            }
         }
         
         else
