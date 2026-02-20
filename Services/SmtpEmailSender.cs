@@ -12,7 +12,7 @@ namespace RecordsMaster.Services
         {
             _config = config;
         }
-
+        // Depending on your SMTP configuration, you may need to change a few things. 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage)
         {
             var message = new MimeMessage();
@@ -23,7 +23,7 @@ namespace RecordsMaster.Services
 
             using var client = new SmtpClient();
             await client.ConnectAsync(_config["Smtp:Host"], int.Parse(_config["Smtp:Port"]), true);
-            await client.AuthenticateAsync(_config["Smtp:Username"], _config["Smtp:Password"]);
+            await client.AuthenticateAsync(_config["Smtp:Username"], _config["Smtp:Password"]); // not necessary on port 587
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
