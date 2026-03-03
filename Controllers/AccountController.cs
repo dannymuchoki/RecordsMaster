@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using RecordsMaster.Models; // For ApplicationUser
+using RecordsMaster.Services;
 
 namespace RecordsMaster.Controllers
 {
@@ -12,12 +14,16 @@ namespace RecordsMaster.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _config;
+        private readonly IEmailSender _emailSender;
+        private readonly ILogger<RecordCheckOutController> _logger;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration config)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IConfiguration config, ILogger<RecordCheckOutController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailSender = emailSender;
              _config = config;
+             _logger = logger;
         }
         // This action returns a view that lists all users and their roles.
         // It uses a tuple to pair each user with a boolean indicating if they are in the "User" role.
@@ -109,6 +115,22 @@ namespace RecordsMaster.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
+
+                var subject = $@"New Account - {email}";
+                var message = $@"
+                    New user  {email} has signed up. You will need to enable their access.</p>
+                    <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>";
+
+                var adminEmail = _config["Notification:NotificationMailbox"];
+                try
+                {
+                    await _emailSender.SendEmailAsync(adminEmail, subject, message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send user sign up email confirmation to mailbox");
+                }
+
                 return RedirectToAction("Index", "Home");
             }
             foreach (var error in result.Errors)

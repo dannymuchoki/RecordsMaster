@@ -93,7 +93,7 @@ namespace RecordsMaster.Controllers
                 <p>Check the RecordsMaster dashboard.</p>";
 
             // Check appsettings.json dictionary for the 'Notification' key. 
-            var adminEmail = _config["Notification:AdminEmail"];
+            var adminEmail = _config["Notification:NotificationMailbox"];
             try
             {
                 // tell the staff that the request is in.
@@ -146,14 +146,13 @@ namespace RecordsMaster.Controllers
             _context.Update(recordItem);
             await _context.SaveChangesAsync();
 
-            var subject = "Record request is ready for pickup";
+            var subject = "You must check your record out in RecordsMaster";
             var message = $@"
-                <h1>This message is your receipt</h1>
-                <h2>Bring this with you</h2>. 
+                <p>Your record is ready for checkout.</p>
                 <p><strong>Record:</strong> {recordItem.BarCode}</p>
                 <p><strong>Requested by:</strong> {user.Email}</p>
                 <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>
-                <p><strong>Check out your record and bring this email with you to pick up the record.</strong></p>";
+                <p><strong>Go to RecordsMaster to check out your record.</strong> Your record will not be issued to you until you have checked out the record.</p>";
 
             try
             {
@@ -220,14 +219,21 @@ namespace RecordsMaster.Controllers
             var message = $@"
                 <p><strong>Record:</strong> {recordItem.BarCode}</p>
                 <p><strong>Checked Out By:</strong> ({user.Email})</p>
-                <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>
-                <p>Have the record ready for pickup</p>.";
+                <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>";
+            
+            var userMessage = $@"
+                <h1>Bring this with you</h1>
+                <h2>This is your receipt</h2>
+                <p><strong>Record:</strong> {recordItem.BarCode}</p>
+                <p><strong>Checked Out By:</strong> ({user.Email})</p>
+                <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>";
 
             // Check appsettings.json dictionary for the 'Notification' key. 
-            var adminEmail = _config["Notification:AdminEmail"];
+            var adminEmail = _config["Notification:NotificationMailbox"];
             try
             {
                 await _emailSender.SendEmailAsync(adminEmail, subject, message);
+                await _emailSender.SendEmailAsync(user.Email, subject, userMessage);
             }
             catch (Exception ex)
             {
