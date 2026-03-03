@@ -1,4 +1,5 @@
 # RecordsMaster 
+This is an app I made for a records room at my place of work. It replaces an Access database. I made it because I could not find anything on the market that met the records room's needs. I made the code public so that others who have similar challenges can reuse it for their purposes. 
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
