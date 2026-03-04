@@ -9,7 +9,9 @@
 *.db
 *.db-shm
 *.db-wal
+*.sh
 original_data.csv
+file.csv
 
 # Build results
 [Dd]ebug/

@@ -11,8 +11,8 @@ using RecordsMaster.Data;
 namespace RecordsMaster.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260213154606_AddIdentityRoleSupport")]
-    partial class AddIdentityRoleSupport
+    [Migration("20260304135348_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

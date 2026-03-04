@@ -55,7 +55,8 @@ public class Program
 
             // Custom method for seeding data
             await SeedData.SeedDataAsync(dbContext, userManager, roleManager, configuration);
-            await SeedDatabase(dbContext);
+            // If users have records checked out already, this will associate the user with the record and create their account
+            await SeedDatabase(dbContext, userManager);
             // btw, SeedData is in the Data directory. 
             
         }
@@ -104,7 +105,7 @@ public class Program
         await app.RunAsync();
     }
 
-    private static async Task SeedDatabase(AppDbContext context)
+    private static async Task SeedDatabase(AppDbContext context, UserManager<ApplicationUser> userManager)
     {
         if (!context.SeedHistories.Any(s => s.SeedType == "Initial"))
         {
@@ -113,8 +114,45 @@ public class Program
 
             if (File.Exists(csvFilePath))
             {
-                var records = CsvRecordReader.ReadRecordsFromCsv(csvFilePath);
-                context.RecordItems.AddRange(records);
+                // Read the csv
+                var records = CsvRecordReader.ReadRecordsFromCsv(csvFilePath).ToList();
+
+                //for each row in the csv
+                foreach (var record in records)
+                {
+                    // check to see if the CheckedOut value is True
+                    if (record.CheckedOut && !string.IsNullOrWhiteSpace(record.CheckedOutToName))
+                    {
+                        // See if there's an associated user (which there should be!)
+                        var user = await userManager.FindByNameAsync(record.CheckedOutToName)
+                                   ?? await userManager.FindByEmailAsync(record.CheckedOutToName);
+
+                        // If this user doesn't already exist, create them.
+                        if (user == null)
+                        {
+                            user = new ApplicationUser
+                            {
+                                UserName = record.CheckedOutToName,
+                                Email = record.CheckedOutToName
+                            };
+                            await userManager.CreateAsync(user);
+                            await userManager.AddToRoleAsync(user, "User");
+                        }
+                        // Assign record to this user.
+                        record.CheckedOutToId = user.Id;
+
+                        // Record checkout history.
+                        record.CheckoutHistoryRecords.Add(new CheckoutHistory
+                        {
+                            RecordItemId = record.ID,
+                            UserId = user.Id,
+                            // At initial migration, the checkout date is the first day the database is populated
+                            CheckedOutDate = DateTime.UtcNow
+                        });
+                    }
+
+                    context.RecordItems.Add(record);
+                }
             }
             else
             {

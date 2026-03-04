@@ -26,6 +26,19 @@ You can use it to set up the admin users, mailboxes, how many pages the List vie
 6. dotnet build
 7. dotnet watch run (tracks live changes)
 
+Consider creating a shell script for the first seven commands. In bash it's something like
+
+```
+#!/bin/bash
+set -e
+
+dotnet ef migrations add InitialMigration
+dotnet ef database update
+dotnet ef migrations add AddIdentityRoleSupport
+dotnet ef database update
+dotnet build
+```
+
 ## In Development mode:
 Migrations will create the SQLite database with the admin user, a test user, and the seeded information. 
 

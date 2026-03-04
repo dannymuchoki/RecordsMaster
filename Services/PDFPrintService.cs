@@ -11,7 +11,7 @@ namespace RecordsMaster.Services
 {
     public class PDFPrintService
     {
-
+        // The labels are formatted to the Avery 5162 standard with two columns of seven labels.
         public void PrintLabels(List<RecordItemModel> records, string? printerName = null)
         {
             if (records == null || records.Count == 0)
@@ -64,6 +64,8 @@ namespace RecordsMaster.Services
             float labelWidth = (float)XUnit.FromInch(4);
             float labelHeight = (float)XUnit.FromInch(1.33);
             float margin = (float)XUnit.FromInch(0.2);
+            float topMargin = (float)(double)XUnit.FromCentimeter(2.1);
+            float bottomMargin = (float)(double)XUnit.FromCentimeter(2.1);
 
             int labelsPerRow = 2;
             int labelsPerColumn = 7;
@@ -73,15 +75,20 @@ namespace RecordsMaster.Services
 
             while (recordIndex < records.Count)
             {
+                float pageHeight = (float)(double)page.Height;
+
                 for (int row = 0; row < labelsPerColumn; row++)
                 {
+                    float y = topMargin + row * labelHeight;
+                    if (y + labelHeight > pageHeight - bottomMargin)
+                        break;
+
                     for (int col = 0; col < labelsPerRow; col++)
                     {
                         if (recordIndex >= records.Count)
                             break;
 
                         float x = margin + col * (labelWidth + margin);
-                        float y = margin + row * (labelHeight + margin);
 
                         var record = records[recordIndex++];
 
@@ -158,6 +165,8 @@ namespace RecordsMaster.Services
             float labelWidth = (float)XUnit.FromInch(4);
             float labelHeight = (float)XUnit.FromInch(1.33);
             float margin = (float)XUnit.FromInch(0.2);
+            float topMargin = (float)(double)XUnit.FromCentimeter(2.1);
+            float bottomMargin = (float)(double)XUnit.FromCentimeter(2.1);
 
             int recordIndex = 0;
 
@@ -168,15 +177,20 @@ namespace RecordsMaster.Services
                 page.Height = XUnit.FromInch(11);
                 var gfx = XGraphics.FromPdfPage(page);
 
+                float pageHeight = (float)(double)page.Height;
+
                 for (int row = 0; row < labelsPerColumn; row++)
                 {
+                    float y = topMargin + row * labelHeight;
+                    if (y + labelHeight > pageHeight - bottomMargin)
+                        break;
+
                     for (int col = 0; col < labelsPerRow; col++)
                     {
                         if (recordIndex >= records.Count)
                             break;
 
                         float x = margin + col * (labelWidth + margin);
-                        float y = margin + row * (labelHeight + margin);
 
                         var record = records[recordIndex++];
 

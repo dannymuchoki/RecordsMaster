@@ -23,10 +23,15 @@ namespace RecordsMaster.Utilities
 
             csv.Context.RegisterClassMap<CsvHelperMap>();
 
-            foreach (var record in csv.GetRecords<RecordItemModel>())
+            csv.Read();
+            csv.ReadHeader();
+
+            while (csv.Read())
             {
-                record.ID = Guid.NewGuid(); // Generate GUID for each record
-                record.CheckedOutTo = null; 
+                var record = csv.GetRecord<RecordItemModel>();
+                record.ID = Guid.NewGuid();
+                // Username/email is in row 11 of the csv 
+                record.CheckedOutToName = csv.TryGetField<string>(11, out var checkedOutToName) ? checkedOutToName : null;
                 yield return record;
             }
         }

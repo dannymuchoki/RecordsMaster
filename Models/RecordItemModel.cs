@@ -82,6 +82,10 @@ namespace RecordsMaster.Models
         [ForeignKey(nameof(CheckedOutToId))]
         public ApplicationUser? CheckedOutTo { get; set; }
 
+        // Temporary field used during initial CSV import migration to hold the raw username/email before resolving to a user.
+        [NotMapped]
+        public string? CheckedOutToName { get; set; }
+
         [Required]
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 

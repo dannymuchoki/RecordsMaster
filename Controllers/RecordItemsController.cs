@@ -163,7 +163,7 @@ namespace RecordsMaster.Controllers
         // Download the CSV
         public IActionResult DownloadCsv()
         {
-            var records = _context.RecordItems.ToList();
+            var records = _context.RecordItems.Include(r => r.CheckedOutTo).ToList();
             var csvString = GenerateCsv(records);
 
             var fileName = $"RecordItems_{DateTime.Now:yyyyMMddHHmmss}.csv";
@@ -174,7 +174,7 @@ namespace RecordsMaster.Controllers
         private string GenerateCsv(IEnumerable<RecordItemModel> records)
         {
             var csvBuilder = new StringBuilder();
-            csvBuilder.AppendLine("ID,CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate,CheckedOut,Requested,ReadyForPickup,CheckedOutToId");
+            csvBuilder.AppendLine("ID,CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate,CheckedOut,Requested,ReadyForPickup,CheckedOutTo");
 
             foreach (var record in records)
             {
@@ -191,7 +191,7 @@ namespace RecordsMaster.Controllers
                     $"{record.CheckedOut}," +
                     $"{record.Requested}," +
                     $"{record.ReadyForPickup}," +
-                    $"{record.CheckedOutToId}");
+                    $"{record.CheckedOutTo?.Email}");
             }
             return csvBuilder.ToString();
         }
