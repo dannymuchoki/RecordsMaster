@@ -74,7 +74,9 @@ namespace RecordsMaster.Controllers
             }
             else
             {
-                query = query.Where(r => r.CIS == input);
+                var paddedInput = "0" + input;
+                // Sometimes CIS numbers are pre-pended by a zero.
+                query = query.Where(r => r.CIS == input || r.CIS == paddedInput);
             }
 
             var records = await query.ToListAsync();
