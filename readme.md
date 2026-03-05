@@ -1,5 +1,5 @@
 # RecordsMaster 
-This is an app I made for a records room at my place of work. It replaces an Access database. I made it because I could not find anything on the market that met the records room's needs. I made the code public so that others who have similar challenges can reuse it for their purposes. 
+**RecordsMaster** is a simple CRUD (Create, Read, Update, Delete) application made in .NET. I made for a records room at my place of work. It replaces an Access database. I made it because I could not find anything on the market that met the records room's needs. I made the code public so that others who have similar challenges can reuse it for their purposes. 
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
@@ -12,32 +12,11 @@ This is an app I made for a records room at my place of work. It replaces an Acc
 You can use it to set up the admin users, mailboxes, how many pages the List view should have, and the database credentials.
 
 # Rename 'original_data_template.csv' to 'file.csv' if you want to populate the table at initial migration.
-0. I **highly recommend** populating the data at initial migration when you have a lot of data. 
+0. I **highly recommend** populating the data at initial migration when you have a lot of data. If you include which user's email address has a record checked out at initial migration, RecordsMaster will create a user and associate the record with them. This user will need to reset their password to get access to their account. See the original_data_template.csv file's 'CheckedOutTo' column.  
 1. Otherwise, the seeded data in Program.cs will populate the table. 
 
 # Set the development environment to Production or Development
 0. You can do this in launchsettings.json, or in the web.config
-
-# When changing the model, or running for the first time, do these things:
-0. dotnet ef migrations add InitialMigration 
-1. dotnet ef database update
-2. dotnet ef migrations add AddIdentityRoleSupport   
-3. dotnet ef database update
-6. dotnet build
-7. dotnet watch run (tracks live changes)
-
-Consider creating a shell script for the first seven commands. In bash it's something like
-
-```
-#!/bin/bash
-set -e
-
-dotnet ef migrations add InitialMigration
-dotnet ef database update
-dotnet ef migrations add AddIdentityRoleSupport
-dotnet ef database update
-dotnet build
-```
 
 ## In Development mode:
 Migrations will create the SQLite database with the admin user, a test user, and the seeded information. 
@@ -49,10 +28,32 @@ If in Development, make sure to uncomment this in RecordsMaster.csjproj.
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
   </Content>
 ```
-This will ensure the Development SQLite database (testdb.db) is included in your published directory. Remove this in production.
+This will ensure the Development SQLite database (testdb.db) is included in your published directory. Remove this in Production.
 
 ## In Production mode:
-The database will be SQL, and the migrations will run using your database credentials. Ensure you have the ability to run migrations.  
+The database will be SQL, and the migrations will run using your database credentials. Ensure you have the ability to run migrations. Follow your administrator's rules on securing database credentials. I recommend against keeping them in appsettings generally.   
+
+# When changing the model, or running for the first time, do these things:
+0. dotnet ef migrations add InitialMigration 
+1. dotnet ef database update
+2. dotnet ef migrations add AddIdentityRoleSupport   
+3. dotnet ef database update
+4. dotnet build
+5. dotnet watch run (tracks live changes)
+
+Consider creating a shell script for the first five commands. In bash it's something like:
+
+```
+#!/bin/bash
+# Save this as a setup.sh file and chmod+x it
+set -e # makes sure errors kill setup.
+
+dotnet ef migrations add InitialMigration
+dotnet ef database update
+dotnet ef migrations add AddIdentityRoleSupport
+dotnet ef database update
+dotnet build
+```
 
 ## To publish and deploy:
 
