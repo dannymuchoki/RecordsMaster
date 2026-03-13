@@ -116,7 +116,8 @@ namespace RecordsMaster.Controllers
             }
             else
             {
-                query = query.Where(r => r.CIS == input && r.ClosingDate.HasValue && r.ClosingDate.Value.Date == closingDate!.Value.Date);
+                var paddedInput = "0" + input;
+                query = query.Where(r => (r.CIS == input || r.CIS == paddedInput) && r.ClosingDate.HasValue && r.ClosingDate.Value.Date == closingDate!.Value.Date);
             }
 
             var records = await query.ToListAsync();
@@ -137,6 +138,34 @@ namespace RecordsMaster.Controllers
                 return NotFound();
             }
             return View("Details", record);
+        }
+
+        public IActionResult BoxDigitizationCheck(int? boxNumber)
+        {
+            if (boxNumber == null)
+            {
+                return View("BoxChecker", Enumerable.Empty<RecordItemModel>());
+            }
+
+            var allRecordsInBox = _context.RecordItems
+                .Where(r => r.BoxNumber == boxNumber)
+                .ToList();
+
+            if (!allRecordsInBox.Any())
+            {
+                ViewData["BoxMessage"] = $"No records found in box {boxNumber}.";
+                return View("BoxChecker", Enumerable.Empty<RecordItemModel>());
+            }
+
+            if (allRecordsInBox.All(r => r.Digitized))
+            {
+                ViewData["BoxMessage"] = $"All records in box {boxNumber} are digitized.";
+                return View("BoxChecker", Enumerable.Empty<RecordItemModel>());
+            }
+
+            var undigitizedRecords = allRecordsInBox.Where(r => !r.Digitized).ToList();
+            ViewData["BoxNumber"] = boxNumber;
+            return View("BoxChecker", undigitizedRecords);
         }
 
         public async Task<IActionResult> Labels(int? pageNumber)

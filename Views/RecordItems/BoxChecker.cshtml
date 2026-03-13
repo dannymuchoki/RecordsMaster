@@ -1,0 +1,47 @@
+@model IEnumerable<RecordsMaster.Models.RecordItemModel>
+
+@if (!User.IsInRole("Admin"))
+{
+    <h1>You are not authorized to view this page</h1>
+    return;
+}
+
+<h2>Box Digitization Check</h2>
+<p>
+    Enter a box number to see if any records were not digitized. 
+</p>
+
+<form method="get" asp-action="BoxDigitizationCheck">
+    <label for="boxNumber">Box Number:</label>
+    <input type="number" id="boxNumber" class="form-control m-1"  name="boxNumber" value="@ViewData["BoxNumber"]" />
+    <button type="submit" class="btn btn-primary mx-auto">Check</button>
+</form>
+
+@if (ViewData["BoxMessage"] != null)
+{
+    <p><strong>@ViewData["BoxMessage"]</strong></p>
+}
+else if (Model.Any())
+{
+    <br/>
+    <p>The following records in box @ViewData["BoxNumber"] are not digitized:</p>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>CIS</th>
+                <th>Barcode</th>
+                <th>Record Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var record in Model)
+            {
+                <tr>
+                    <td>@record.CIS</td>
+                    <td>@record.BarCode</td>
+                    <td>@record.RecordType</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
