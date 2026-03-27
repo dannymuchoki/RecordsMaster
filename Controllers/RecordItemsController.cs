@@ -74,9 +74,10 @@ namespace RecordsMaster.Controllers
             }
             else
             {
-                var paddedInput = "0" + input;
-                // Sometimes CIS numbers are pre-pended by a zero.
-                query = query.Where(r => r.CIS == input || r.CIS == paddedInput);
+                // Database values are messy. Thirty years of accumulated errors
+                var paddedInput = "0" + input; // sometimes there's a zero in front of the CIS number
+                var strippedInput = input.StartsWith("015") ? input[3..] : null; // sometimes the CIS number is missing the 015. 
+                query = query.Where(r => r.CIS == input || r.CIS == paddedInput || (strippedInput != null && r.CIS == strippedInput));
             }
 
             var records = await query.ToListAsync();
@@ -117,7 +118,9 @@ namespace RecordsMaster.Controllers
             else
             {
                 var paddedInput = "0" + input;
-                query = query.Where(r => (r.CIS == input || r.CIS == paddedInput) && r.ClosingDate.HasValue && r.ClosingDate.Value.Date == closingDate!.Value.Date);
+                var strippedInput = input.StartsWith("015") ? input[3..] : null;
+                query = query.Where(r => (r.CIS == input || r.CIS == paddedInput || (strippedInput != null && r.CIS == strippedInput))
+                    && r.ClosingDate.HasValue && r.ClosingDate.Value.Date == closingDate!.Value.Date);
             }
 
             var records = await query.ToListAsync();
