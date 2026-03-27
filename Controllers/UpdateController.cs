@@ -41,8 +41,10 @@ namespace RecordsMaster.Controllers
                 return View();
             }
 
-            List<string> rowErrors = new List<string>();
+            // Each entry holds the original row fields plus an "Error" column
+            var errorRows = new List<Dictionary<string, string>>();
             int rowNumber = 2; // Assuming header is row 1
+            string[]? headers = null;
 
             try
             {
@@ -59,66 +61,97 @@ namespace RecordsMaster.Controllers
                     {
                         csv.Read();
                         csv.ReadHeader();
+                        headers = csv.HeaderRecord;
 
                         while (csv.Read())
                         {
-                            string cisField = csv.GetField(0)!;
-                            string barcodeField = csv.GetField(1)!;
-
-                            if (!int.TryParse(cisField, out int cis))
+                            // Capture all raw field values for this row
+                            var rawFields = new Dictionary<string, string>();
+                            if (headers != null)
                             {
-                                // CIS field is a string in the database, but is required to be an integer.
-                                rowErrors.Add($"Row {rowNumber}: CIS '{cisField}' is not a valid integer.");
-                                rowNumber++;
-                                continue;
+                                foreach (var header in headers)
+                                    rawFields[header] = csv.GetField(header) ?? string.Empty;
                             }
+
+                            string barcodeField = csv.GetField(1)!;
 
                             if (string.IsNullOrWhiteSpace(barcodeField))
                             {
-                                rowErrors.Add($"Row {rowNumber}: BarCode is empty.");
+                                rawFields["Error"] = $"Row {rowNumber}: BarCode is empty.";
+                                errorRows.Add(rawFields);
                                 rowNumber++;
                                 continue;
                             }
 
-                            // Find the record by CIS and BarCode
-                            var record = _context.RecordItems.FirstOrDefault(r => r.CIS == cisField && r.BarCode == barcodeField);
-                            
+                            // For updates, just by barcode works
+                            var record = _context.RecordItems.FirstOrDefault(r => r.BarCode == barcodeField);
                             if (record == null)
                             {
-                                rowErrors.Add($"Row {rowNumber}: No record found with CIS '{cis}' and BarCode '{barcodeField}'.");
+                                rawFields["Error"] = $"Row {rowNumber}: No record found with BarCode '{barcodeField}'.";
+                                errorRows.Add(rawFields);
                                 rowNumber++;
                                 continue;
                             }
 
-                            // Example: update the Location field from the fifth column if present
                             if (csv.HeaderRecord != null && csv.HeaderRecord.Length > 2)
                             {
-                                var locationField = csv.GetField(5);
+                                var locationField = csv.GetField(3);
                                 if (!string.IsNullOrWhiteSpace(locationField))
                                 {
                                     record.Location = locationField;
                                 }
-                                
-                            }
 
-                            // Add more updates here as needed, e.g., record.RecordType = csv.GetField(3);
+                                var boxNumberField = csv.GetField(4);
+                                if (!string.IsNullOrWhiteSpace(boxNumberField) && int.TryParse(boxNumberField, out var boxnumber))
+                                {
+                                    record.BoxNumber = boxnumber;
+                                }
+
+                                var digitizedField = csv.GetField(5);
+                                if (!string.IsNullOrWhiteSpace(digitizedField) && bool.TryParse(digitizedField, out var digitized))
+                                {
+                                    record.Digitized = digitized;
+                                }
+                            }
 
                             rowNumber++;
                         }
                     }
                 }
 
-                if (rowErrors.Any())
+                // Save all valid records regardless of errors
+                await _context.SaveChangesAsync();
+
+                if (errorRows.Any())
                 {
-                    ModelState.AddModelError("file", "Some rows contained errors. Please review the details below:");
-                    foreach (var error in rowErrors)
+                    // Build error CSV in memory and return as download
+                    var csvStream = new MemoryStream();
+                    using (var writer = new StreamWriter(csvStream, leaveOpen: true))
+                    using (var errorCsv = new CsvWriter(writer, CultureInfo.InvariantCulture))
                     {
-                        ModelState.AddModelError(string.Empty, error);
+                        // Write header: original columns + Error
+                        var errorHeaders = (headers ?? []).Append("Error").ToList();
+                        foreach (var h in errorHeaders)
+                        {
+                            errorCsv.WriteField(h);
+                        }
+                        errorCsv.NextRecord();
+
+                        foreach (var row in errorRows)
+                        {
+                            foreach (var h in errorHeaders)
+                            {
+                                errorCsv.WriteField(row.TryGetValue(h, out var val) ? val : string.Empty);
+                            }
+                            errorCsv.NextRecord();
+                        }
                     }
-                    return View();
+
+                    csvStream.Position = 0;
+                    TempData["Warning"] = $"{rowNumber - 2 - errorRows.Count} record(s) updated. {errorRows.Count} row(s) had errors — see downloaded errors.csv.";
+                    return File(csvStream, "text/csv", "errors.csv");
                 }
 
-                await _context.SaveChangesAsync();
                 TempData["Success"] = "Records updated successfully.";
                 return RedirectToAction("Index", "RecordItems");
             }
