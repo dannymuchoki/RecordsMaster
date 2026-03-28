@@ -6,7 +6,7 @@
     return;
 }
 
-<h2>Box Digitization Check</h2>
+<h2 class='p-2'>Box Digitization Check</h2>
 <p>
     Enter a box number to see if any records were not digitized. 
 </p>
@@ -40,6 +40,37 @@ else if (Model.Any())
                     <td>@record.CIS</td>
                     <td>@record.BarCode</td>
                     <td>@record.RecordType</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+}
+
+@if (ViewData["DigitizedBoxes"] is Dictionary<int?, List<RecordsMaster.Models.RecordItemModel>> allBoxes && allBoxes.Any())
+{
+    <h4 class="mt-4">All Boxes</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Box</th>
+                <th>Records</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var box in allBoxes)
+            {
+                var allDigitized = box.Value.All(r => r.Digitized);
+                var rowClass = allDigitized ? "table-success" : "table-warning";
+                <tr class="@rowClass">
+                    <td><strong>@box.Key</strong></td>
+                    <td>
+                        @foreach (var record in box.Value)
+                        {
+                            <span class="me-2">@record.BarCode</span>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>

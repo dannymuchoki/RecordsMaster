@@ -20,7 +20,9 @@ namespace RecordsMaster.Models
         [Key]
         public int Id { get; set; }
 
-        public Guid RecordItemId { get; set; }
+        public Guid? RecordItemId { get; set; }
+
+        public Guid? PreBarCodeRecordId { get; set; }
 
         [Required]
         public required string UserId { get; set; }
@@ -37,6 +39,10 @@ namespace RecordsMaster.Models
         // Navigation property to the record
         [ForeignKey(nameof(RecordItemId))]
         public RecordItemModel? RecordItem { get; set; }
+
+        // Navigation property to the pre-barcode record
+        [ForeignKey(nameof(PreBarCodeRecordId))]
+        public PreBarCodeRecordModel? PreBarCodeRecord { get; set; }
     }
     // foreign key property named CheckedOutTo.
     public class RecordItemModel
@@ -48,7 +54,6 @@ namespace RecordsMaster.Models
         [Required]
         public required string CIS { get; set; }
 
-        [Required]
         [StringLength(100)]
         public string? BarCode { get; set; }
 
@@ -56,7 +61,56 @@ namespace RecordsMaster.Models
         [StringLength(50)]
         public required string RecordType { get; set; }
 
+        [StringLength(128)]
+        public string? Location { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Box Number must be a positive integer.")]
+        public int? BoxNumber { get; set; }
+
+        public bool Digitized { get; set; }
+
+        public DateTime? ClosingDate { get; set; }
+
+        public DateTime? DestroyDate { get; set; }
+
+        public bool CheckedOut { get; set; }
+
+        public bool Requested { get; set; }
+
+        public bool ReadyForPickup { get; set; }
+
+        // The foreign key property:
+        public string? CheckedOutToId { get; set; }
+
+        // The corresponding navigation property.
+        [ForeignKey(nameof(CheckedOutToId))]
+        public ApplicationUser? CheckedOutTo { get; set; }
+
+        // Temporary field used during initial CSV import migration to hold the raw username/email before resolving to a user.
+        [NotMapped]
+        public string? CheckedOutToName { get; set; }
+
         [Required]
+        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+
+        // Navigation property: history of all checkouts and returns for this record
+        public ICollection<CheckoutHistory> CheckoutHistoryRecords { get; set; } = new List<CheckoutHistory>();
+
+    }
+
+    // Old records that have no barcodes for some reason.
+    public class PreBarCodeRecordModel
+    {
+        [Key]
+        public Guid ID { get; set; }
+
+        [Required]
+        public required string CIS { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public required string RecordType { get; set; }
+
         [StringLength(128)]
         public string? Location { get; set; }
 

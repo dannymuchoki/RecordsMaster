@@ -15,6 +15,7 @@ namespace RecordsMaster.Data
 
         // Table for RecordItemModel entities.
         public DbSet<RecordItemModel> RecordItems { get; set; }
+        public DbSet<PreBarCodeRecordModel> PreBarCodeRecords { get; set; }
         public DbSet<SeedHistory> SeedHistories { get; set; }
         public DbSet<CheckoutHistory> CheckoutHistory { get; set; }
 
@@ -27,7 +28,6 @@ namespace RecordsMaster.Data
             modelBuilder.Entity<RecordItemModel>().HasKey(r => r.ID);
 
             modelBuilder.Entity<RecordItemModel>().Property(r => r.BarCode)
-                .IsRequired()
                 .HasMaxLength(100);
 
             modelBuilder.Entity<RecordItemModel>().Property(r => r.RecordType)
@@ -46,6 +46,14 @@ namespace RecordsMaster.Data
                 .HasOne(ch => ch.RecordItem)
                 .WithMany(r => r.CheckoutHistoryRecords)
                 .HasForeignKey(ch => ch.RecordItemId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CheckoutHistory>()
+                .HasOne(ch => ch.PreBarCodeRecord)
+                .WithMany(r => r.CheckoutHistoryRecords)
+                .HasForeignKey(ch => ch.PreBarCodeRecordId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<CheckoutHistory>()

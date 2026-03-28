@@ -143,6 +143,19 @@ namespace RecordsMaster.Controllers
             return View("Details", record);
         }
 
+        public IActionResult DigitizedBoxes()
+        {
+             var allBoxes = _context.RecordItems
+                .Where(r => r.BoxNumber != null)
+                .OrderBy(r => r.BoxNumber)
+                .AsEnumerable()
+                .GroupBy(r => r.BoxNumber)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+             ViewData["DigitizedBoxes"] = allBoxes;
+             return View("BoxChecker", Enumerable.Empty<RecordItemModel>());
+        }
+
         public IActionResult BoxDigitizationCheck(int? boxNumber)
         {
             if (boxNumber == null)
