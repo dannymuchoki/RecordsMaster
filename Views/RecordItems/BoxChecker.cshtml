@@ -48,7 +48,7 @@ else if (Model.Any())
 
 }
 
-@if (ViewData["DigitizedBoxes"] is Dictionary<int?, List<RecordsMaster.Models.RecordItemModel>> allBoxes && allBoxes.Any())
+@if (ViewData["DigitizedBoxes"] is Dictionary<int, List<RecordsMaster.Models.RecordItemModel>> allBoxes && allBoxes.Any())
 {
     <h4 class="mt-4">All Boxes</h4>
     <table class="table">

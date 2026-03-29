@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using CsvHelper;
+using RecordsMaster.Services;
 using CsvHelper.Configuration;
 using System.Globalization;
 using System.IO;
@@ -18,10 +19,14 @@ namespace RecordsMaster.Controllers
     public class UpdateController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailSender _emailSender;
 
-        public UpdateController(AppDbContext context)
+        public UpdateController(AppDbContext context, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
             _context = context;
+            _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         // GET: Update/Upload
@@ -43,6 +48,7 @@ namespace RecordsMaster.Controllers
 
             // Each entry holds the original row fields plus an "Error" column
             var errorRows = new List<Dictionary<string, string>>();
+            var newUsers = new List<ApplicationUser>();
             int rowNumber = 2; // Assuming header is row 1
             string[]? headers = null;
 
@@ -74,7 +80,6 @@ namespace RecordsMaster.Controllers
                             }
 
                             string barcodeField = csv.GetField(1)!;
-
                             if (string.IsNullOrWhiteSpace(barcodeField))
                             {
                                 rawFields["Error"] = $"Row {rowNumber}: BarCode is empty.";
@@ -112,6 +117,34 @@ namespace RecordsMaster.Controllers
                                 {
                                     record.Digitized = digitized;
                                 }
+
+                                var checkedOutTo = csv.GetField(11);
+                                if (!string.IsNullOrWhiteSpace(checkedOutTo) && checkedOutTo.Contains('@'))
+                                {
+                                    var user = await _userManager.FindByEmailAsync(checkedOutTo);
+                                    if (user == null)
+                                    {
+                                        user = new ApplicationUser
+                                        {
+                                            UserName = checkedOutTo,
+                                            Email = checkedOutTo,
+                                        };
+                                        await _userManager.CreateAsync(user);
+                                        await _userManager.AddToRoleAsync(user, "User");
+                                        newUsers.Add(user);
+                                    }
+
+                                    record.CheckedOutToId = user.Id;
+                                    record.CheckedOut = true;
+
+                                    _context.CheckoutHistory.Add(new CheckoutHistory
+                                    {
+                                        RecordItemId = record.ID,
+                                        UserId = user.Id,
+                                        CheckedOutDate = DateTime.UtcNow
+                                    });
+                                }
+
                             }
 
                             rowNumber++;
@@ -121,6 +154,31 @@ namespace RecordsMaster.Controllers
 
                 // Save all valid records regardless of errors
                 await _context.SaveChangesAsync();
+
+                // Send each newly created user a password reset link so they can set their password
+                foreach (var newUser in newUsers)
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(newUser);
+                    var resetLink = Url.Action(
+                        "ConfirmPasswordReset",
+                        "PasswordReset",
+                        new { userId = newUser.Id, token },
+                        protocol: Request.Scheme
+                    );
+                    var subject = "You have been added to RecordsMaster";
+                    var message = $@"
+                        <p>An account has been created for you in RecordsMaster.</p>
+                        <p>Click the link below to set your password. This link can only be used once:</p>
+                        <p><a href='{resetLink}'>Set Password</a></p>";
+                    try
+                    {
+                        await _emailSender.SendEmailAsync(newUser.Email!, subject, message);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to send welcome email to {newUser.Email}: {ex.Message}");
+                    }
+                }
 
                 if (errorRows.Any())
                 {
