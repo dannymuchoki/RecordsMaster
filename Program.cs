@@ -73,7 +73,9 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        app.UseStaticFiles(); //.NET 9
+
+        //For .NET 10 use: app.MapStaticAssets();
 
         app.UseRouting();
         app.UseAuthentication();

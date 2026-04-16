@@ -1,4 +1,7 @@
 @model IEnumerable<RecordsMaster.Models.RecordItemModel>
+@{
+    var preBarCodeRecords = ViewData["PreBarCodeRecords"] as IEnumerable<RecordsMaster.Models.PreBarCodeRecordModel> ?? Enumerable.Empty<RecordsMaster.Models.PreBarCodeRecordModel>();
+}
 
 <h2>Record Detail</h2>
 <table class="table table-striped">
@@ -94,4 +97,45 @@
         }
     </tbody>
 </table>
+@if (preBarCodeRecords.Any())
+{
+    <h2 class="mt-4">Pre-Barcode Records</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Case#</th>
+                <th>Record Type</th>
+                <th>Box Number</th>
+                <th>Digitized</th>
+                <th>Closing Date</th>
+                <th>Destroy Date</th>
+                <th>Checked Out To</th>
+                <th>History</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in preBarCodeRecords)
+            {
+                <tr>
+                    <td>@item.CIS</td>
+                    <td>@item.RecordType</td>
+                    <td>@item.BoxNumber</td>
+                    <td>@(item.Digitized ? "Yes" : "No")</td>
+                    <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
+                    <td>@item.DestroyDate?.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        @if (item.CheckedOut)
+                        {
+                            @(item.CheckedOutTo?.UserName ?? "N/A")
+                        }
+                    </td>
+                    <td>
+                        <a href="@Url.Action("CheckoutHistory", "RecordItems", new { id = item.ID })" class="btn btn-sm btn-info">View History</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Back to Search</a>

@@ -84,3 +84,14 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 2. 'SeedTestData' used to be part of AppDbContext. Now it sets up the admin users and the first seeded data. 
 3. 'CsvHelperMap' helps map uploaded .csv data to the model. You can use it to reconstruct the order of columns in the .csv file. It is also easier than managing the data in the controllers. This feels more like a utility but oh well. 
  
+ For .NET 10, update these in .csproj
+
+Microsoft.AspNetCore.Identity.EntityFrameworkCore	9.0.1
+Microsoft.AspNetCore.Identity.UI	9.0.1
+Microsoft.EntityFrameworkCore	9.0.1
+Microsoft.EntityFrameworkCore.Design	9.0.1
+Microsoft.EntityFrameworkCore.Relational	9.0.1
+Microsoft.EntityFrameworkCore.Sqlite	9.0.1
+Microsoft.EntityFrameworkCore.SqlServer	9.0.1
+Microsoft.EntityFrameworkCore.Tools	9.0.1
+System.Drawing.Common	9.0.7
