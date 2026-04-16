@@ -43,8 +43,12 @@
                     <td>@item.Date.ToString("MM/dd/yyyy")</td>
                     <td>@item.Count</td>
                     <td>
-                        <a href="@Url.Action("GenerateLabelsByDate", "Labels", new { date = item.Date.ToString("yyyy-MM-dd") })"
-                           class="btn btn-sm btn-outline-primary">Download Labels</a>
+                        <!-- Initial migration has thousands of records. Do not show them. -->
+                        @if (item.Count <= 1000)
+                        {
+                            <a href="@Url.Action("GenerateLabelsByDate", "Labels", new { date = item.Date.ToString("yyyy-MM-dd") })"
+                               class="btn btn-sm btn-outline-primary">Download Labels</a>
+                        }
                     </td>
                 </tr>
             }
