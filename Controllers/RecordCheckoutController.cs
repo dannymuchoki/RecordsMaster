@@ -97,7 +97,7 @@ namespace RecordsMaster.Controllers
             try
             {
                 // tell the staff that the request is in.
-                await _emailSender.SendEmailAsync(adminEmail, subject, message);
+                await _emailSender.SendEmailAsync(adminEmail!, subject, message);
             }
             catch (Exception ex)
             {
@@ -156,8 +156,8 @@ namespace RecordsMaster.Controllers
 
             try
             {
-                // Tell the user it's ready for pickup. 
-                await _emailSender.SendEmailAsync(user.Email, subject, message);
+                // Tell the user it's ready for pickup.
+                await _emailSender.SendEmailAsync(user.Email!, subject, message);
             }
             catch (Exception ex)
             {
@@ -232,8 +232,8 @@ namespace RecordsMaster.Controllers
             var adminEmail = _config["Notification:NotificationMailbox"];
             try
             {
-                await _emailSender.SendEmailAsync(adminEmail, subject, message);
-                await _emailSender.SendEmailAsync(user.Email, subject, userMessage);
+                await _emailSender.SendEmailAsync(adminEmail!, subject, message);
+                await _emailSender.SendEmailAsync(user.Email!, subject, userMessage);
             }
             catch (Exception ex)
             {

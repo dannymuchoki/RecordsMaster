@@ -52,6 +52,7 @@ namespace RecordsMaster.Services
                     float y = margin + row * (labelHeight + margin);
 
                     var record = records[recordIndex++];
+                    if (e.Graphics is null) return;
                     e.Graphics.DrawRectangle(Pens.Black, x, y, labelWidth, labelHeight);
 
                     string labelText = $"CIS: {record.CIS}\nBarCode: {record.BarCode}\nRecordType: {record.RecordType}";

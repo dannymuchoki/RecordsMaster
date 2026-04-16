@@ -42,8 +42,11 @@
                         <th>Case#</th>
                         <th>Barcode</th>
                         <th>Record Type</th>
-                        <th>Box Number</th>
-                        <th>Digitized</th>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <th>Box Number</th>
+                                <th>Digitized</th>
+                            }
                         <th>Closing Date</th>
                         <th>Ready For Pickup</th>
                     </tr>
@@ -55,8 +58,11 @@
                                     <td> <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@item.ID" asp-route-cis="@item.CIS">@item.CIS</a></td>
                                     <td> @item.BarCode</td>
                                     <td>@item.RecordType</td>
-                                    <td>@item.BoxNumber</td>
-                                    <td>@(item.Digitized ? "Yes" : "No")</td>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <td>@item.BoxNumber</td>
+                                        <td>@(item.Digitized ? "Yes" : "No")</td>
+                                    }
                                     <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>  
                                     <td>@item.ReadyForPickup</td>
                                 </tr>
@@ -131,7 +137,7 @@
 
 else
     {
-        @if (User.Identity.IsAuthenticated)
+        @if (User.Identity?.IsAuthenticated == true)
         {
             @if (!User.IsInRole("Admin") || (!User.IsInRole("User"))) 
             {

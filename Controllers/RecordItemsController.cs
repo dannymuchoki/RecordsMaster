@@ -150,7 +150,7 @@ namespace RecordsMaster.Controllers
                 .OrderBy(r => r.BoxNumber)
                 .AsEnumerable()
                 .GroupBy(r => r.BoxNumber)
-                .ToDictionary(g => g.Key, g => g.ToList());
+                .ToDictionary(g => g.Key!.Value, g => g.ToList());
 
              ViewData["DigitizedBoxes"] = allBoxes;
              return View("BoxChecker", Enumerable.Empty<RecordItemModel>());
@@ -228,9 +228,9 @@ namespace RecordsMaster.Controllers
                 csvBuilder.AppendLine(
                     $"{record.ID}," +
                     $"{record.CIS}," +
-                    $"{EscapeCsvValue(record.BarCode)}," +
-                    $"{EscapeCsvValue(record.RecordType)}," +
-                    $"{EscapeCsvValue(record.Location)}," +
+                    $"{EscapeCsvValue(record.BarCode ?? string.Empty)}," +
+                    $"{EscapeCsvValue(record.RecordType ?? string.Empty)}," +
+                    $"{EscapeCsvValue(record.Location ?? string.Empty)}," +
                     $"{record.BoxNumber}," +
                     $"{record.Digitized}," +
                     $"{record.ClosingDate?.ToString("o", CultureInfo.InvariantCulture)}," +

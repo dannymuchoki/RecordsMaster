@@ -60,7 +60,7 @@ namespace RecordsMaster.Controllers
             var lastBarcodeInDb = _context.RecordItems.OrderByDescending(r => r.CreatedOn).Select(r => r.BarCode).FirstOrDefault();
 
             // We'll track the most recent barcode as we process the CSV.
-            string lastBarcode = lastBarcodeInDb;
+            string? lastBarcode = lastBarcodeInDb;
 
             try
             {
@@ -223,7 +223,7 @@ namespace RecordsMaster.Controllers
         /// </summary>
         /// <param name="lastBarcode">The last barcode value (could be null or empty).</param>
         /// <returns>A new barcode string.</returns>
-        private string GetNextBarcode(string lastBarcode)
+        private string GetNextBarcode(string? lastBarcode)
         {
             // Get two-digit current year (e.g., 23 for 2023)
             int currentYear = DateTime.Now.Year;

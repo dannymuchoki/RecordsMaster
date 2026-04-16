@@ -10,8 +10,11 @@
             <th>Case#</th>
             <th>Barcode</th>
             <th>Record Type</th>
+         @if (User.IsInRole("Admin"))
+            {
             <th>Box Number</th>
             <th>Digitized</th>
+            }
             <th>Closing Date</th>
             <th>Destroy Date</th>
             @if (User.IsInRole("Admin"))
@@ -33,8 +36,11 @@
                 <td>@item.CIS</td>
                 <td>@item.BarCode</td>
                 <td>@item.RecordType</td>
+            @if (User.IsInRole("Admin"))
+            {
                 <td>@item.BoxNumber</td>
                 <td>@(item.Digitized ? "Yes" : "No")</td>
+            }
                 <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
                 <td>@item.DestroyDate?.ToString("yyyy-MM-dd")</td>
                 <td>

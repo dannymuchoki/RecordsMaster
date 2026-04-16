@@ -22,7 +22,7 @@ namespace RecordsMaster.Services
             message.Body = new TextPart("html") { Text = htmlMessage };
 
             using var client = new SmtpClient();
-            await client.ConnectAsync(_config["Smtp:Host"], int.Parse(_config["Smtp:Port"]), true);
+            await client.ConnectAsync(_config["Smtp:Host"], int.Parse(_config["Smtp:Port"] ?? "587"), true);
             await client.AuthenticateAsync(_config["Smtp:Username"], _config["Smtp:Password"]); // not necessary on port 587
             await client.SendAsync(message);
             await client.DisconnectAsync(true);

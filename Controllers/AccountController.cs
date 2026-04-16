@@ -124,7 +124,7 @@ namespace RecordsMaster.Controllers
                 var adminEmail = _config["Notification:NotificationMailbox"];
                 try
                 {
-                    await _emailSender.SendEmailAsync(adminEmail, subject, message);
+                    await _emailSender.SendEmailAsync(adminEmail!, subject, message);
                 }
                 catch (Exception ex)
                 {

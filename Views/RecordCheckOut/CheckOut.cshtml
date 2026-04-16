@@ -26,14 +26,17 @@
         <th>Record Type</th>
         <td>@Model.RecordType</td>
     </tr>
-    <tr>
-        <th>Box Number</th>
-        <td>@Model.BoxNumber</td>
-    </tr>
-    <tr>
-        <th>Digitized</th>
-        <td>@(Model.Digitized ? "Yes" : "No")</td>
-    </tr>
+    @if (User.IsInRole("Admin"))
+    {
+        <tr>
+            <th>Box Number</th>
+            <td>@Model.BoxNumber</td>
+        </tr>
+        <tr>
+            <th>Digitized</th>
+            <td>@(Model.Digitized ? "Yes" : "No")</td>
+        </tr>
+    }
     <tr>
         <th>Closing Date</th>
         <td>@Model.ClosingDate?.ToString("yyyy-MM-dd")</td>
@@ -69,7 +72,7 @@
         {
             @if (Model.Digitized)
             {
-                <p>This record has been digitized. The user may not need the physical record. Prepare a link to the digital file or get the physical record from <b>Box @Model.BoxNumber</b>. When that's done, click the 'Ready for Pickup' button below </p>
+                <p>This record has been digitized. Get the physical record from <b>Box @Model.BoxNumber</b>. When that's done, click the 'Ready for Pickup' button below </p>
                 @using (Html.BeginForm("ReadyForPickup", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post))
                     {
                         @Html.AntiForgeryToken()
@@ -92,7 +95,7 @@
     else{
 
         @if (!Model.ReadyForPickup){
-        <p> You will be notified when the record is ready. Digitized records may be sent electronically.</p>
+        <p> You will be notified when the record is ready.</p>
         }
         else{
         <p>The record is ready for pickup. Click 'Check Out'. </p>

@@ -84,25 +84,35 @@ public class Program
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");
+        
+        //For .NET10: app.MapRaxorPages()
 
         app.MapControllerRoute(
             name: "records-list",
             pattern: "{controller=Home}/{action=List}");
 
+        //For .NET10: app.MapRaxorPages()
+
         app.MapControllerRoute(
             name: "upload",
             pattern: "Upload",
             defaults: new { controller = "Upload", action = "Upload" });
+        
+        //For .NET10: app.MapRaxorPages()
 
         app.MapControllerRoute(
             name: "labels",
             pattern: "labels/generate/{start?}/{end?}",
             defaults: new { controller = "Labels", action = "GenerateLabels" });
+        
+        //For .NET10: app.MapRaxorPages()
 
         app.MapControllerRoute(
             name: "labelsForm",
             pattern: "labels/form",
             defaults: new { controller = "Labels", action = "GenerateLabelsForm" });
+        
+        //For .NET10: app.MapRaxorPages()
 
         await app.RunAsync();
     }
