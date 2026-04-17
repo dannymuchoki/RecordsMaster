@@ -18,9 +18,12 @@ else
         var pdfFileName = TempData["PdfFileName"] as string;
         var successMessage = TempData["SuccessMessage"] as string;
 
-        // Keep TempData for the next request so the download button persists through page reloads
-        TempData.Keep("PdfFileName");
-        TempData.Keep("SuccessMessage");
+        // Only keep TempData when there's a PDF download button to preserve across reloads
+        if (hasPdf)
+        {
+            TempData.Keep("PdfFileName");
+            TempData.Keep("SuccessMessage");
+        }
 
         <div class="alert alert-success @(hasPdf ? "" : "alert-dismissible") fade show" role="alert" id="pdfAlert">
             @successMessage
