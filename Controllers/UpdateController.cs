@@ -211,7 +211,7 @@ namespace RecordsMaster.Controllers
                 }
 
                 TempData["Success"] = "Records updated successfully.";
-                return RedirectToAction("Index", "RecordItems");
+                return RedirectToAction("Upload");
             }
             catch (Exception ex)
             {

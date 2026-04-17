@@ -10,6 +10,11 @@
         Ensure that the CSV file is properly formatted and does not contain any errors to avoid issues during the upload process.
     </p>
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
     <form asp-action="Upload" enctype="multipart/form-data" method="post">
         <div asp-validation-summary="All" class="text-danger"></div>
 
