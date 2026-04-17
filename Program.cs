@@ -51,8 +51,9 @@ public class Program
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var configuration = builder.Configuration; // retrieve configuration from appsettings.json
 
-            if (app.Environment.IsProduction())
-                await EnsureMigrationHistoryAsync(dbContext);
+            // Check for synced migrations in Production. 
+            //if (app.Environment.IsProduction())
+                //await EnsureMigrationHistoryAsync(dbContext);
 
             await dbContext.Database.MigrateAsync();
 
@@ -126,7 +127,7 @@ public class Program
 
         await app.RunAsync();
     }
-
+    
     private static async Task EnsureMigrationHistoryAsync(AppDbContext dbContext)
     {
         var conn = dbContext.Database.GetDbConnection();
@@ -158,85 +159,78 @@ public class Program
 
     private static async Task SeedDatabase(AppDbContext context, UserManager<ApplicationUser> userManager)
     {
-        if (!context.SeedHistories.Any(s => s.SeedType == "Initial"))
+        var projectDirectory = Directory.GetCurrentDirectory();
+        var csvFilePath = Path.Combine(projectDirectory, "file.csv");
+
+        if (File.Exists(csvFilePath))
         {
-            var projectDirectory = Directory.GetCurrentDirectory();
-            var csvFilePath = Path.Combine(projectDirectory, "file.csv");
+            var records = CsvRecordReader.ReadRecordsFromCsv(csvFilePath).ToList();
+            var existingIds = context.RecordItems.Select(r => r.ID).ToHashSet();
 
-            if (File.Exists(csvFilePath))
+            foreach (var record in records)
             {
-                // Read the csv
-                var records = CsvRecordReader.ReadRecordsFromCsv(csvFilePath).ToList();
+                if (existingIds.Contains(record.ID))
+                    continue;
 
-                //for each row in the csv
-                foreach (var record in records)
+                if (record.CheckedOut && !string.IsNullOrWhiteSpace(record.CheckedOutToName))
                 {
-                    // check to see if the CheckedOut value is True
-                    if (record.CheckedOut && !string.IsNullOrWhiteSpace(record.CheckedOutToName))
+                    var user = await userManager.FindByNameAsync(record.CheckedOutToName)
+                               ?? await userManager.FindByEmailAsync(record.CheckedOutToName);
+
+                    if (user == null)
                     {
-                        // See if there's an associated user (which there should be!)
-                        var user = await userManager.FindByNameAsync(record.CheckedOutToName)
-                                   ?? await userManager.FindByEmailAsync(record.CheckedOutToName);
-
-                        // If this user doesn't already exist, create them.
-                        if (user == null)
+                        user = new ApplicationUser
                         {
-                            user = new ApplicationUser
-                            {
-                                UserName = record.CheckedOutToName,
-                                Email = record.CheckedOutToName
-                            };
-                            await userManager.CreateAsync(user);
-                            await userManager.AddToRoleAsync(user, "User");
-                        }
-                        // Assign record to this user.
-                        record.CheckedOutToId = user.Id;
-
-                        // Record checkout history.
-                        record.CheckoutHistoryRecords.Add(new CheckoutHistory
-                        {
-                            RecordItemId = record.ID,
-                            UserId = user.Id,
-                            // At initial migration, the checkout date is the first day the database is populated
-                            CheckedOutDate = DateTime.UtcNow
-                        });
+                            UserName = record.CheckedOutToName,
+                            Email = record.CheckedOutToName
+                        };
+                        await userManager.CreateAsync(user);
+                        await userManager.AddToRoleAsync(user, "User");
                     }
 
-                    context.RecordItems.Add(record);
+                    record.CheckedOutToId = user.Id;
+                    record.CheckoutHistoryRecords.Add(new CheckoutHistory
+                    {
+                        RecordItemId = record.ID,
+                        UserId = user.Id,
+                        CheckedOutDate = DateTime.UtcNow
+                    });
                 }
-            }
-            else
-            {
-                context.RecordItems.AddRange(new[]
-                {
-                    new RecordItemModel
-                    {
-                        ID = new Guid("11111111-1111-1111-1111-111111111111"),
-                        CIS = "1001",
-                        BarCode = "93-98765",
-                        RecordType = "Type A",
-                        Location = "Records Room",
-                        BoxNumber = 10,
-                        Digitized = true,
-                        ClosingDate = new DateTime(2023, 1, 1),
-                        DestroyDate = new DateTime(2028, 1, 1)
-                    },
-                    new RecordItemModel
-                    {
-                        ID = new Guid("22222222-2222-2222-2222-222222222222"),
-                        CIS = "1002D",
-                        BarCode = "93-98766",
-                        RecordType = "Type B",
-                        Location = "Records Room",
-                        BoxNumber = 20,
-                        Digitized = false,
-                        ClosingDate = new DateTime(2024, 1, 1),
-                        DestroyDate = new DateTime(2029, 1, 1)
-                    }
-                });
+
+                context.RecordItems.Add(record);
             }
 
-            // Sets up the initial seeding of the database. See the SeedHistory class in RecordItemModel.cs
+            await context.SaveChangesAsync();
+        }
+        else if (!context.SeedHistories.Any(s => s.SeedType == "Initial"))
+        {
+            context.RecordItems.AddRange([
+                new()
+                {
+                    ID = new Guid("11111111-1111-1111-1111-111111111111"),
+                    CIS = "1001",
+                    BarCode = "93-98765",
+                    RecordType = "Type A",
+                    Location = "Records Room",
+                    BoxNumber = 10,
+                    Digitized = true,
+                    ClosingDate = new DateTime(2023, 1, 1),
+                    DestroyDate = new DateTime(2028, 1, 1)
+                },
+                new()
+                {
+                    ID = new Guid("22222222-2222-2222-2222-222222222222"),
+                    CIS = "1002D",
+                    BarCode = "93-98766",
+                    RecordType = "Type B",
+                    Location = "Records Room",
+                    BoxNumber = 20,
+                    Digitized = false,
+                    ClosingDate = new DateTime(2024, 1, 1),
+                    DestroyDate = new DateTime(2029, 1, 1)
+                }
+            ]);
+
             context.SeedHistories.Add(new SeedHistory
             {
                 SeedType = "Initial",
