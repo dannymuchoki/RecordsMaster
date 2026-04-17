@@ -101,6 +101,13 @@ public class Program
         //For .NET10: app.MapRaxorPages()
 
         app.MapControllerRoute(
+            name: "update",
+            pattern: "Update",
+            defaults: new { controller = "Update", action = "Update" });
+        
+        //For .NET10: app.MapRaxorPages()
+
+        app.MapControllerRoute(
             name: "labels",
             pattern: "labels/generate/{start?}/{end?}",
             defaults: new { controller = "Labels", action = "GenerateLabels" });

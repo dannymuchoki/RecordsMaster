@@ -29,16 +29,14 @@ namespace RecordsMaster.Controllers
             _emailSender = emailSender;
         }
 
-        // GET: Update/Upload
-        public IActionResult Upload()
+        public IActionResult Update()
         {
-            return View("Update");
+            return View();
         }
 
-        // POST: Update/Upload
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Update(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -188,16 +186,16 @@ namespace RecordsMaster.Controllers
                         .ToList();
                     TempData["Warning"] = $"{rowNumber - 2 - errorRows.Count} record(s) updated. {errorRows.Count} row(s) had errors.";
                     TempData["Errors"] = string.Join("|", errorMessages);
-                    return RedirectToAction("Upload");
+                    return RedirectToAction("Update");
                 }
 
                 TempData["Success"] = $"{rowNumber - 2} record(s) updated successfully.";
-                return RedirectToAction("Upload");
+                return RedirectToAction("Update");
             }
             catch (Exception ex)
             {
                 TempData["Error"] = $"An error occurred while processing the file: {ex.Message}";
-                return RedirectToAction("Upload");
+                return RedirectToAction("Update");
             }
         }
     }
