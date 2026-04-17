@@ -221,12 +221,11 @@ namespace RecordsMaster.Controllers
         private string GenerateCsv(IEnumerable<RecordItemModel> records)
         {
             var csvBuilder = new StringBuilder();
-            csvBuilder.AppendLine("ID,CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate,CheckedOut,Requested,ReadyForPickup,CheckedOutTo");
+            csvBuilder.AppendLine("CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate,CheckedOut,Requested,ReadyForPickup,CheckedOutTo");
 
             foreach (var record in records)
             {
                 csvBuilder.AppendLine(
-                    $"{record.ID}," +
                     $"{record.CIS}," +
                     $"{EscapeCsvValue(record.BarCode ?? string.Empty)}," +
                     $"{EscapeCsvValue(record.RecordType ?? string.Empty)}," +

@@ -93,10 +93,12 @@ else
         <form asp-action="DownloadCsv" asp-controller="RecordItems" method="post" style="display:inline;">
             <button type="submit" name="download" value="download" class="btn btn-sm btn-primary">Download All</button>
         </form>
+        <!-- 
         <form asp-action="WipeRecords" asp-controller="RecordItems" method="post" style="display:inline;" id="wipeForm">
             @Html.AntiForgeryToken()
             <button type="submit" class="btn btn-sm btn-danger ml-2">Wipe All Records</button>
         </form>
+        -->
     </div>
 }
 

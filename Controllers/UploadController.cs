@@ -108,7 +108,7 @@ namespace RecordsMaster.Controllers
                             }
 
                             // Location of the record
-                            var locationField = csv.GetField(4);
+                            var locationField = csv.GetField(3);
 
                             // Validation: the sixth column is a valid DateTime
                             var dateField = csv.GetField(6);
