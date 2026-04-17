@@ -86,10 +86,14 @@ else
             </nav>
         }
     </div>
-    <div id='downloadCsv'> 
+    <div id='downloadCsv'>
         <form asp-action="DownloadCsv" asp-controller="RecordItems" method="post" style="display:inline;">
-        <button type="submit" name="download" value="download" class="btn btn-sm btn-primary">Download All</button>
-    </form>
+            <button type="submit" name="download" value="download" class="btn btn-sm btn-primary">Download All</button>
+        </form>
+        <form asp-action="WipeRecords" asp-controller="RecordItems" method="post" style="display:inline;" id="wipeForm">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm btn-danger ml-2">Wipe All Records</button>
+        </form>
     </div>
 }
 
@@ -134,6 +138,16 @@ else
                 xhr.send();
             });
 
+            // Confirm before wiping all records
+            var wipeForm = document.getElementById('wipeForm');
+            if (wipeForm) {
+                wipeForm.addEventListener('submit', function (e) {
+                    if (!confirm('Are you sure you want to wipe ALL records? This cannot be undone.')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
             // Handle PDF alert dismiss button
             var dismissPdfAlertBtn = document.getElementById('dismissPdfAlert');
             if (dismissPdfAlertBtn) {
@@ -164,3 +178,4 @@ else
         });
     </script>
 }
+
