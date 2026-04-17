@@ -32,7 +32,7 @@ namespace RecordsMaster.Controllers
         // GET: Update/Upload
         public IActionResult Upload()
         {
-            return View();
+            return View("Update");
         }
 
         // POST: Update/Upload
@@ -182,41 +182,22 @@ namespace RecordsMaster.Controllers
 
                 if (errorRows.Any())
                 {
-                    // Build error CSV in memory and return as download
-                    var csvStream = new MemoryStream();
-                    using (var writer = new StreamWriter(csvStream, leaveOpen: true))
-                    using (var errorCsv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-                    {
-                        // Write header: original columns + Error
-                        var errorHeaders = (headers ?? []).Append("Error").ToList();
-                        foreach (var h in errorHeaders)
-                        {
-                            errorCsv.WriteField(h);
-                        }
-                        errorCsv.NextRecord();
-
-                        foreach (var row in errorRows)
-                        {
-                            foreach (var h in errorHeaders)
-                            {
-                                errorCsv.WriteField(row.TryGetValue(h, out var val) ? val : string.Empty);
-                            }
-                            errorCsv.NextRecord();
-                        }
-                    }
-
-                    csvStream.Position = 0;
-                    TempData["Warning"] = $"{rowNumber - 2 - errorRows.Count} record(s) updated. {errorRows.Count} row(s) had errors — see downloaded errors.csv.";
-                    return File(csvStream, "text/csv", "errors.csv");
+                    var errorMessages = errorRows
+                        .Select(r => r.TryGetValue("Error", out var e) ? e : null)
+                        .Where(e => e != null)
+                        .ToList();
+                    TempData["Warning"] = $"{rowNumber - 2 - errorRows.Count} record(s) updated. {errorRows.Count} row(s) had errors.";
+                    TempData["Errors"] = string.Join("|", errorMessages);
+                    return RedirectToAction("Upload");
                 }
 
-                TempData["Success"] = "Records updated successfully.";
+                TempData["Success"] = $"{rowNumber - 2} record(s) updated successfully.";
                 return RedirectToAction("Upload");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("file", $"An error occurred while processing the file: {ex.Message}");
-                return View();
+                TempData["Error"] = $"An error occurred while processing the file: {ex.Message}";
+                return RedirectToAction("Upload");
             }
         }
     }

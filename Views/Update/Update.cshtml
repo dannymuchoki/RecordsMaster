@@ -15,6 +15,28 @@
         <div class="alert alert-success">@TempData["Success"]</div>
     }
 
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning">@TempData["Warning"]</div>
+    }
+
+    @if (TempData["Errors"] != null)
+    {
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach (var err in TempData["Errors"]!.ToString()!.Split('|'))
+                {
+                    <li>@err</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
     <form asp-action="Upload" enctype="multipart/form-data" method="post">
         <div asp-validation-summary="All" class="text-danger"></div>
 
