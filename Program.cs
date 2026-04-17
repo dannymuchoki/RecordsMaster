@@ -165,11 +165,13 @@ public class Program
         if (File.Exists(csvFilePath))
         {
             var records = CsvRecordReader.ReadRecordsFromCsv(csvFilePath).ToList();
-            var existingIds = context.RecordItems.Select(r => r.ID).ToHashSet();
+            var existingKeys = context.RecordItems
+                .Select(r => new { r.CIS, r.BarCode })
+                .ToHashSet();
 
             foreach (var record in records)
             {
-                if (existingIds.Contains(record.ID))
+                if (existingKeys.Contains(new { record.CIS, record.BarCode }))
                     continue;
 
                 if (record.CheckedOut && !string.IsNullOrWhiteSpace(record.CheckedOutToName))
