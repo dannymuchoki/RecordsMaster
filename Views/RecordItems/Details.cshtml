@@ -14,6 +14,7 @@
             {
             <th>Box Number</th>
             <th>Digitized</th>
+            <th>Location</th>
             }
             <th>Closing Date</th>
             <th>Destroy Date</th>
@@ -40,6 +41,7 @@
             {
                 <td>@item.BoxNumber</td>
                 <td>@(item.Digitized ? "Yes" : "No")</td>
+                <td>@(item.Location)</td>
             }
                 <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
                 <td>@item.DestroyDate?.ToString("yyyy-MM-dd")</td>

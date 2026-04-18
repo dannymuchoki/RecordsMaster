@@ -2,22 +2,50 @@
     ViewData["Title"] = "Upload New Record Items";
 }
 
-<h3>Upload CSV File</h3>
+<h3>Upload New Records</h3>
 <p>
     Use the form below to upload a CSV file containing new record items. The file should be formatted with the following columns <b>in this order</b>:
-    <table class="table table-bordered table-sm mt-2" style="width:auto;">
+    <table class="table table-bordered mt-2">
         <thead class="table-light">
             <tr>
-                <th>CIS</th>
-                <th>BarCode</th>
-                <th>RecordType</th>
-                <th>Box Number</th>
-                <th>Location</th>
-                <th>Digitized</th>
-                <th>ClosingDate</th>
-                <th>DestroyDate</th>
+                <th style="vertical-align:top;">CIS</th>
+                <th style="vertical-align:top;">BarCode</th>
+                <th style="vertical-align:top;">RecordType</th>
+                <th style="vertical-align:top;">Box Number</th>
+                <th style="vertical-align:top;">Location</th>
+                <th style="vertical-align:top;">Digitized</th>
+                <th style="vertical-align:top;">ClosingDate</th>
+                <th style="vertical-align:top;">DestroyDate</th>
             </tr>
         </thead>
+                <tbody>
+            <tr>
+                <td>
+                    Must be filled in
+                </td>
+                <td>
+                    Must be blank
+                </td>
+                <td>
+                    Must be filled in
+                </td>
+                <td>
+                    Must be blank
+                </td>
+                <td>
+                    Must be blank
+                </td>
+                <td>
+                    Must be blank
+                </td>
+                <td>
+                    Must be filled in
+                </td>
+                <td>
+                    Must be filled in for EX records
+                </td>
+            </tr>
+        </tbody>
     </table>
 </p>
 

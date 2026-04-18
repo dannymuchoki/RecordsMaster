@@ -2,7 +2,7 @@
     ViewData["Title"] = "Update Existing Record Items";
 }
 
-    <h3>Update Existing Records via Upload</h3>
+    <h3>Update Existing Records</h3>
 <p>
     Use the form below to update records in the database The file should be formatted with the following columns <b>in this order</b>:
     <table class="table table-bordered mt-2">
@@ -30,26 +30,29 @@
     <ol>
         <li><a href="/files/update_records_template.csv" download>Download the Update Template</a></li>
         <li>
+            <b>CIS</b> and <b>Barcode</b> are required. Without them, you cannot update a record. 
+        </li>
+        <li>
             You can only update the following columns:
             <ul>
                 <li>
-                    <b>Box number</b> with a whole integer (no decimals or letters)
+                    <b>Box number</b> with a whole integer (that means no decimals, dashes, commas, periods, or letters). Numbers only. 
                 </li>
                 <li>
                     <b>Location</b>  must be blank <b>or</b> either Records Room or Archives. Leaving it blank means it's in the Records Room by default. 
                 </li>
                 <li>
-                    <b>Digitized</b> must be blank <b>or</b> TRUE or FALSE in all caps.<br/><br/>Check the digital archive to make sure the record's barcode has been digitized before marking this TRUE.  
+                    <b>Digitized</b> must be blank <b>or</b> TRUE or FALSE in all caps.<br/>Check the digital archive to make sure the record's barcode has been digitized before marking <b>Digitized</b> as TRUE.  
                 </li>
                 <li>
-                    <b>CheckedOut</b> - must be blank <b>or</b> TRUE or FALSE in all caps. 
-                    <ol>
-                        <li> If the record has been checked out, mark it as TRUE and </li>
+                    <b>CheckedOut</b> and <b>CheckedOutTo</b> must be updated together. 
+                     <ol>
+                        <li> If <b>CheckedOut</b> is TRUE:</li>
                         <li>Make sure the <b>CheckedOutTo</b> column contains a valid email address.</li>
                     </ol>
                 </li>
                 <li>
-                    <b>CheckedOutTo</b> - must be a valid email address if CheckedOut is TRUE. Otherwise, leave this blank. 
+                     Otherwise <b>CheckedOut</b> and <b>CheckedOutTo</b> must both remain blank. 
                 </li>
             </ul>
 
@@ -87,7 +90,6 @@
         <div asp-validation-summary="All" class="text-danger"></div>
 
         <div class="form-group">
-            <label for="file">Choose CSV file</label>
             <input type="file" class="form-control" id="file" name="file" accept=".csv" />
             
         </div>
