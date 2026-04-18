@@ -3,12 +3,58 @@
 }
 
     <h3>Update Existing Records via Upload</h3>
-    <p>
-        The .csv file should be formatted with the following columns <b>in this order</b>: <br/> <br/>
-        CIS, BarCode, RecordType, Box Number, Location, Digitized, ClosingDate, DestroyDate
-        <br/> <br/>
-        Ensure that the CSV file is properly formatted and does not contain any errors to avoid issues during the upload process.
-    </p>
+<p>
+    Use the form below to update records in the database The file should be formatted with the following columns <b>in this order</b>:
+    <table class="table table-bordered mt-2">
+        <thead class="table-light">
+            <tr>
+                <th style="vertical-align:top;">CIS</th>
+                <th style="vertical-align:top;">BarCode</th>
+                <th style="vertical-align:top;">RecordType</th>
+                <th style="vertical-align:top;">Box Number</th>
+                <th style="vertical-align:top;">Location</th>
+                <th style="vertical-align:top;">Digitized</th>
+                <th style="vertical-align:top;">ClosingDate</th>
+                <th style="vertical-align:top;">DestroyDate</th>
+                <th style="vertical-align:top;">CheckedOut</th>
+                <th style="vertical-align:top;">Requested</th>
+                <th style="vertical-align:top;">ReadyForPickup</th>
+                <th style="vertical-align:top;">CheckedOutTo</th>
+            </tr>
+        </thead>
+    </table>
+</p>
+ 
+
+
+    <ol>
+        <li><a href="/files/update_records_template.csv" download>Download the Update Template</a></li>
+        <li>
+            You can only update the following columns:
+            <ul>
+                <li>
+                    <b>Box number</b> with a whole integer (no decimals or letters)
+                </li>
+                <li>
+                    <b>Location</b>  must be blank <b>or</b> either Records Room or Archives. Leaving it blank means it's in the Records Room by default. 
+                </li>
+                <li>
+                    <b>Digitized</b> must be blank <b>or</b> TRUE or FALSE in all caps.<br/><br/>Check the digital archive to make sure the record's barcode has been digitized before marking this TRUE.  
+                </li>
+                <li>
+                    <b>CheckedOut</b> - must be blank <b>or</b> TRUE or FALSE in all caps. 
+                    <ol>
+                        <li> If the record has been checked out, mark it as TRUE and </li>
+                        <li>Make sure the <b>CheckedOutTo</b> column contains a valid email address.</li>
+                    </ol>
+                </li>
+                <li>
+                    <b>CheckedOutTo</b> - must be a valid email address if CheckedOut is TRUE. Otherwise, leave this blank. 
+                </li>
+            </ul>
+
+        </li>
+    </ol>
 
     @if (TempData["Success"] != null)
     {

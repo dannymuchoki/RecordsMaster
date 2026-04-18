@@ -4,23 +4,67 @@
 
 <h3>Upload CSV File</h3>
 <p>
-    Use the form below to upload a CSV file containing new record items. The file should be formatted with the following columns <b>in this order</b>:<br/><br/> 
-    CIS, BarCode, RecordType, Box Number, Location, Digitized, ClosingDate, DestroyDate
-    <br/><br/>
-    <h3>
-        Make sure the barcode is blank! RecordsMaster generates barcodes for you!
-    </h3>
-    Ensure that the CSV file is properly formatted and does not contain any errors to avoid issues during the upload process.
+    Use the form below to upload a CSV file containing new record items. The file should be formatted with the following columns <b>in this order</b>:
+    <table class="table table-bordered table-sm mt-2" style="width:auto;">
+        <thead class="table-light">
+            <tr>
+                <th>CIS</th>
+                <th>BarCode</th>
+                <th>RecordType</th>
+                <th>Box Number</th>
+                <th>Location</th>
+                <th>Digitized</th>
+                <th>ClosingDate</th>
+                <th>DestroyDate</th>
+            </tr>
+        </thead>
+    </table>
 </p>
 
-<form asp-action="Upload" enctype="multipart/form-data" method="post">
-    <!-- Display a summary of validation errors -->
-    <div asp-validation-summary="All" class="text-danger"></div>
+<div id="cancelMessage" class="alert alert-warning mt-3" style="display:none;">
+    Upload cancelled. Please complete the following steps:
+    <ol>
+        <li>Download the data template: <a href="/files/new_records_template.csv" download>Download Data Template</a></li>
+        <li>In Microsoft Excel, replace the template values with the information you received from the case workers.</li>
+        <li><a asp-controller="Upload" asp-action="Index">Click here to try again.</a></li>
+    </ol>
+</div>
 
-    <div class="form-group">
-        <label for="file">Choose CSV file</label>
-        <input type="file" class="form-control" id="file" name="file" accept=".csv" />
-        
-    </div>
-    <button type="submit" class="btn btn-primary m-1">Upload New Records</button>
-</form>
+<div id="uploadForm" style="display:none;">
+    <form asp-action="Upload" enctype="multipart/form-data" method="post">
+        <!-- Display a summary of validation errors -->
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="form-group">
+            <input type="file" class="form-control" id="file" name="file" accept=".csv" />
+        </div>
+        <button type="submit" class="btn btn-primary m-1">Upload New Records</button>
+    </form>
+</div>
+
+<script>
+    (function () {
+        var checks = [
+            "DO NOT IGNORE THESE CHECKS. Failure to follow instructions will result in potentially irreversible database corruption. Follow these instructions exactly.",
+            "Have you downloaded the data template?\n\nIf not, cancel and download it now.",
+            "Have you renamed the template file to today\'s date? \n\n Naming convention: MM-DD-YYYY-upload.csv",
+            "Have you replaced the template file values with the actual data received from the case workers?",
+            "Have you saved the renamed file in the Records Room sharepoint?",
+            "Do the template headers match exactly?\n\nCIS, BarCode, RecordType, Box Number, Location, Digitized, ClosingDate, DestroyDate",
+            "Have you placed case numbers in the FIRST column (CIS)?",
+            "Have you placed record types in the THIRD column (RecordType)?",
+            "Have you placed closing dates in the SEVENTH column (ClosingDate)?",
+            "Have you placed destroy dates in the EIGHTH column (DestroyDate)?",
+            "Is the SECOND column (BarCode) blank?\n\nRecordsMaster generates barcodes for you — do not fill this in."
+        ];
+
+        for (var i = 0; i < checks.length; i++) {
+            if (!confirm(checks[i])) {
+                document.getElementById("cancelMessage").style.display = "block";
+                return;
+            }
+        }
+
+        document.getElementById("uploadForm").style.display = "block";
+    })();
+</script>
