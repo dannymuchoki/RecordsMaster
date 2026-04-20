@@ -15,8 +15,12 @@ public class Program
         // Use SQLite in development. Use SqlServer in Prod. 
         if (builder.Environment.IsDevelopment())
             {
+                /*
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+                */
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
             }
             else if (builder.Environment.IsProduction())
             {
@@ -53,29 +57,29 @@ public class Program
 
             // TEMPORARY: apply schema fix and register all migrations manually for production.
             // Remove this block after running the app once successfully.
-            if (app.Environment.IsProduction())
+            if (dbContext.Database.IsSqlServer())
             {
+                // Step 1: ensure history table exists before referencing it
                 dbContext.Database.ExecuteSqlRaw(@"
-                    IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260304135348_InitialMigration')
-                        INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135348_InitialMigration', '9.0.1');
-                    IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260304135403_AddIdentityRoleSupport')
-                        INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135403_AddIdentityRoleSupport', '9.0.1');
-                    IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260328113713_AddPreBarCodeCheckoutHistory')
-                        INSERT INTO [__EFMigrationsHistory] VALUES ('20260328113713_AddPreBarCodeCheckoutHistory', '9.0.1');
+                    IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+                    CREATE TABLE [__EFMigrationsHistory] (
+                        [MigrationId] nvarchar(150) NOT NULL,
+                        [ProductVersion] nvarchar(32) NOT NULL,
+                        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+                    )");
 
-                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('CheckoutHistory') AND name = 'PreBarCodeRecordId')
-                        ALTER TABLE [CheckoutHistory] ADD [PreBarCodeRecordId] uniqueidentifier NULL;
+                // Step 2: register already-applied migrations (each as its own call)
+                dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260304135348_InitialMigration') INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135348_InitialMigration', '9.0.1')");
+                dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260304135403_AddIdentityRoleSupport') INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135403_AddIdentityRoleSupport', '9.0.1')");
+                dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260328113713_AddPreBarCodeCheckoutHistory') INSERT INTO [__EFMigrationsHistory] VALUES ('20260328113713_AddPreBarCodeCheckoutHistory', '9.0.1')");
 
-                    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID('CheckoutHistory') AND name = 'IX_CheckoutHistory_PreBarCodeRecordId')
-                        CREATE INDEX [IX_CheckoutHistory_PreBarCodeRecordId] ON [CheckoutHistory] ([PreBarCodeRecordId]);
+                // Step 3: apply the new schema change
+                dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('CheckoutHistory') AND name = 'PreBarCodeRecordId') ALTER TABLE [CheckoutHistory] ADD [PreBarCodeRecordId] uniqueidentifier NULL");
+                dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID('CheckoutHistory') AND name = 'IX_CheckoutHistory_PreBarCodeRecordId') CREATE INDEX [IX_CheckoutHistory_PreBarCodeRecordId] ON [CheckoutHistory] ([PreBarCodeRecordId])");
+                dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_CheckoutHistory_PreBarCodeRecords_PreBarCodeRecordId') ALTER TABLE [CheckoutHistory] ADD CONSTRAINT [FK_CheckoutHistory_PreBarCodeRecords_PreBarCodeRecordId] FOREIGN KEY ([PreBarCodeRecordId]) REFERENCES [PreBarCodeRecords] ([ID]) ON DELETE CASCADE");
 
-                    IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_CheckoutHistory_PreBarCodeRecords_PreBarCodeRecordId')
-                        ALTER TABLE [CheckoutHistory] ADD CONSTRAINT [FK_CheckoutHistory_PreBarCodeRecords_PreBarCodeRecordId]
-                            FOREIGN KEY ([PreBarCodeRecordId]) REFERENCES [PreBarCodeRecords] ([ID]) ON DELETE CASCADE;
-
-                    IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260420222218_AddPreBarCodeRecordIdToCheckoutHistory')
-                        INSERT INTO [__EFMigrationsHistory] VALUES ('20260420222218_AddPreBarCodeRecordIdToCheckoutHistory', '9.0.1');
-                ");
+                // Step 4: register the new migration so MigrateAsync skips it
+                dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260420222218_AddPreBarCodeRecordIdToCheckoutHistory') INSERT INTO [__EFMigrationsHistory] VALUES ('20260420222218_AddPreBarCodeRecordIdToCheckoutHistory', '9.0.1')");
             }
 
             await dbContext.Database.MigrateAsync();
