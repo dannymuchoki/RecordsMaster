@@ -51,8 +51,8 @@ public class Program
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var configuration = builder.Configuration; // retrieve configuration from appsettings.json
 
-            // TEMPORARY: register already-applied migrations so MigrateAsync doesn't try to re-run them.
-            // Remove this block after running dotnet run once. Then stop the app. 
+            // TEMPORARY: apply schema fix and register all migrations manually for production.
+            // Remove this block after running the app once successfully.
             if (app.Environment.IsProduction())
             {
                 dbContext.Database.ExecuteSqlRaw(@"
@@ -62,10 +62,21 @@ public class Program
                         INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135403_AddIdentityRoleSupport', '9.0.1');
                     IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260328113713_AddPreBarCodeCheckoutHistory')
                         INSERT INTO [__EFMigrationsHistory] VALUES ('20260328113713_AddPreBarCodeCheckoutHistory', '9.0.1');
+
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('CheckoutHistory') AND name = 'PreBarCodeRecordId')
+                        ALTER TABLE [CheckoutHistory] ADD [PreBarCodeRecordId] uniqueidentifier NULL;
+
+                    IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID('CheckoutHistory') AND name = 'IX_CheckoutHistory_PreBarCodeRecordId')
+                        CREATE INDEX [IX_CheckoutHistory_PreBarCodeRecordId] ON [CheckoutHistory] ([PreBarCodeRecordId]);
+
+                    IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_CheckoutHistory_PreBarCodeRecords_PreBarCodeRecordId')
+                        ALTER TABLE [CheckoutHistory] ADD CONSTRAINT [FK_CheckoutHistory_PreBarCodeRecords_PreBarCodeRecordId]
+                            FOREIGN KEY ([PreBarCodeRecordId]) REFERENCES [PreBarCodeRecords] ([ID]) ON DELETE CASCADE;
+
+                    IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260420222218_AddPreBarCodeRecordIdToCheckoutHistory')
+                        INSERT INTO [__EFMigrationsHistory] VALUES ('20260420222218_AddPreBarCodeRecordIdToCheckoutHistory', '9.0.1');
                 ");
             }
-
-            //After this dotnet ef migrations add AddPreBarCodeRecordIdToCheckoutHistory
 
             await dbContext.Database.MigrateAsync();
 
