@@ -51,9 +51,19 @@ public class Program
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var configuration = builder.Configuration; // retrieve configuration from appsettings.json
 
-            // Check for synced migrations in Production. 
-            //if (app.Environment.IsProduction())
-                //await EnsureMigrationHistoryAsync(dbContext);
+            // TEMPORARY: register already-applied migrations so MigrateAsync doesn't try to re-run them.
+            // Remove this block after running the app once in production.
+            if (app.Environment.IsProduction())
+            {
+                dbContext.Database.ExecuteSqlRaw(@"
+                    IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260304135348_InitialMigration')
+                        INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135348_InitialMigration', '9.0.1');
+                    IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260304135403_AddIdentityRoleSupport')
+                        INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135403_AddIdentityRoleSupport', '9.0.1');
+                    IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260328113713_AddPreBarCodeCheckoutHistory')
+                        INSERT INTO [__EFMigrationsHistory] VALUES ('20260328113713_AddPreBarCodeCheckoutHistory', '9.0.1');
+                ");
+            }
 
             await dbContext.Database.MigrateAsync();
 
@@ -128,34 +138,7 @@ public class Program
         await app.RunAsync();
     }
     
-    private static async Task EnsureMigrationHistoryAsync(AppDbContext dbContext)
-    {
-        var conn = dbContext.Database.GetDbConnection();
-        await conn.OpenAsync();
-        try
-        {
-            using var createHistory = conn.CreateCommand();
-            createHistory.CommandText = @"
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='__EFMigrationsHistory' AND xtype='U')
-                CREATE TABLE [__EFMigrationsHistory] (
-                    [MigrationId] nvarchar(150) NOT NULL,
-                    [ProductVersion] nvarchar(32) NOT NULL,
-                    CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId]))";
-            await createHistory.ExecuteNonQueryAsync();
 
-            using var insertCmd = conn.CreateCommand();
-            insertCmd.CommandText = @"
-                IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260304135348_InitialMigration')
-                    INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135348_InitialMigration', '9.0.1');
-                IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260304135403_AddIdentityRoleSupport')
-                    INSERT INTO [__EFMigrationsHistory] VALUES ('20260304135403_AddIdentityRoleSupport', '9.0.1');";
-            await insertCmd.ExecuteNonQueryAsync();
-        }
-        finally
-        {
-            await conn.CloseAsync();
-        }
-    }
 
     private static async Task SeedDatabase(AppDbContext context, UserManager<ApplicationUser> userManager)
     {
