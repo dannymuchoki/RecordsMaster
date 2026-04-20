@@ -52,7 +52,7 @@ public class Program
             var configuration = builder.Configuration; // retrieve configuration from appsettings.json
 
             // TEMPORARY: register already-applied migrations so MigrateAsync doesn't try to re-run them.
-            // Remove this block after running the app once in production.
+            // Remove this block after running dotnet run once. Then stop the app. 
             if (app.Environment.IsProduction())
             {
                 dbContext.Database.ExecuteSqlRaw(@"
@@ -64,6 +64,8 @@ public class Program
                         INSERT INTO [__EFMigrationsHistory] VALUES ('20260328113713_AddPreBarCodeCheckoutHistory', '9.0.1');
                 ");
             }
+
+            //After this dotnet ef migrations add AddPreBarCodeRecordIdToCheckoutHistory
 
             await dbContext.Database.MigrateAsync();
 
