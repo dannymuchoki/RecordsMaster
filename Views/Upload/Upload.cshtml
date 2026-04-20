@@ -72,6 +72,13 @@
 
 <script>
     (function () {
+        var validationSummary = document.querySelector("[data-valmsg-summary]");
+        var hasErrors = validationSummary && validationSummary.classList.contains("validation-summary-errors");
+        if (hasErrors) {
+            document.getElementById("uploadForm").style.display = "block";
+            return;
+        }
+
         var checks = [
             "DO NOT IGNORE THESE CHECKS. Failure to follow instructions will result in potentially irreversible database corruption. Follow these instructions exactly.",
             "Have you downloaded the data template?\n\nIf not, cancel and download it now.",
