@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // For ToListAsync
@@ -207,15 +208,32 @@ namespace RecordsMaster.Controllers
             return View(pagedRecords);
         }
 
-        // Download the CSV
+        // Download a ZIP containing RecordItems.csv and CheckoutHistory.csv
         public IActionResult DownloadCsv()
         {
             var records = _context.RecordItems.Include(r => r.CheckedOutTo).ToList();
-            var csvString = GenerateCsv(records);
+            var history = _context.CheckoutHistory
+                .Include(ch => ch.User)
+                .Include(ch => ch.RecordItem)
+                .Include(ch => ch.PreBarCodeRecord)
+                .ToList();
 
-            var fileName = $"RecordItems_{DateTime.Now:yyyyMMddHHmmss}.csv";
-            var fileBytes = Encoding.UTF8.GetBytes(csvString);
-            return File(fileBytes, "text/csv", fileName);
+            var timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+
+            using var memoryStream = new MemoryStream();
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                var recordsEntry = archive.CreateEntry($"RecordItems_{timestamp}.csv");
+                using (var writer = new StreamWriter(recordsEntry.Open(), Encoding.UTF8))
+                    writer.Write(GenerateCsv(records));
+
+                var historyEntry = archive.CreateEntry($"CheckoutHistory_{timestamp}.csv");
+                using (var writer = new StreamWriter(historyEntry.Open(), Encoding.UTF8))
+                    writer.Write(GenerateCheckoutHistoryCsv(history));
+            }
+
+            memoryStream.Position = 0;
+            return File(memoryStream.ToArray(), "application/zip", $"Export_{timestamp}.zip");
         }
 
         private string GenerateCsv(IEnumerable<RecordItemModel> records)
@@ -238,6 +256,29 @@ namespace RecordsMaster.Controllers
                     $"{record.Requested}," +
                     $"{record.ReadyForPickup}," +
                     $"{record.CheckedOutTo?.Email}");
+            }
+            return csvBuilder.ToString();
+        }
+
+        private string GenerateCheckoutHistoryCsv(IEnumerable<CheckoutHistory> history)
+        {
+            var csvBuilder = new StringBuilder();
+            csvBuilder.AppendLine("Id,RecordItemId,PreBarCodeRecordId,CIS,BarCode,UserEmail,CheckedOutDate,ReturnedDate");
+
+            foreach (var ch in history)
+            {
+                var cis = ch.RecordItem?.CIS ?? ch.PreBarCodeRecord?.CIS ?? string.Empty;
+                var barCode = ch.RecordItem?.BarCode ?? string.Empty;
+
+                csvBuilder.AppendLine(
+                    $"{ch.Id}," +
+                    $"{ch.RecordItemId}," +
+                    $"{ch.PreBarCodeRecordId}," +
+                    $"{EscapeCsvValue(cis)}," +
+                    $"{EscapeCsvValue(barCode)}," +
+                    $"{EscapeCsvValue(ch.User?.Email ?? string.Empty)}," +
+                    $"{ch.CheckedOutDate.ToString("o", CultureInfo.InvariantCulture)}," +
+                    $"{ch.ReturnedDate?.ToString("o", CultureInfo.InvariantCulture)}");
             }
             return csvBuilder.ToString();
         }
