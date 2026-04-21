@@ -15,12 +15,10 @@ public class Program
         // Use SQLite in development. Use SqlServer in Prod. 
         if (builder.Environment.IsDevelopment())
             {
-                /*
+                
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-                */
-                builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServerConnection")));
+                
             }
             else if (builder.Environment.IsProduction())
             {
@@ -55,8 +53,13 @@ public class Program
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var configuration = builder.Configuration; // retrieve configuration from appsettings.json
 
-            // TEMPORARY: apply schema fix and register all migrations manually for production.
-            // Remove this block after running the app once successfully.
+            /* 
+            YOU DO NOT NEED TO RUN THIS AGAIN. This was a one-time fix. I left the code here because it was annoying to figure out, and if the issue occurs again, you now know that you can run SQL queries right here in Program.cs. 
+            
+            Basically, the migrations, database, and schema were out of alignment. Probably my mistake during development. Instead of dropping the SQL table and starting over, I created a schema fix and registered all migrations manually for production.
+            
+            This ran exactly once at at the first dotnet run (no database update required.) MAKE SURE YOU ARE WRITING TO THE RIGHT DATABASE! Change the Development server to SQL above to be double-plus sure. 
+
             if (dbContext.Database.IsSqlServer())
             {
                 // Step 1: ensure history table exists before referencing it
@@ -76,11 +79,11 @@ public class Program
                 // Step 3: apply the new schema change
                 dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('CheckoutHistory') AND name = 'PreBarCodeRecordId') ALTER TABLE [CheckoutHistory] ADD [PreBarCodeRecordId] uniqueidentifier NULL");
                 dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID('CheckoutHistory') AND name = 'IX_CheckoutHistory_PreBarCodeRecordId') CREATE INDEX [IX_CheckoutHistory_PreBarCodeRecordId] ON [CheckoutHistory] ([PreBarCodeRecordId])");
-                dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_CheckoutHistory_PreBarCodeRecords_PreBarCodeRecordId') ALTER TABLE [CheckoutHistory] ADD CONSTRAINT [FK_CheckoutHistory_PreBarCodeRecords_PreBarCodeRecordId] FOREIGN KEY ([PreBarCodeRecordId]) REFERENCES [PreBarCodeRecords] ([ID]) ON DELETE CASCADE");
 
                 // Step 4: register the new migration so MigrateAsync skips it
                 dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260420222218_AddPreBarCodeRecordIdToCheckoutHistory') INSERT INTO [__EFMigrationsHistory] VALUES ('20260420222218_AddPreBarCodeRecordIdToCheckoutHistory', '9.0.1')");
             }
+            */
 
             await dbContext.Database.MigrateAsync();
 
