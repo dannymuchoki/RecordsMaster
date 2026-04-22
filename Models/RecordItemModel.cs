@@ -98,7 +98,12 @@ namespace RecordsMaster.Models
 
     }
 
-    // Old records that have no barcodes for some reason.
+    /*
+     Old records that have no barcodes for some reason.
+     You may never need to use this table. Probably easier to give all records
+     an old barcode from 1991 (i.e. pre-database) in Excel
+     or something like that. 
+     */
     public class PreBarCodeRecordModel
     {
         [Key]

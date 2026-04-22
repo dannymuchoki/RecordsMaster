@@ -24,6 +24,7 @@ public sealed class CsvHelperMap : ClassMap<RecordItemModel>
     }
 }
 
+
 // Handles non-numeric and empty values for int? fields, returning null instead of throwing.
 public class NullableInt32Converter : Int32Converter
 {

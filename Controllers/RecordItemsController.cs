@@ -19,23 +19,29 @@ namespace RecordsMaster.Controllers
     [Authorize]
     public class RecordItemsController : Controller
     {
-        // This was the first controller I wrote. It handles record item operations, such as searching and listing records.
-        // It uses Entity Framework Core to interact with the database and supports pagination.
-        // Dependencies:
-        // - AppDbContext: The database context for accessing RecordItemModel entities.
-        // - IConfiguration: Used to read settings from appsettings.json.
-        // - PaginatedList: A utility class for handling pagination of lists. (see Utilities/PaginatedList.cs)
-        // - RecordItemModel: The model representing a record item in the database.
-        // - ApplicationUser: Represents a user in the system, used for checking out records.
-        // https://learn.microsoft.com/en-us/ef/core/
+        /* This was the first controller I wrote. It handles record item operations, such as searching and listing records.
+         It uses Entity Framework Core to interact with the database and supports pagination.
+         Dependencies:
+         - AppDbContext: The database context for accessing RecordItemModel entities.
+         - IConfiguration: Used to read settings from appsettings.json.
+         - PaginatedList: A utility class for handling pagination of lists. (see Utilities/PaginatedList.cs)
+         - RecordItemModel: The model representing a record item in the database.
+         - ApplicationUser: Represents a user in the system, used for checking out records.
+         https://learn.microsoft.com/en-us/ef/core/ 
+         
+         */
+
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly int _appsettingsPageSize;
 
-        // Constructor to inject dependencies
-        // AppDbContext is used to access the database, and IConfiguration is used to read settings from appsettings.json.
-        // The page size for pagination is also set from the configuration in appsettings.json.
-        // This allows for easy adjustments to pagination settings without changing the code.
+        /*
+         Constructor to inject dependencies
+            - AppDbContext is used to access the database
+            - IConfiguration is used to read settings from appsettings.json.
+            - The page size for pagination is also set from the configuration in appsettings.json.
+            This allows for easy adjustments to pagination settings without changing the controller directly.
+        */
         public RecordItemsController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
@@ -91,6 +97,10 @@ namespace RecordsMaster.Controllers
             return View("Details", records);
         }
 
+        /* 
+            Case workers can only search for what they need to know, so they need to provide a closing date. 
+            Or a barcode. 
+        */
         public async Task<IActionResult> CaseWorkerSearch(string? input, DateTime? closingDate)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -260,10 +270,14 @@ namespace RecordsMaster.Controllers
             return csvBuilder.ToString();
         }
 
+        /* 
+            This isn't connected to a CSV map because the columns match what SeedCheckoutHistory is expecting in Program.cs
+            So you can use this output to re-populate the checkout history table if you need to. 
+        */
         private string GenerateCheckoutHistoryCsv(IEnumerable<CheckoutHistory> history)
         {
             var csvBuilder = new StringBuilder();
-            csvBuilder.AppendLine("Id,RecordItemId,PreBarCodeRecordId,CIS,BarCode,UserEmail,CheckedOutDate,ReturnedDate");
+            csvBuilder.AppendLine("BarCode,UserEmail,CheckedOutDate,ReturnedDate");
 
             foreach (var ch in history)
             {
@@ -271,10 +285,10 @@ namespace RecordsMaster.Controllers
                 var barCode = ch.RecordItem?.BarCode ?? string.Empty;
 
                 csvBuilder.AppendLine(
-                    $"{ch.Id}," +
-                    $"{ch.RecordItemId}," +
-                    $"{ch.PreBarCodeRecordId}," +
-                    $"{EscapeCsvValue(cis)}," +
+                    //$"{ch.Id}," +
+                    //$"{ch.RecordItemId}," +
+                    //$"{ch.PreBarCodeRecordId}," +
+                    //$"{EscapeCsvValue(cis)}," +
                     $"{EscapeCsvValue(barCode)}," +
                     $"{EscapeCsvValue(ch.User?.Email ?? string.Empty)}," +
                     $"{ch.CheckedOutDate.ToString("o", CultureInfo.InvariantCulture)}," +
