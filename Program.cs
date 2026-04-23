@@ -31,6 +31,14 @@ public class Program
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>();
 
+        builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.LoginPath = "/Account/Login";
+            });
+
+
         builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
             opt.TokenLifespan = TimeSpan.FromHours(1)); // Reset token is valid for one hour
 
