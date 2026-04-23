@@ -210,7 +210,7 @@ namespace RecordsMaster.Controllers
 
             var recordsQuery = _context.RecordItems
                 .Include(r => r.CheckedOutTo)
-                .OrderByDescending(r => r.CreatedOn);
+                .OrderBy(r => r.CreatedOn);
 
             var pagedRecords = await PaginatedList<RecordItemModel>.CreateAsync(recordsQuery, pageNumber, pageSize);
 
@@ -221,7 +221,8 @@ namespace RecordsMaster.Controllers
         // Download a ZIP containing RecordItems.csv and CheckoutHistory.csv
         public IActionResult DownloadCsv()
         {
-            var records = _context.RecordItems.Include(r => r.CheckedOutTo).ToList();
+            var records = _context.RecordItems.Include(r => r.CheckedOutTo).OrderBy(r => r.CreatedOn).ToList();
+
             var history = _context.CheckoutHistory
                 .Include(ch => ch.User)
                 .Include(ch => ch.RecordItem)
