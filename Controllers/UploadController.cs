@@ -131,6 +131,8 @@ namespace RecordsMaster.Controllers
                             // Update our local variable so the next call knows the last value after increment.
                             lastBarcode = recordItem.BarCode;
 
+                            recordItem.UploadedBy = User.Identity?.Name;
+
                             validRecords.Add(recordItem);
                             rowNumber++;
                         }

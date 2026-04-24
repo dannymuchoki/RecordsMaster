@@ -93,6 +93,8 @@ namespace RecordsMaster.Models
         [Required]
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
+        public string? UploadedBy {get; set;}
+
         // Navigation property: history of all checkouts and returns for this record
         public ICollection<CheckoutHistory> CheckoutHistoryRecords { get; set; } = new List<CheckoutHistory>();
 
@@ -147,6 +149,8 @@ namespace RecordsMaster.Models
 
         [Required]
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+
+        public string? UploadedBy {get; set;}
 
         // Navigation property: history of all checkouts and returns for this record
         public ICollection<CheckoutHistory> CheckoutHistoryRecords { get; set; } = new List<CheckoutHistory>();

@@ -84,7 +84,8 @@ namespace RecordsMaster.Controllers
                 // Database values are messy. Thirty years of accumulated errors
                 var paddedInput = "0" + input; // sometimes there's a zero in front of the CIS number
                 var strippedInput = input.StartsWith("015") ? input[3..] : null; // sometimes the CIS number is missing the 015. 
-                query = query.Where(r => r.CIS == input || r.CIS == paddedInput || (strippedInput != null && r.CIS == strippedInput));
+                var nozeroes = input.StartsWith('0') ? input[1..] : null;
+                query = query.Where(r => r.CIS == input || r.CIS == paddedInput || (strippedInput != null && r.CIS == strippedInput) || (nozeroes != null && r.CIS == nozeroes));
             }
 
             var records = await query.ToListAsync();
@@ -130,7 +131,8 @@ namespace RecordsMaster.Controllers
             {
                 var paddedInput = "0" + input;
                 var strippedInput = input.StartsWith("015") ? input[3..] : null;
-                query = query.Where(r => (r.CIS == input || r.CIS == paddedInput || (strippedInput != null && r.CIS == strippedInput))
+                var nozeroes = input.StartsWith('0') ? input[1..] : null;
+                query = query.Where(r => (r.CIS == input || r.CIS == paddedInput || (strippedInput != null && r.CIS == strippedInput) || (nozeroes != null && r.CIS == nozeroes))
                     && r.ClosingDate.HasValue && r.ClosingDate.Value.Date == closingDate!.Value.Date);
             }
 

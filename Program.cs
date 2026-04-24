@@ -350,10 +350,14 @@ public class Program
                     .Select(r => r.CIS + "|" + (r.BarCode ?? ""))
             );
 
+            var uploadedBy = $"Initial upload - {DateTime.UtcNow:yyyy-MM-dd}";
+
             foreach (var record in records)
             {
                 if (existingKeys.Contains(record.CIS + "|" + (record.BarCode ?? "")))
                     continue;
+
+                record.UploadedBy = uploadedBy;
 
                 if (record.CheckedOut && !string.IsNullOrWhiteSpace(record.CheckedOutToName))
                 {
@@ -398,7 +402,8 @@ public class Program
                     BoxNumber = 10,
                     Digitized = true,
                     ClosingDate = new DateTime(2023, 1, 1),
-                    DestroyDate = new DateTime(2028, 1, 1)
+                    DestroyDate = new DateTime(2028, 1, 1),
+                    UploadedBy = $"Initial upload - {DateTime.UtcNow:yyyy-MM-dd}"
                 },
                 new()
                 {
@@ -410,7 +415,8 @@ public class Program
                     BoxNumber = 20,
                     Digitized = false,
                     ClosingDate = new DateTime(2024, 1, 1),
-                    DestroyDate = new DateTime(2029, 1, 1)
+                    DestroyDate = new DateTime(2029, 1, 1),
+                    UploadedBy = $"Initial upload - {DateTime.UtcNow:yyyy-MM-dd}"
                 }
             ]);
 
