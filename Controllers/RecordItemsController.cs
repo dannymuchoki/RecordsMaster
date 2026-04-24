@@ -252,7 +252,7 @@ namespace RecordsMaster.Controllers
         private string GenerateCsv(IEnumerable<RecordItemModel> records)
         {
             var csvBuilder = new StringBuilder();
-            csvBuilder.AppendLine("CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate,CheckedOut,Requested,ReadyForPickup,CheckedOutTo");
+            csvBuilder.AppendLine("CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate,UploadedBy,CheckedOut,Requested,ReadyForPickup,CheckedOutTo");
 
             foreach (var record in records)
             {
@@ -265,6 +265,7 @@ namespace RecordsMaster.Controllers
                     $"{record.Digitized}," +
                     $"{record.ClosingDate?.ToString("o", CultureInfo.InvariantCulture)}," +
                     $"{record.DestroyDate?.ToString("o", CultureInfo.InvariantCulture)}," +
+                     $"{record.UploadedBy}," +
                     $"{record.CheckedOut}," +
                     $"{record.Requested}," +
                     $"{record.ReadyForPickup}," +
@@ -280,7 +281,7 @@ namespace RecordsMaster.Controllers
         private string GenerateCheckoutHistoryCsv(IEnumerable<CheckoutHistory> history)
         {
             var csvBuilder = new StringBuilder();
-            csvBuilder.AppendLine("BarCode,UserEmail,CheckedOutDate,ReturnedDate");
+            csvBuilder.AppendLine("CIS, BarCode,UserEmail,CheckedOutDate,ReturnedDate");
 
             foreach (var ch in history)
             {
@@ -291,7 +292,7 @@ namespace RecordsMaster.Controllers
                     //$"{ch.Id}," +
                     //$"{ch.RecordItemId}," +
                     //$"{ch.PreBarCodeRecordId}," +
-                    //$"{EscapeCsvValue(cis)}," +
+                    $"{EscapeCsvValue(cis)}," +
                     $"{EscapeCsvValue(barCode)}," +
                     $"{EscapeCsvValue(ch.User?.Email ?? string.Empty)}," +
                     $"{ch.CheckedOutDate.ToString("o", CultureInfo.InvariantCulture)}," +
