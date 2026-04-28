@@ -1,4 +1,4 @@
-﻿CIS,BarCode,RecordType,Box Number,Location,Digitized,ClosingDate,DestroyDate
+﻿CIS,BarCode,RecordType,Location,BoxNumber,Digitized,ClosingDate,DestroyDate
 1001,,FC,,,,1/1/23,1/1/28
 1002,,PS,,,,1/1/24,1/1/29
 1003,,FC,,,,1/2/24,1/2/29
