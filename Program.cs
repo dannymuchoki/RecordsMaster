@@ -54,7 +54,7 @@ public class Program
 
         var app = builder.Build();
 
-        // Run with --download-migrations to pull __EFMigrationsHistory from the DB and write stub .cs files to Migrations/
+        // Run with --download-migrations to pull __EFMigrationsHistory from the DB and write stub .cs files to Migrations/. Mostly here to show it can be done. 
         if (args.Contains("--download-migrations"))
         {
             using var scope = app.Services.CreateScope();
@@ -76,7 +76,7 @@ public class Program
             var configuration = builder.Configuration; // retrieve configuration from appsettings.json
 
             /* 
-            YOU DO NOT NEED TO RUN THIS AGAIN. This was a one-time fix. I left the code here because it was annoying to figure out, and if the issue occurs again, you now know that you can run SQL queries right here in Program.cs. 
+            YOU DO NOT NEED TO RUN THIS AGAIN. This was a one-time fix. I left the code here because (like everything in .NET) it was annoying to figure out, and if the issue occurs again, you now know that you can run SQL queries right here in Program.cs. 
             
             Basically, the migrations, database, and schema were out of alignment. Probably my mistake during development. Instead of dropping the SQL table and starting over, I created a schema fix and registered all migrations manually for production. This worked for a bit, but ultimately it was easier to get a new database and re-run the migrations. 
             
