@@ -16,14 +16,14 @@ namespace RecordsMaster.Services
         public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage)
         {
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("App", _config["Smtp:From"]));
+            message.From.Add(new MailboxAddress("App", _config["Smtp:From"] ?? "from@example.com"));
             message.To.Add(MailboxAddress.Parse(toEmail));
             message.Subject = subject;
             message.Body = new TextPart("html") { Text = htmlMessage };
 
             using var client = new SmtpClient();
-            await client.ConnectAsync(_config["Smtp:Host"], int.Parse(_config["Smtp:Port"] ?? "587"), true);
-            await client.AuthenticateAsync(_config["Smtp:Username"], _config["Smtp:Password"]); // not necessary on port 587
+            await client.ConnectAsync(_config["Smtp:Host"] ?? "Host name. here", int.Parse(_config["Smtp:Port"] ?? "587"), true);
+            await client.AuthenticateAsync(_config["Smtp:Username"] ?? "Username", _config["Smtp:Password"] ?? "Passowrd"); // not necessary on port 587
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }

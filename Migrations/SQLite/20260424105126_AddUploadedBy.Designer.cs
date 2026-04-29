@@ -8,9 +8,9 @@ using RecordsMaster.Data;
 
 #nullable disable
 
-namespace RecordsMaster.Migrations
+namespace RecordsMaster.Migrations.SQLite
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(SqliteAppDbContext))]
     [Migration("20260424105126_AddUploadedBy")]
     partial class AddUploadedBy
     {

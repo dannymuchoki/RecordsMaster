@@ -1,5 +1,7 @@
 # RecordsMaster 
-**RecordsMaster** is a simple CRUD (Create, Read, Update, Delete) application made in .NET. I made for a records room at my place of work. It replaces an Access database. I made it because I could not find anything on the market that met the records room's needs. I made the code public so that others who have similar challenges can reuse it for their purposes. 
+**RecordsMaster** is a simple CRUD (Create, Read, Update, Delete) application made in .NET for a records room at my place of work. It replaces an Access database. 
+
+I made RecordsMaster because I could not find anything on the market that met the records room's needs. I made the code public so that others who have similar challenges can reuse it for their purposes. Go ahead and fork it. 
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
@@ -21,6 +23,12 @@ You can use it to set up the admin users, mailboxes, how many pages the List vie
 ## In Development mode:
 Migrations will create the SQLite database with the admin user, a test user, and the seeded information. 
 
+# SQLite (development)
+## SQLite migration 
+> dotnet ef migrations add MyChange --context SqliteAppDbContext
+
+In .NET, SQLite and SQL have subtle differences, ergo the two different AppDbContext in the Data directory. This lesson was annoying to learn. The migrations will be in a subdirectory of 'Migrations' called 'SQLite'
+
 If in Development, make sure to uncomment this in RecordsMaster.csjproj.   
 
  ```   
@@ -32,6 +40,11 @@ This will ensure the Development SQLite database (testdb.db) is included in your
 
 ## In Production mode:
 The database will be SQL, and the migrations will run using your database credentials. Ensure you have the ability to run migrations. Follow your administrator's rules on securing database credentials. I recommend against keeping them in appsettings generally.   
+
+# SQL Server (production)
+> dotnet ef migrations add MyChange --context AppDbContext
+
+The migrations will be in the root 'Migrations' directory. 
 
 # When changing the model, or running for the first time, do these things:
 0. dotnet ef migrations add InitialMigration 
@@ -80,7 +93,7 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 2. A class that implements rudimentary pagination in the 'List' view of all records. Pagination is controlled by a key in the appsettings.json file 
 
 ## 'Data' directory contains:
-1. This is where you can find AppDbContext - this is mostly ORM stuff that runs at initial migration. 
+1. This is where you can find the two AppDbContexts - one for SQLite and the other for Production SQL. That's why there's two different ways to run migrations for Development and Production. 
 2. 'SeedTestData' used to be part of AppDbContext. Now it sets up the admin users and the first seeded data. 
 3. 'CsvHelperMap' helps map uploaded .csv data to the model. You can use it to reconstruct the order of columns in the .csv file. It is also easier than managing the data in the controllers. This feels more like a utility but oh well. 
  

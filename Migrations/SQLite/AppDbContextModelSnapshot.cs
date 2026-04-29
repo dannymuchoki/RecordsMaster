@@ -7,10 +7,10 @@ using RecordsMaster.Data;
 
 #nullable disable
 
-namespace RecordsMaster.Migrations
+namespace RecordsMaster.Migrations.SQLite
 {
-    [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(SqliteAppDbContext))]
+    partial class SqliteAppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

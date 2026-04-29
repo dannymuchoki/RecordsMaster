@@ -12,13 +12,15 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Use SQLite in development. Use SqlServer in Prod. 
+        // Use SQLite in development. Use SqlServer in Prod.
+        // SQLite migrations live in Migrations/SQLite/ (context: SqliteAppDbContext).
+        // SQL Server migrations live in Migrations/ (context: AppDbContext).
         if (builder.Environment.IsDevelopment())
             {
-                
-                builder.Services.AddDbContext<AppDbContext>(options =>
+                builder.Services.AddDbContext<SqliteAppDbContext>(options =>
                     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-                
+                // Forward AppDbContext resolution to SqliteAppDbContext so Identity and the rest of the app work unchanged.
+                builder.Services.AddScoped<AppDbContext>(sp => sp.GetRequiredService<SqliteAppDbContext>());
             }
             else if (builder.Environment.IsProduction())
             {
@@ -57,7 +59,10 @@ public class Program
         {
             using var scope = app.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            await DownloadMigrationsAsync(dbContext, Path.Combine(Directory.GetCurrentDirectory(), "Migrations"));
+            var migrationsDir = app.Environment.IsDevelopment()
+                ? Path.Combine(Directory.GetCurrentDirectory(), "Migrations", "SQLite")
+                : Path.Combine(Directory.GetCurrentDirectory(), "Migrations");
+            await DownloadMigrationsAsync(dbContext, migrationsDir);
             return;
         }
 

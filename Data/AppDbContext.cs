@@ -12,6 +12,10 @@ namespace RecordsMaster.Data
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         { }
+        // Supports the SqliteAppDbContext and inherit from AppDbContext without crashing. See SqliteAppDbContext in 'Data'        
+        protected AppDbContext(DbContextOptions options)
+            : base(options)
+        { }
 
         // Table for RecordItemModel entities.
         public DbSet<RecordItemModel> RecordItems { get; set; }

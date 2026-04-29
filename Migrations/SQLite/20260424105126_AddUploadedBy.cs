@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace RecordsMaster.Migrations
+namespace RecordsMaster.Migrations.SQLite
 {
     /// <inheritdoc />
     public partial class AddUploadedBy : Migration

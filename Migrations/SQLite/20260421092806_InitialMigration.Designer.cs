@@ -6,11 +6,11 @@ using RecordsMaster.Data;
 
 #nullable disable
 
-namespace RecordsMaster.Migrations
+namespace RecordsMaster.Migrations.SQLite
 {
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20260421092820_AddIdentityRoleSupport")]
-    partial class AddIdentityRoleSupport
+    [DbContext(typeof(SqliteAppDbContext))]
+    [Migration("20260421092806_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
