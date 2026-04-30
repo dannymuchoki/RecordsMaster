@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#save this as a DevelopmentSetup.sh file and chmod +x 
+set -e
+
+dotnet ef migrations add InitialMigration --context SqliteAppDbContext
+dotnet ef database update --context SqliteAppDbContext
+dotnet ef migrations add AddIdentityRoleSupport --context SqliteAppDbContext
+dotnet ef database update --context SqliteAppDbContext
+dotnet build
+
+# PowerShell (.\DevelopmentSetup.ps1) 
+# May need to Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+$ErrorActionPreference = "Stop"
+
+dotnet ef migrations add InitialMigration --context SqliteAppDbContext
+dotnet ef database update --context SqliteAppDbContext
+dotnet ef migrations add AddIdentityRoleSupport --context SqliteAppDbContext
+dotnet ef database update --context SqliteAppDbContext
+dotnet build
