@@ -20,10 +20,11 @@ namespace RecordsMaster.Services
             message.To.Add(MailboxAddress.Parse(toEmail));
             message.Subject = subject;
             message.Body = new TextPart("html") { Text = htmlMessage };
+            //message.Body = new TextPart("html") { Text = htmlMessage + "<p>this inbox cannot receive messages.</p>" };
 
             using var client = new SmtpClient();
             await client.ConnectAsync(_config["Smtp:Host"] ?? "Host name. here", int.Parse(_config["Smtp:Port"] ?? "587"), true);
-            await client.AuthenticateAsync(_config["Smtp:Username"] ?? "Username", _config["Smtp:Password"] ?? "Passowrd"); // not necessary on port 587
+            await client.AuthenticateAsync(_config["Smtp:Username"] ?? "Username", _config["Smtp:Password"] ?? "Password"); // not necessary on port 587
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
