@@ -1,33 +1,44 @@
 # RecordsMaster 
-**RecordsMaster** is a simple CRUD (Create, Read, Update, Delete) application made in .NET for a records room at my place of work. It replaces an Access database. 
+**RecordsMaster** is a simple CRUD (Create, Read, Update, Delete) application made in .NET (dotnet) for a records room at my place of work. It replaces an Access database. 
 
-I made RecordsMaster because I could not find anything on the market that met the records room's needs. I made the code public so that others who have similar challenges can reuse it for their purposes. Go ahead and fork it. 
+[dotnet](https://dotnet.microsoft.com/en-us/) is sort of like [Flask](https://flask.palletsprojects.com/en/stable/), except made by Microsoft. Instead of Python, you use C#. 
+
+I made RecordsMaster because I could not find anything on the market that met the records room's needs. I made the code public so that others who have similar challenges can reuse it for their purposes. This is partially a learning experience for me, and the best way to learn is to just go for it.  
 
 # Before anything rename 'appsettings-prod.json' to 'appsettings.json'
 0. Rename 'appsettings-prod.json' filename to 'appsettings.json' - this is a template appsettings file.
-1. Modify the default admin and user parameters in the 'UserSeedData' key in appsettings. 
+1. Modify the default admin and user email addresses in the 'UserSeedData' key in appsettings. 
 2. Add the email boxes you'd like to use in appsettings. 
 2. The default admin user in appsettings under the "AdminEmail" key is referenced the UserRoles.cshtml view. This is done to avoid accidental self-nerfing the admin user. This user will see "this user's permissions cannot be modified".
-3. You will need to enter a SMTP server in appsettings for email to work.
+3. You will need to enter a SMTP server in appsettings for email to work. SMTP uses MailKit. 
 
-## Appsettings holds most of the configurations you need to change.
-You can use it to set up the admin users, mailboxes, how many pages the List view should have, and the database credentials.
+# Appsettings holds most of the configurations you need to change.
+You can use it to set up the admin users, mailboxes, how many pages the List view should have, and the database credentials. 
+
+.NET supports having a Production appsettings (appsettings.Production.json) and a Development appsettings (appsettings.Development.json). I didn't do that here because the only environmental difference in RecordsMaster is the database. 
 
 # Rename 'original_data_template.csv' to 'file.csv' if you want to populate the table at initial migration.
-0. I **highly recommend** populating the data at initial migration when you have a lot of data. If you include which user's email address has a record checked out at initial migration, RecordsMaster will create a user and associate the record with them. This user will need to reset their password to get access to their account. See the original_data_template.csv file's 'CheckedOutTo' column.  
-1. Otherwise, the seeded data in Program.cs will populate the table. 
+RecordsMaster will populate your database at first run with whatever data you put in file.csv. If you include which user's email address has a record checked out at initial migration, RecordsMaster will create a user and associate the record with them. 
+
+This user will need to reset their password to get access to their account. See the original_data_template.csv file's 'CheckedOutTo' column.  
+
+Otherwise, the seeded data in Program.cs will populate the table. You can use the upload template to add more record items. 
 
 # Set the development environment to Production or Development
-0. You can do this in launchsettings.json, or in the web.config
+0. You can do this in launchsettings.json (for local development), or in the web.config (for production servers). 
 
-## In Development mode:
+# In Development mode:
 Migrations will create the SQLite database with the admin user, a test user, and the seeded information. 
 
-# SQLite (development)
-## SQLite migration 
+Migrations in Development:
+
 > dotnet ef migrations add MyChange --context SqliteAppDbContext
 
-In .NET, SQLite and SQL have subtle differences, ergo the two different AppDbContext in the Data directory. This lesson was annoying to learn. The migrations will be in a subdirectory of 'Migrations' called 'SQLite'
+You need the --context flag because .NET doesn't read environment variables when checking the database context (i.e. it needs you to explicitly say which database to use). The SQLite and SQL contexts each have context factory classes in the 'Data' directory. 
+
+.NET **does** read environment variables when loading or running the app in Program.cs though. Why am I spending all this time talking about obscure database issues?
+
+In .NET, SQLite and SQL have subtle differences at migration, ergo the two different AppDbContexts in the Data directory. This lesson was annoying to learn. In Development, the migrations will be in a subdirectory of 'Migrations' called 'SQLite'
 
 If in Development, make sure to uncomment this in RecordsMaster.csjproj.   
 
@@ -38,7 +49,7 @@ If in Development, make sure to uncomment this in RecordsMaster.csjproj.
 ```
 This will ensure the Development SQLite database (testdb.db) is included in your published directory. Remove this in Production.
 
-## In Production mode:
+# In Production mode:
 The database will be SQL, and the migrations will run using your database credentials. Ensure you have the ability to run migrations. Follow your administrator's rules on securing database credentials. I recommend against keeping them in appsettings generally.   
 
 # SQL Server (production)
@@ -47,28 +58,28 @@ The database will be SQL, and the migrations will run using your database creden
 The migrations will be in the root 'Migrations' directory. 
 
 # When changing the model, or running for the first time, do these things:
-0. dotnet ef migrations add InitialMigration 
-1. dotnet ef database update
-2. dotnet ef migrations add AddIdentityRoleSupport   
-3. dotnet ef database update
+0. dotnet ef migrations add InitialMigration --context AppDbContext (or SqliteAppDbContext)
+1. dotnet ef database update  --context AppDbContext (or SqliteAppDbContext)
+2. dotnet ef migrations add AddIdentityRoleSupport  --context AppDbContext (or SqliteAppDbContext)  
+3. dotnet ef database update --context AppDbContext (or SqliteAppDbContext)
 4. dotnet build
 5. dotnet watch run (tracks live changes)
 
-Consider creating a shell script for the first five commands. In bash it's something like:
+Consider creating shell scripts and naming them very differently. In bash it's something like:
 
 ```
 #!/bin/bash
-# Save this as a setup.sh file and chmod+x it
+# Save this as a ProductionSetup.sh file and chmod+x it
 set -e # makes sure errors kill setup.
 
-dotnet ef migrations add InitialMigration
-dotnet ef database update
-dotnet ef migrations add AddIdentityRoleSupport
-dotnet ef database update
+dotnet ef migrations add InitialMigration --context AppDbContext
+dotnet ef database update --context AppDbContext
+dotnet ef migrations add AddIdentityRoleSupport --context AppDbContext
+dotnet ef database update --context AppDbContext
 dotnet build
 ```
 
-## To publish and deploy:
+# To publish and deploy:
 
 > dotnet publish -c Release -o ./publish
 
@@ -85,7 +96,7 @@ The app has ten controllers. The controllers, as the name suggests, control what
 Admin users can see what each user has requested or checked out via the 'Manage Users' page. Click on the username hyperlink to access the user's record view.
 
 ## 'Services' directory contains:
-1. The email sender. This is flexible and may require configuration to work with your SMTP setup. 
+1. The email sender. This is flexible and may require configuration to work with your SMTP setup. I recommend spending several hours with the C# [SMTP class documentation](https://learn.microsoft.com/en-us/dotnet/api/system.net.mail.smtpclient?view=net-9.0). Then ragequit and decide to use [MailKit](https://github.com/jstedfast/mailkit). In fact, that's what the .NET documentation tells you to do. 
 2. Two PDF printing services - one for development in Windows, the other cross-plaform. The development version is not used in the final app; it's just there to help troubleshoot.
 
 ## 'Utilities' directory contains:
@@ -93,18 +104,29 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 2. A class that implements rudimentary pagination in the 'List' view of all records. Pagination is controlled by a key in the appsettings.json file 
 
 ## 'Data' directory contains:
-1. This is where you can find the two AppDbContexts - one for SQLite and the other for Production SQL. That's why there's two different ways to run migrations for Development and Production. 
+1. This is where you can find the two AppDbContexts. One for SQLite and the other for Production SQL. That's why there's two different ways to run migrations for Development and Production, and why you need the --context flag. 
 2. 'SeedTestData' used to be part of AppDbContext. Now it sets up the admin users and the first seeded data. 
 3. 'CsvHelperMap' helps map uploaded .csv data to the model. You can use it to reconstruct the order of columns in the .csv file. It is also easier than managing the data in the controllers. This feels more like a utility but oh well. 
  
- For .NET 10, update these in .csproj
+# Coming changes
+.NET 9 reaches EOL in November 2026. The change to .NET 10 is mostly incremental. I've already put preview changes in Program.cs. These will need a version bump in RecordsMaster.csproj
 
 Microsoft.AspNetCore.Identity.EntityFrameworkCore	9.0.1
+
 Microsoft.AspNetCore.Identity.UI	9.0.1
+
 Microsoft.EntityFrameworkCore	9.0.1
+
 Microsoft.EntityFrameworkCore.Design	9.0.1
+
 Microsoft.EntityFrameworkCore.Relational	9.0.1
+
 Microsoft.EntityFrameworkCore.Sqlite	9.0.1
+
 Microsoft.EntityFrameworkCore.SqlServer	9.0.1
+
 Microsoft.EntityFrameworkCore.Tools	9.0.1
+
 System.Drawing.Common	9.0.7
+
+If you have feedback, you can reach me via my [website](https://dannymuchoki.com).
