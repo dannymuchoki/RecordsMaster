@@ -40,7 +40,7 @@ You need the --context flag because .NET doesn't read environment variables when
 
 In .NET, SQLite and SQL have subtle differences at migration, ergo the two different AppDbContexts in the Data directory. This lesson was annoying to learn. In Development, the migrations will be in a subdirectory of 'Migrations' called 'SQLite'
 
-If in Development, make sure to uncomment this in RecordsMaster.csjproj.   
+If in Development, make sure to uncomment this in RecordsMaster.csproj.   
 
  ```   
   <Content Include="testdb.db">
@@ -65,19 +65,7 @@ The migrations will be in the root 'Migrations' directory.
 4. dotnet build
 5. dotnet watch run (tracks live changes)
 
-Consider creating shell scripts and naming them very differently. In bash it's something like:
-
-```
-#!/bin/bash
-# Save this as a ProductionSetup.sh file and chmod+x it
-set -e # makes sure errors kill setup.
-
-dotnet ef migrations add InitialMigration --context AppDbContext
-dotnet ef database update --context AppDbContext
-dotnet ef migrations add AddIdentityRoleSupport --context AppDbContext
-dotnet ef database update --context AppDbContext
-dotnet build
-```
+Consider creating shell scripts and naming them very differently. DevelopmentSetup.txt has examples you can use. 
 
 # To publish and deploy:
 
