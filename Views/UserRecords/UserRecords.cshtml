@@ -6,7 +6,49 @@
 
 <h2>@ViewData["Title"]</h2>
 
-@if (!Model.Any(record => record.Requested || record.CheckedOut))
+@if (User.IsInRole("Admin"))
+{
+    var allCheckedOut = ViewBag.AllCheckedOutRecords as IEnumerable<RecordsMaster.Models.RecordItemModel> ?? Enumerable.Empty<RecordsMaster.Models.RecordItemModel>();
+    <h4>@(ViewBag.FilterEmail != null ? $"Records checked out by {ViewBag.FilterEmail}" : "All Checked Out Records")</h4>
+    @if (!allCheckedOut.Any())
+    {
+        <p>No records are currently checked out.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Case#</th>
+                    <th>BarCode</th>
+                    <th>Record Type</th>
+                    <th>Checked Out To</th>
+                    <th>Delivery Message</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var record in allCheckedOut)
+            {
+                var activeCheckout = record.CheckoutHistoryRecords
+                    .Where(h => h.ReturnedDate == null)
+                    .OrderByDescending(h => h.CheckedOutDate)
+                    .FirstOrDefault();
+                <tr>
+                    <td><a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS">@record.CIS</a></td>
+                    <td>@record.BarCode</td>
+                    <td>@record.RecordType</td>
+                    <td>@(record.CheckedOutTo?.Email ?? "-")</td>
+                    <td>@(activeCheckout?.DeliveryMessage ?? "-")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+}
+
+else{
+
+    @if (!Model.Any(record => record.Requested || record.CheckedOut))
 {
     <p>You have no records requested or checked out.</p>
 }
@@ -91,3 +133,5 @@ else
         </table>
     }
 }
+}
+

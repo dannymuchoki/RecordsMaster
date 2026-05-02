@@ -33,29 +33,55 @@ namespace RecordsMaster.Controllers
                 .Where(r => r.CheckedOutToId == userId)
                 .ToListAsync();
 
-            //return View(userRecords);
+            if (User.IsInRole("Admin"))
+            {
+                var allCheckedOut = await _context.RecordItems
+                    .Include(r => r.CheckedOutTo)
+                    .Include(r => r.CheckoutHistoryRecords)
+                    .Where(r => r.CheckedOut)
+                    .OrderBy(r => r.CheckedOutTo == null ? string.Empty : r.CheckedOutTo.Email)
+                    .ThenBy(r => r.CIS)
+                    .ToListAsync();
+                ViewBag.AllCheckedOutRecords = allCheckedOut;
+            }
+
             return View("UserRecords", userRecords);
         }
 
-        public async Task<IActionResult> AdminViewUserRecords(string email)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminViewUserRecords(string? email = null)
         {
-            if (string.IsNullOrEmpty(email))
+            var userRecords = new List<RecordItemModel>();
+
+            if (!string.IsNullOrEmpty(email))
             {
-                return BadRequest("Email address is required.");
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email == email);
+
+                if (user == null)
+                    return NotFound("User not found.");
+
+                userRecords = await _context.RecordItems
+                    .Include(r => r.CheckedOutTo)
+                    .Where(r => r.CheckedOutToId == user.Id)
+                    .ToListAsync();
             }
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email);
-
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-
-            var userRecords = await _context.RecordItems
+            var checkedOutQuery = _context.RecordItems
                 .Include(r => r.CheckedOutTo)
-                .Where(r => r.CheckedOutToId == user.Id)
+                .Include(r => r.CheckoutHistoryRecords)
+                .Where(r => r.CheckedOut);
+
+            if (!string.IsNullOrEmpty(email))
+                checkedOutQuery = checkedOutQuery.Where(r => r.CheckedOutTo != null && r.CheckedOutTo.Email == email);
+
+            var allCheckedOut = await checkedOutQuery
+                .OrderBy(r => r.CheckedOutTo == null ? string.Empty : r.CheckedOutTo.Email)
+                .ThenBy(r => r.CIS)
                 .ToListAsync();
+
+            ViewBag.AllCheckedOutRecords = allCheckedOut;
+            ViewBag.FilterEmail = email;
 
             return View("UserRecords", userRecords);
         }

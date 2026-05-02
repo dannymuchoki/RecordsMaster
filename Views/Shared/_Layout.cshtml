@@ -26,19 +26,19 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                             </li>
-                            <li>
-                                <a class="nav-link text-dark" asp-controller="UserRecords" asp-action="UserRecords">My Records</a>
-                            </li>
                             @if (User.IsInRole("Admin"))
                             {
+                                <li>
+                                    <a class="nav-link text-dark" asp-controller="UserRecords" asp-action="UserRecords">Currently Checked Out</a>
+                                </li>
+                                 @if (User.Identity.Name == Config["Notification:AdminEmail"])
+                                    {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="RecordItems" asp-action="Index">List</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Upload" asp-action="Index">Upload New Records</a>
-                                </li>
-                                 @if (User.Identity.Name == Config["Notification:AdminEmail"])
-                                    {
+                                </li>    
                                     <li class="nav-item">
                                         <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="UserRoles">Manage Users</a>
                                     </li>
@@ -52,6 +52,11 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="RecordItems" asp-action="BoxDigitizationCheck">Digitization Check</a>
                                 </li>                                        
+                            }
+                            else{
+                            <li>
+                                    <a class="nav-link text-dark" asp-controller="UserRecords" asp-action="UserRecords">My Records</a>
+                                </li>
                             }
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>

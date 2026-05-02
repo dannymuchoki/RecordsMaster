@@ -43,6 +43,8 @@ namespace RecordsMaster.Models
         // Navigation property to the pre-barcode record
         [ForeignKey(nameof(PreBarCodeRecordId))]
         public PreBarCodeRecordModel? PreBarCodeRecord { get; set; }
+
+        public string? DeliveryMessage { get; set; }
     }
     // foreign key property named CheckedOutTo.
     public class RecordItemModel

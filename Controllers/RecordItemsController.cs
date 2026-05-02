@@ -281,7 +281,7 @@ namespace RecordsMaster.Controllers
         private string GenerateCheckoutHistoryCsv(IEnumerable<CheckoutHistory> history)
         {
             var csvBuilder = new StringBuilder();
-            csvBuilder.AppendLine("CIS, BarCode,UserEmail,CheckedOutDate,ReturnedDate");
+            csvBuilder.AppendLine("CIS,BarCode,UserEmail,CheckedOutDate,ReturnedDate,DeliveryMessage");
 
             foreach (var ch in history)
             {
@@ -296,7 +296,8 @@ namespace RecordsMaster.Controllers
                     $"{EscapeCsvValue(barCode)}," +
                     $"{EscapeCsvValue(ch.User?.Email ?? string.Empty)}," +
                     $"{ch.CheckedOutDate.ToString("o", CultureInfo.InvariantCulture)}," +
-                    $"{ch.ReturnedDate?.ToString("o", CultureInfo.InvariantCulture)}");
+                    $"{ch.ReturnedDate?.ToString("o", CultureInfo.InvariantCulture)}," +
+                    $"{EscapeCsvValue(ch.DeliveryMessage ?? string.Empty)}");
             }
             return csvBuilder.ToString();
         }

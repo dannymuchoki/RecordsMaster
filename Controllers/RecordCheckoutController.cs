@@ -173,8 +173,20 @@ namespace RecordsMaster.Controllers
         // POST: RecordItems/Checkout/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Checkout(Guid id)
+        public async Task<IActionResult> Checkout(Guid id, string? deliveryOption, string? deliveryMessage)
         {
+            if (string.IsNullOrEmpty(deliveryOption))
+            {
+                TempData["Message"] = "Please select a delivery option.";
+                return RedirectToAction(nameof(CheckOut), new { id });
+            }
+
+            if (deliveryOption == "send" && string.IsNullOrWhiteSpace(deliveryMessage))
+            {
+                TempData["Message"] = "Please enter a delivery address.";
+                return RedirectToAction(nameof(CheckOut), new { id });
+            }
+
             var recordItem = await _context.RecordItems.FindAsync(id);
             if (recordItem == null)
             {
@@ -195,6 +207,10 @@ namespace RecordsMaster.Controllers
                 return Challenge(); // Forces the user to log in.
             }
 
+            var resolvedDeliveryMessage = deliveryOption == "send"
+                ? deliveryMessage!
+                : $"{user.Email} will pick up the record";
+
             // Associate the record with the user and mark it as checked out.
             recordItem.Requested = false;
             recordItem.ReadyForPickup = false;
@@ -208,25 +224,30 @@ namespace RecordsMaster.Controllers
                 RecordItemId = recordItem.ID,
                 UserId = user.Id,
                 CheckedOutDate = DateTime.UtcNow,
-                ReturnedDate = null
+                ReturnedDate = null,
+                DeliveryMessage = resolvedDeliveryMessage
             };
 
             _context.CheckoutHistory.Add(checkoutHistory);
             _context.Update(recordItem);
             await _context.SaveChangesAsync();
 
+            var deliveryInfo = $"<p><strong>Delivery:</strong> {resolvedDeliveryMessage}</p>";
+
             var subject = $@"Record {recordItem.BarCode} checked out by {user.Email}";
             var message = $@"
                 <p><strong>Record:</strong> {recordItem.BarCode}</p>
                 <p><strong>Checked Out By:</strong> ({user.Email})</p>
-                <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>";
-            
+                <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>
+                {deliveryInfo}";
+
             var userMessage = $@"
                 <h1>Bring this with you</h1>
                 <h2>This is your receipt</h2>
                 <p><strong>Record:</strong> {recordItem.BarCode}</p>
                 <p><strong>Checked Out By:</strong> ({user.Email})</p>
-                <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>";
+                <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>
+                {deliveryInfo}";
 
             // Check appsettings.json dictionary for the 'Notification' key. 
             var adminEmail = _config["Notification:NotificationMailbox"];

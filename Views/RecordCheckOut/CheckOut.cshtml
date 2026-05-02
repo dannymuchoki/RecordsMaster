@@ -98,12 +98,50 @@
         <p> You will be notified when the record is ready.</p>
         }
         else{
-        <p>The record is ready for pickup. Click 'Check Out'. </p>
+        <p>The record is ready. Please choose how you'd like to receive it, then click 'Check Out'.</p>
+
         @using (Html.BeginForm("Checkout", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post)){
-                @Html.AntiForgeryToken()
-            <input type="submit" value="Check Out" class="btn btn-success" />                   
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="deliveryOption" id="pickupOption" value="pickup" onchange="handleDeliveryChange()" />
+                    <label class="form-check-label" for="pickupOption">I will pick up this record</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="deliveryOption" id="sendOption" value="send" onchange="handleDeliveryChange()" />
+                    <label class="form-check-label" for="sendOption">Send this record to me</label>
+                </div>
+            </div>
+
+            <div id="deliveryAddressSection" class="mb-3" style="display:none;">
+                <label for="deliveryMessage" class="form-label">Delivery address/instructions</label>
+                <input type="text" class="form-control" id="deliveryMessage" name="deliveryMessage" placeholder="Enter your delivery address" />
+            </div>
+
+            <input type="submit" id="checkoutButton" value="Check Out" class="btn btn-success" style="display:none;" />
         }
         }
+
+<script>
+    function handleDeliveryChange() {
+        var sendOption = document.getElementById('sendOption');
+        var deliverySection = document.getElementById('deliveryAddressSection');
+        var deliverInput = document.getElementById('deliveryMessage');
+        var checkoutBtn = document.getElementById('checkoutButton');
+
+        if (sendOption.checked) {
+            deliverySection.style.display = 'block';
+            deliverInput.required = true;
+        } else {
+            deliverySection.style.display = 'none';
+            deliverInput.required = false;
+            deliverInput.value = '';
+        }
+
+        checkoutBtn.style.display = 'inline-block';
+    }
+</script>
     
     
     }
