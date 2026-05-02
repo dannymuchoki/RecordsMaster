@@ -4,108 +4,22 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-#if NET10_0_OR_GREATER
-using PdfSharp.Pdf;
-using PdfSharp.Drawing;
-using PdfSharp.Fonts;
-#else
-using PdfSharpCore.Pdf;
 using PdfSharpCore.Drawing;
-#endif
+using PdfSharpCore.Pdf;
+
+// First PDF printer that worked cross-platform using PdfSharpCore (which as an unpatched security issue). Excluded in compilation (see .csproj)
 
 namespace RecordsMaster.Services
 {
     public class PDFPrintService
     {
-#if NET10_0_OR_GREATER
-        static PDFPrintService()
-        {
-            GlobalFontSettings.FontResolver = new SystemFontResolver();
-        }
-
-        private sealed class SystemFontResolver : IFontResolver
-        {
-            private static readonly string[] FontDirectories = BuildFontDirectories();
-
-            private static string[] BuildFontDirectories()
-            {
-                var dirs = new List<string>
-                {
-                    // App-local fonts/ folder — works everywhere including IIS restricted accounts
-                    Path.Combine(AppContext.BaseDirectory, "fonts")
-                };
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // SpecialFolder.Fonts resolves correctly for both interactive and IIS app pool accounts
-                    var winFonts = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-                    if (!string.IsNullOrEmpty(winFonts))
-                        dirs.Add(winFonts);
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    dirs.Add("/System/Library/Fonts/Supplemental");
-                    dirs.Add("/Library/Fonts");
-                    dirs.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library/Fonts"));
-                }
-                else
-                {
-                    dirs.Add("/usr/share/fonts");
-                    dirs.Add("/usr/local/share/fonts");
-                }
-
-                return dirs.ToArray();
-            }
-
-            public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
-            {
-                string[] candidates;
-
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    // Windows font files use compact names: arialbd.ttf, ariali.ttf, arialbi.ttf
-                    string winBase = familyName.Replace(" ", "").ToLowerInvariant();
-                    string winSuffix = (isBold && isItalic) ? "bi" : isBold ? "bd" : isItalic ? "i" : "";
-                    candidates =
-                    [
-                        winBase + winSuffix,
-                        familyName + (isBold ? " Bold" : "") + (isItalic ? " Italic" : ""),
-                        familyName
-                    ];
-                }
-                else
-                {
-                    string suffix = (isBold ? " Bold" : "") + (isItalic ? " Italic" : "");
-                    candidates = [familyName + suffix, familyName + suffix.Replace(" ", ""), familyName];
-                }
-
-                foreach (var dir in FontDirectories)
-                {
-                    if (!Directory.Exists(dir)) continue;
-                    foreach (var name in candidates)
-                    {
-                        foreach (var ext in new[] { ".ttf", ".otf" })
-                        {
-                            var path = Path.Combine(dir, name + ext);
-                            if (File.Exists(path))
-                                return new FontResolverInfo(path);
-                        }
-                    }
-                }
-                return null;
-            }
-
-            public byte[]? GetFont(string faceName) =>
-                File.Exists(faceName) ? File.ReadAllBytes(faceName) : null;
-        }
-#endif
-
         // The labels are formatted to the Avery 5162 standard with two columns of seven labels.
         public void PrintLabels(List<RecordItemModel> records, string? printerName = null)
         {
             if (records == null || records.Count == 0)
                 throw new ArgumentException("No records provided.", nameof(records));
 
+            // Turn the list item into a string.
             static string MakeSafe(string? value)
             {
                 if (string.IsNullOrWhiteSpace(value))
@@ -124,11 +38,15 @@ namespace RecordsMaster.Services
             string firstBarcode = MakeSafe(records[0]?.BarCode);
             string lastBarcode = MakeSafe(records[^1]?.BarCode);
 
+            // File name consists of the first and last BarCode values
             string tempPdfPath = Path.Combine(Path.GetTempPath(), $"{firstBarcode}_{lastBarcode}.pdf");
 
             Console.WriteLine($"PDF Path: {tempPdfPath}");
 
+            // Create PDF with labels
             CreateLabelsPdf(records, tempPdfPath);
+
+            // Send to printer (cross-platform)
             PrintPdfCrossPlatform(tempPdfPath, printerName);
         }
 
@@ -141,27 +59,29 @@ namespace RecordsMaster.Services
 
             var gfx = XGraphics.FromPdfPage(page);
 
+            // Fonts: small for Case#, large for BarCode and RecordType
             var fontSmall = new XFont("Arial", 12);
             var fontLarge = new XFont("Arial", 24);
 
-            double labelWidth = XUnit.FromInch(4).Point;
-            double labelHeight = XUnit.FromInch(1.33).Point;
-            double margin = XUnit.FromInch(0.2).Point;
-            double topMargin = XUnit.FromCentimeter(2.1).Point;
-            double bottomMargin = XUnit.FromCentimeter(2.1).Point;
+            float labelWidth = (float)XUnit.FromInch(4);
+            float labelHeight = (float)XUnit.FromInch(1.33);
+            float margin = (float)XUnit.FromInch(0.2);
+            float topMargin = (float)(double)XUnit.FromCentimeter(2.1);
+            float bottomMargin = (float)(double)XUnit.FromCentimeter(2.1);
 
             int labelsPerRow = 2;
             int labelsPerColumn = 7;
+            int labelsPerPage = labelsPerRow * labelsPerColumn;
 
             int recordIndex = 0;
 
             while (recordIndex < records.Count)
             {
-                double pageHeight = page.Height.Point;
+                float pageHeight = (float)(double)page.Height;
 
                 for (int row = 0; row < labelsPerColumn; row++)
                 {
-                    double y = topMargin + row * labelHeight;
+                    float y = topMargin + row * labelHeight;
                     if (y + labelHeight > pageHeight - bottomMargin)
                         break;
 
@@ -170,20 +90,26 @@ namespace RecordsMaster.Services
                         if (recordIndex >= records.Count)
                             break;
 
-                        double x = margin + col * (labelWidth + margin);
+                        float x = margin + col * (labelWidth + margin);
+
                         var record = records[recordIndex++];
 
+                        // Draw label border
                         gfx.DrawRectangle(XPens.Black, x, y, labelWidth, labelHeight);
 
+                        // Text padding inside label
                         double padding = 5;
                         double xText = x + padding;
-                        double yText = y + padding + fontSmall.Size;
+                        double yText = y + padding + fontSmall.Size; // baseline for first line
 
+                        // Line 1: Case# (small font)
                         gfx.DrawString($"Case#: {record.CIS}", fontSmall, XBrushes.Black, new XPoint(xText, yText));
 
-                        yText += fontLarge.Size + 2;
+                        // Line 2: BarCode (large font)
+                        yText += fontLarge.Size + 2; // simple spacing
                         gfx.DrawString($"{record.BarCode}", fontLarge, XBrushes.Black, new XPoint(xText, yText));
 
+                        // Line 3: RecordType (large font)
                         yText += fontLarge.Size + 2;
                         gfx.DrawString($"{record.RecordType}", fontLarge, XBrushes.Black, new XPoint(xText, yText));
                     }
@@ -219,26 +145,31 @@ namespace RecordsMaster.Services
                         chars[i] = '_';
                 }
                 var safeString = new string(chars);
-                return string.IsNullOrWhiteSpace(safeString) ? "UNKNOWN" : safeString;
+                if (string.IsNullOrWhiteSpace(safeString))
+                    return "UNKNOWN";
+
+                return safeString;
             }
 
             string firstBarcode = MakeSafe(records[0]?.BarCode);
             string lastBarcode = MakeSafe(records[^1]?.BarCode);
+
             string fileName = $"{firstBarcode} - {lastBarcode}.pdf";
 
             using var document = new PdfDocument();
 
+            int labelsPerRow = 2;
+            int labelsPerColumn = 7;
+
             var fontSmall = new XFont("Arial", 12);
             var fontLarge = new XFont("Arial", 24);
 
-            double labelWidth = XUnit.FromInch(4).Point;
-            double labelHeight = XUnit.FromInch(1.33).Point;
-            double margin = XUnit.FromInch(0.2).Point;
-            double topMargin = XUnit.FromCentimeter(2.1).Point;
-            double bottomMargin = XUnit.FromCentimeter(2.1).Point;
+            float labelWidth = (float)XUnit.FromInch(4);
+            float labelHeight = (float)XUnit.FromInch(1.33);
+            float margin = (float)XUnit.FromInch(0.2);
+            float topMargin = (float)(double)XUnit.FromCentimeter(2.1);
+            float bottomMargin = (float)(double)XUnit.FromCentimeter(2.1);
 
-            int labelsPerRow = 2;
-            int labelsPerColumn = 7;
             int recordIndex = 0;
 
             while (recordIndex < records.Count)
@@ -248,11 +179,11 @@ namespace RecordsMaster.Services
                 page.Height = XUnit.FromInch(11);
                 var gfx = XGraphics.FromPdfPage(page);
 
-                double pageHeight = page.Height.Point;
+                float pageHeight = (float)(double)page.Height;
 
                 for (int row = 0; row < labelsPerColumn; row++)
                 {
-                    double y = topMargin + row * labelHeight;
+                    float y = topMargin + row * labelHeight;
                     if (y + labelHeight > pageHeight - bottomMargin)
                         break;
 
@@ -261,7 +192,8 @@ namespace RecordsMaster.Services
                         if (recordIndex >= records.Count)
                             break;
 
-                        double x = margin + col * (labelWidth + margin);
+                        float x = margin + col * (labelWidth + margin);
+
                         var record = records[recordIndex++];
 
                         gfx.DrawRectangle(XPens.Black, x, y, labelWidth, labelHeight);
@@ -296,10 +228,11 @@ namespace RecordsMaster.Services
                 string adobeReaderPath = @"C:\Program Files\Adobe\Acrobat Reader DC\Reader\AcroRd32.exe";
                 if (File.Exists(adobeReaderPath))
                 {
+                    string args = $"/t \"{pdfFilePath}\" \"{printerName}\"";
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = adobeReaderPath,
-                        Arguments = $"/t \"{pdfFilePath}\" \"{printerName}\"",
+                        Arguments = args,
                         CreateNoWindow = true,
                         UseShellExecute = false
                     });
@@ -318,13 +251,14 @@ namespace RecordsMaster.Services
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
                      RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+                string lpCommand = "lp";
                 string lpArgs = string.IsNullOrEmpty(printerName)
                     ? $"\"{pdfFilePath}\""
                     : $"-d \"{printerName}\" \"{pdfFilePath}\"";
 
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "lp",
+                    FileName = lpCommand,
                     Arguments = lpArgs,
                     CreateNoWindow = true,
                     UseShellExecute = false

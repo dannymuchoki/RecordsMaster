@@ -99,22 +99,8 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 # Coming changes
 .NET 9 reaches EOL in November 2026. The change to .NET 10 is mostly incremental. I've already put preview changes in Program.cs. These will need a version bump in RecordsMaster.csproj
 
-Microsoft.AspNetCore.Identity.EntityFrameworkCore	9.0.1
+For now, have a .Net10-specific csproj. You can build with this:
 
-Microsoft.AspNetCore.Identity.UI	9.0.1
-
-Microsoft.EntityFrameworkCore	9.0.1
-
-Microsoft.EntityFrameworkCore.Design	9.0.1
-
-Microsoft.EntityFrameworkCore.Relational	9.0.1
-
-Microsoft.EntityFrameworkCore.Sqlite	9.0.1
-
-Microsoft.EntityFrameworkCore.SqlServer	9.0.1
-
-Microsoft.EntityFrameworkCore.Tools	9.0.1
-
-System.Drawing.Common	9.0.7
+> dotnet build RecordsMaster.Net10.csproj
 
 If you have feedback, you can reach me via my [website](https://dannymuchoki.com).
