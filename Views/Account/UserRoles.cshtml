@@ -7,10 +7,10 @@
 
 
  @if (User.IsInRole("Admin")){
-        <h2>Users</h2>
+        <h5>Users</h5>
 
-        <table class="table">
-            <thead>
+        <table class="table table-bordered">
+            <thead class="table-dark">
                 <tr>
                     <th>User</th>
                     <th>Has 'User' Role?</th>
@@ -48,9 +48,7 @@
                     <td>
                         @if (item.User.Email == ViewBag.AdminEmail)
                         {
-                            <p> 
-                                This user's permissions cannot be modified. 
-                            </p>
+                            <span>  This user's permissions cannot be modified. </span>
                         }
                         else{
                         <form asp-action="SetUserRole" asp-controller="Account" method="post" style="display:inline;">

@@ -4,7 +4,7 @@
     ViewData["Title"] = "Record Details";
 }
 
-<h2>Record Details</h2>
+<h5>Record Details</h5>
 
 @if (TempData["Message"] != null)
 {
@@ -49,10 +49,12 @@
         <th>Status</th>
         <td>@(Model.CheckedOut ? "Checked Out" : "Available")</td>
     </tr>
+    @if (User.IsInRole("Admin")){
     <tr>
         <th>Checkout History</th>
         <td><a href="@Url.Action("CheckoutHistory", "RecordItems", new { id = Model.ID })" class="btn btn btn-info m-1">View History</a></td>
     </tr>
+    }
     @if (Model.CheckedOut && Model.CheckedOutTo != null)
     {
         <tr>

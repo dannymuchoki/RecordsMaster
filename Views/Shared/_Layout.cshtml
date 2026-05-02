@@ -1,4 +1,15 @@
 ﻿@inject Microsoft.Extensions.Configuration.IConfiguration Config
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    string NavClass(string controller, string? action = null)
+    {
+        bool match = string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase)
+                     && (action == null || string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase));
+        return match ? "nav-link text-dark active-nav" : "nav-link text-dark";
+    }
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +24,7 @@
 <body>
     <header>
         @if (User.Identity?.IsAuthenticated == true)
-            { 
+            {
                 <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
                 <div class="container-fluid">
                     <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RecordsMaster @Env.EnvironmentName</a>
@@ -24,42 +35,42 @@
                     <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                         <ul class="navbar-nav flex-grow-1">
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                                <a class="@NavClass("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                             </li>
                             @if (User.IsInRole("Admin"))
                             {
                                 <li>
-                                    <a class="nav-link text-dark" asp-controller="UserRecords" asp-action="UserRecords">Currently Checked Out</a>
+                                    <a class="@NavClass("UserRecords", "UserRecords")" asp-controller="UserRecords" asp-action="UserRecords">Currently Checked Out</a>
                                 </li>
                                  @if (User.Identity.Name == Config["Notification:AdminEmail"])
                                     {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="RecordItems" asp-action="Index">List</a>
+                                    <a class="@NavClass("RecordItems", "List")" asp-area="" asp-controller="RecordItems" asp-action="List">List</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Upload" asp-action="Index">Upload New Records</a>
-                                </li>    
+                                    <a class="@NavClass("Upload", "Upload")" asp-area="" asp-controller="Upload" asp-action="Upload">Upload New Records</a>
+                                </li>
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="UserRoles">Manage Users</a>
+                                        <a class="@NavClass("Account", "UserRoles")" asp-area="" asp-controller="Account" asp-action="UserRoles">Manage Users</a>
                                     </li>
                                     }
                                   <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Update" asp-action="Update">Update Records</a>
-                                </li>  
+                                    <a class="@NavClass("Update", "Update")" asp-area="" asp-controller="Update" asp-action="Update">Update Records</a>
+                                </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Labels" asp-action="GenerateLabelsForm">Generate Labels</a>
-                                </li> 
+                                    <a class="@NavClass("Labels", "GenerateLabelsForm")" asp-area="" asp-controller="Labels" asp-action="GenerateLabelsForm">Generate Labels</a>
+                                </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="RecordItems" asp-action="BoxDigitizationCheck">Digitization Check</a>
-                                </li>                                        
+                                    <a class="@NavClass("RecordItems", "BoxDigitizationCheck")" asp-area="" asp-controller="RecordItems" asp-action="BoxDigitizationCheck">Digitization Check</a>
+                                </li>
                             }
                             else{
                             <li>
-                                    <a class="nav-link text-dark" asp-controller="UserRecords" asp-action="UserRecords">My Records</a>
+                                    <a class="@NavClass("UserRecords", "UserRecords")" asp-controller="UserRecords" asp-action="UserRecords">My Records</a>
                                 </li>
                             }
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                <a class="@NavClass("Account", "Logout")" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
                             </li>
                         </ul>
                     </div>

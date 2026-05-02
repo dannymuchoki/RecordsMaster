@@ -6,11 +6,14 @@
     @if (User.IsInRole("Admin"))
     {
         <form method="get" action="@Url.Action("SearchRecords", "RecordItems")" onsubmit="return validateInput()">
-            <div class="form-group m-1 p-2">
-                <label for="Input">Enter Case number or bar code:</label>
-                <input name="input" id="Input" class="form-control" required />
+            <div class="form-group">
+                <h5 class="mt-1">Search</h5>
+                <div class="input-group">
+                    <input name="input" id="Input" class="form-control" placeholder="Case number or barcode" required />
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary mx-auto">Search</button>
+            
         </form>
         @section Scripts 
         {
@@ -34,10 +37,10 @@
             }
         else
             {
-                <h5 class="mt-2">Requested Records</h5>
+                <h5 class="mt-5">Requested Records</h5>
 
-                <table class="table table-striped"> 
-                    <thead>
+                <table class="table table-striped table-bordered"> 
+                    <thead class="table-dark">
                     <tr>
                         <th>Case#</th>
                         <th>Barcode</th>
@@ -48,7 +51,6 @@
                                 <th>Digitized</th>
                             }
                         <th>Closing Date</th>
-                        <th>Ready For Pickup</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -64,7 +66,6 @@
                                         <td>@(item.Digitized ? "Yes" : "No")</td>
                                     }
                                     <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>  
-                                    <td>@item.ReadyForPickup</td>
                                 </tr>
                                 
                             }
@@ -78,13 +79,16 @@
     else if (User.IsInRole("User"))
         {
         <form method="get" action="@Url.Action("CaseWorkerSearch", "RecordItems")" onsubmit="return validateCaseWorkerInput()">
-            <div class="form-group m-1 p-2">
+            <div class="form-group mb-4">
                 <label for="CaseWorkerInput">Enter Case number or barcode (YY-DDDDD):</label>
-                <input name="input" id="CaseWorkerInput" class="form-control" required />
+                <input name="input" id="CaseWorkerInput" placeholder="Case number or barcode" class="form-control" required />
                 <label for="ClosingDate">Enter closing date (not required if searching by barcode)</label>
                 <input name="closingDate" id="ClosingDate" type="date" class="form-control" />
+                <div class="text-center mt-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary mx-auto">Search</button>
+            
         </form>
         @section Scripts
         {
@@ -111,23 +115,31 @@
 
             if (Model.Any(record => record.ReadyForPickup))
             {  
-                        <h5 class='text-center'>Ready for pickup</h5>
-                        <p class='text-center'>Please clink the Case# link to check the record out. We will package the record for you to collect, or have it deliverd to you.</p>
+                <div class="alert alert-success" role="alert">
+                    We've found these records. Please check them out. 
+                </div>
+
                         <table class="table table-striped">
-                            <thead>
+                            <thead class="table-dark">
                                 <tr>
                                     <th>Case#</th>
                                     <th>BarCode</th>
                                     <th>Record Type</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                        @foreach (var record in Model.Where(record => record.Requested))
+                        @foreach (var record in Model.Where(record => record.Requested && !record.CheckedOut))
                             {
                                 <tr>
-                                    <td><a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS">@record.CIS</a></td>
+                                    <td>
+                                        @record.CIS
+                                    </td>
                                     <td>@record.BarCode</td>
                                     <td>@record.RecordType</td>
+                                    <td>
+                                        <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS"><button type="submit" class="btn btn-primary mx-auto">Check out</button></a>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -150,7 +162,7 @@ else
         else
         {
 
-        <h2>Login</h2>
+        <h5>Login</h5>
 
          @if (TempData["LoginError"] != null)
             {

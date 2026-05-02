@@ -4,20 +4,18 @@
     ViewData["Title"] = "Records";
 }
 
-<h2>@ViewData["Title"]</h2>
-
 @if (User.IsInRole("Admin"))
 {
     var allCheckedOut = ViewBag.AllCheckedOutRecords as IEnumerable<RecordsMaster.Models.RecordItemModel> ?? Enumerable.Empty<RecordsMaster.Models.RecordItemModel>();
-    <h4>@(ViewBag.FilterEmail != null ? $"Records checked out by {ViewBag.FilterEmail}" : "All Checked Out Records")</h4>
+    <h5 class="ml-3">@(ViewBag.FilterEmail != null ? $"Records checked out by {ViewBag.FilterEmail}" : "Currently checked out")</h5>
     @if (!allCheckedOut.Any())
     {
         <p>No records are currently checked out.</p>
     }
     else
     {
-        <table class="table table-striped">
-            <thead>
+        <table class="table table-striped border-1">
+            <thead class="table-dark"> 
                 <tr>
                     <th>Case#</th>
                     <th>BarCode</th>
@@ -56,9 +54,9 @@ else
 {
     if (Model.Any(record => record.Requested))
     {
-        <h5>Requested</h5>
-        <table class="table table-striped">
-            <thead>
+        <h5>Requested Records</h5>
+        <table class="table table-striped border-1">
+            <thead class="table-dark"> 
                 <tr>
                     <th>Case#</th>
                     <th>BarCode</th>
@@ -95,9 +93,9 @@ else
 
     if (Model.Any(record => record.CheckedOut))
     {
-        <h5>Checked Out</h5>
-        <table class="table table-striped">
-            <thead>
+        <h5>Checked Out Records</h5>
+        <table class="table table-striped border-1">
+            <thead class="table-dark"> 
                 <tr>
                     <th>Case#</th>
                     <th>BarCode</th>

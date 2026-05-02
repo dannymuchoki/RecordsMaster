@@ -4,7 +4,7 @@
     var errorMessage = ViewData["ErrorMessage"] as string;
 }
 
-<h2>Generate Labels</h2>
+<h5>Generate Labels</h5>
 
 @if (!string.IsNullOrEmpty(errorMessage))
 {
@@ -27,9 +27,9 @@
 
 @if (ViewBag.RecentUploadDates != null)
 {
-    <h4 class="mt-4">Recent Upload Dates</h4>
-    <table class="table table-sm table-bordered w-auto">
-        <thead>
+    <h5 class="mt-4">Recent Upload Dates</h5>
+    <table class="table table-bordered">
+        <thead class="table-dark">
             <tr>
                 <th>Date Uploaded</th>
                 <th>Records</th>
