@@ -2,15 +2,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace RecordsMaster.Data
 {
+    /* 
+        SqliteAppDbContext inherits from AppDbContext, so it makes the same tables and relationships. 
+        At first I thought this was all I needed, but I kept getting type errors at runtime. 
+
+        The solution was weird (to me at least). At design time, instantiate a generic DbContext using
+        the DesignTimeDbContextFactory to run migrations. This avoided the type errors. The only thing
+        I added was a protected class in AppDbContext. 
+    */
     public class SqliteAppDbContext : AppDbContext
     {
-        /* 
-           When making a SqliteAppDbContext, you call the parent AppDbContext. This says run AppDbContext, and then pass 'options'. 
-           
-           But options is empty, so you've instantiated a parent class using this inherited method. 
-
-           In AppDbContext you have (DbContextOptions options)
-           Here creating a new class SqliteAppDbContext(DbContextOptions, and the option you're passing is is SqliteAppDbContext)
+        /*
+            The sole difference is that at design time, SqliteAppDbContext pulls in parameters from
+            the SqliteAppDbContextFactory. Using the IDesignTimeDbContextFactory, it instantiates
+            a generic DbContext with SQLite parameters. 
         */
         public SqliteAppDbContext(DbContextOptions<SqliteAppDbContext> options) : base(options) { }
     }

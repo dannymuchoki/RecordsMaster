@@ -19,6 +19,7 @@ public class Program
             {
                 builder.Services.AddDbContext<SqliteAppDbContext>(options =>
                     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+                    
                 // Forward AppDbContext resolution to SqliteAppDbContext so Identity and the rest of the app work unchanged.
                 builder.Services.AddScoped<AppDbContext>(sp => sp.GetRequiredService<SqliteAppDbContext>());
             }
@@ -54,7 +55,8 @@ public class Program
 
         var app = builder.Build();
 
-        // Run with --download-migrations to pull __EFMigrationsHistory from the DB and write stub .cs files to Migrations/. Mostly here to show it can be done. 
+        // Run with --download-migrations to pull __EFMigrationsHistory from the DB and write stub .cs files to Migrations/. Mostly here to show it can be done. Do not use it if your migrations work. 
+        /*
         if (args.Contains("--download-migrations"))
         {
             using var scope = app.Services.CreateScope();
@@ -65,6 +67,7 @@ public class Program
             await DownloadMigrationsAsync(dbContext, migrationsDir);
             return;
         }
+        */
 
         // Apply migrations and seed data dynamically.
         using (var scope = app.Services.CreateScope())
@@ -79,6 +82,8 @@ public class Program
             YOU DO NOT NEED TO RUN THIS AGAIN. This was a one-time fix. I left the code here because (like everything in .NET) it was annoying to figure out, and if the issue occurs again, you now know that you can run SQL queries right here in Program.cs. 
             
             Basically, the migrations, database, and schema were out of alignment. Probably my mistake during development. Instead of dropping the SQL table and starting over, I created a schema fix and registered all migrations manually for production. This worked for a bit, but ultimately it was easier to get a new database and re-run the migrations. 
+
+            The ultimate solution was in the IDesignDbContextFactory at design time. 
             
             This ran exactly once at at the first dotnet run (no database update required.) MAKE SURE YOU ARE WRITING TO THE RIGHT DATABASE! Change the Development server to SQL above to be double-plus sure. 
 
@@ -105,9 +110,10 @@ public class Program
                 // Step 4: register the new migration so MigrateAsync skips it
                 dbContext.Database.ExecuteSqlRaw("IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = '20260420222218_AddPreBarCodeRecordIdToCheckoutHistory') INSERT INTO [__EFMigrationsHistory] VALUES ('20260420222218_AddPreBarCodeRecordIdToCheckoutHistory', '9.0.1')");
             }
-            */
-
+            
             //await dbContext.Database.MigrateAsync();
+
+            */
 
             // Custom method for seeding data
             await SeedData.SeedDataAsync(dbContext, userManager, roleManager, configuration);
