@@ -34,11 +34,12 @@ Migrations in Development:
 
 > dotnet ef migrations add MyChange --context SqliteAppDbContext
 
-You need the --context flag because .NET doesn't read environment variables when checking the database context (i.e. it needs you to explicitly say which database to use). The SQLite and SQL contexts each have context factory classes in the 'Data' directory. 
+You need the --context flag because .NET doesn't read environment variables when checking the database context (i.e. it needs you to explicitly say which database to use). The SQLite and SQL contexts each have context factory classes in the 'Data' directory that run at design time. This solves a type issue
+that kept coming up when I just had two different AppDbContexts. 
 
-.NET **does** read environment variables when loading or running the app in Program.cs though. Why am I spending all this time talking about obscure database issues?
+.NET **does** read environment variables when loading or running the app in Program.cs though. 
 
-In .NET, SQLite and SQL have subtle differences at migration, ergo the two different AppDbContexts in the Data directory. This lesson was annoying to learn. In Development, the migrations will be in a subdirectory of 'Migrations' called 'SQLite'
+In Development, the migrations will be in a subdirectory of 'Migrations' called 'SQLite'
 
 If in Development, make sure to uncomment this in RecordsMaster.csproj.   
 
@@ -47,7 +48,7 @@ If in Development, make sure to uncomment this in RecordsMaster.csproj.
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
   </Content>
 ```
-This will ensure the Development SQLite database (testdb.db) is included in your published directory. Remove this in Production.
+This will ensure the Development SQLite database (testdb.db) is included in your published directory. Remove this in Production because your database will be remote. 
 
 # In Production mode:
 The database will be SQL, and the migrations will run using your database credentials. Ensure you have the ability to run migrations. Follow your administrator's rules on securing database credentials. I recommend against keeping them in appsettings generally.   
@@ -57,7 +58,7 @@ The database will be SQL, and the migrations will run using your database creden
 
 The migrations will be in the root 'Migrations' directory. 
 
-# When changing the model, or running for the first time, do these things:
+# When running for the first time, do these things:
 0. dotnet ef migrations add InitialMigration --context AppDbContext (or SqliteAppDbContext)
 1. dotnet ef database update  --context AppDbContext (or SqliteAppDbContext)
 2. dotnet ef migrations add AddIdentityRoleSupport  --context AppDbContext (or SqliteAppDbContext)  
@@ -79,17 +80,22 @@ The app runs on two models and the default ApplicationUser.
 2. CheckOutHistory which tracks when a record was checked in and out
 3. The default ApplicationUser (so you don't need to create a model for the users)
 
-The app has ten controllers. The controllers, as the name suggests, control what the user sees in the views. Each controller has a corresponding view in the 'Views' directory. Each controller has different methods.
 
-Admin users can see what each user has requested or checked out via the 'Manage Users' page. Click on the username hyperlink to access the user's record view.
+## Controllers
+The app has ten controllers. The controllers, as the name suggests, control what the user sees in the views. Each controller has a corresponding view in the 'Views' directory. Each controller has different methods (or things that you can do with the data in the database)
+
+Admin users can see what each user has requested or checked out via the 'Manage Users' page. Click on the username hyperlink to access the user's record view. There is also a method that will wipe the database, but you must manually configure it. It is only useful in testing and activating it is left as an exercise for the reader (i.e. me when I forget how to call methods in .NET). 
 
 ## 'Services' directory contains:
 1. The email sender. This is flexible and may require configuration to work with your SMTP setup. I recommend spending several hours with the C# [SMTP class documentation](https://learn.microsoft.com/en-us/dotnet/api/system.net.mail.smtpclient?view=net-9.0). Then ragequit and decide to use [MailKit](https://github.com/jstedfast/mailkit). In fact, that's what the .NET documentation tells you to do. 
-2. Two PDF printing services - one for development in Windows, the other cross-plaform. The development version is not used in the final app; it's just there to help troubleshoot.
+2. Three PDF printing services:
+   - LabelPrintServices is for development in Windows
+   - PDFSharpCorePrintService is cross-platform, but PDFSharpCore has a security vulnerability. It is excluded in both .csproj files, but still around because the PDF labels were really hard to figure out.
+   - PDFPrintService is cross-platform and compatible with .NET9 and .NET10.
 
 ## 'Utilities' directory contains:
 1. A class that reads CSV files
-2. A class that implements rudimentary pagination in the 'List' view of all records. Pagination is controlled by a key in the appsettings.json file 
+2. A class that implements rudimentary pagination in the 'List' view of all records. Pagination is controlled by a key in the appsettings.json file. 
 
 ## 'Data' directory contains:
 1. This is where you can find the two AppDbContexts. One for SQLite and the other for Production SQL. That's why there's two different ways to run migrations for Development and Production, and why you need the --context flag. 
@@ -97,10 +103,8 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 3. 'CsvHelperMap' helps map uploaded .csv data to the model. You can use it to reconstruct the order of columns in the .csv file. It is also easier than managing the data in the controllers. This feels more like a utility but oh well. 
  
 # Coming changes
-.NET 9 reaches EOL in November 2026. The change to .NET 10 is mostly incremental. I've already put preview changes in Program.cs. These will need a version bump in RecordsMaster.csproj
+.NET 9 reaches EOL in November 2026. The app is now defaulting to .NET10 in RecordsMaster.csproj. To run in .NET 9:
 
-For now, have a .Net10-specific csproj. You can build with this:
-
-> dotnet build RecordsMaster.Net10.csproj
+> dotnet build RecordsMaster.Net9.csproj
 
 If you have feedback, you can reach me via my [website](https://dannymuchoki.com).
