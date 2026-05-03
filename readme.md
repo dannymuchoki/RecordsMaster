@@ -68,6 +68,11 @@ The migrations will be in the root 'Migrations' directory.
 
 Consider creating shell scripts and naming them very differently. DevelopmentSetup.txt has examples you can use. 
 
+# To run
+> dotnet watch run --project RecordsMaster.csproj
+
+This uses the default .NET 10 .csproj
+
 # To publish and deploy:
 
 > dotnet publish -c Release -o ./publish
@@ -106,5 +111,9 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 .NET 9 reaches EOL in November 2026. The app is now defaulting to .NET10 in RecordsMaster.csproj. To run in .NET 9:
 
 > dotnet build RecordsMaster.Net9.csproj
+
+then:
+
+> dotnet watch run --project RecordsMaster.Net9. csproj
 
 If you have feedback, you can reach me via my [website](https://dannymuchoki.com).
