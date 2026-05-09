@@ -114,15 +114,15 @@ namespace RecordsMaster.Controllers
         public IActionResult Register() => View();
 
         private static readonly Regex EmailFormatRegex = new(
-            @"^[A-Za-z][A-Za-z\-]*\.[A-Za-z][A-Za-z\-]*@[A-Za-z0-9\-]+\.[A-Za-z]{2,}$",
-            RegexOptions.Compiled);
+            @"^[A-Za-z][A-Za-z0-9\-]*\.[A-Za-z][A-Za-z0-9\-]*@domain\.tld",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         [HttpPost]
         public async Task<IActionResult> Register(string email, string password)
         {
             if (string.IsNullOrWhiteSpace(email) || !EmailFormatRegex.IsMatch(email))
             {
-                ModelState.AddModelError("", "Email must be in the format firstname.lastname@domain.tld.");
+                ModelState.AddModelError("", "Email must be in the format firstname.lastname@gmail.com.");
                 return View();
             }
 
@@ -139,14 +139,19 @@ namespace RecordsMaster.Controllers
                     <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>";
 
                 var adminEmail = _config["Notification:NotificationMailbox"];
-                try
+                var emailSender = _emailSender;
+                var logger = _logger;
+                _ = Task.Run(async () =>
                 {
-                    await _emailSender.SendEmailAsync(adminEmail!, subject, message);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to send user sign up email confirmation to mailbox");
-                }
+                    try
+                    {
+                        await emailSender.SendEmailAsync(adminEmail!, subject, message);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to send user sign up email confirmation to mailbox");
+                    }
+                });
 
                 return RedirectToAction("Index", "Home");
             }
