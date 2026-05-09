@@ -106,6 +106,18 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 1. This is where you can find the two AppDbContexts. One for SQLite and the other for Production SQL. That's why there's two different ways to run migrations for Development and Production, and why you need the --context flag. 
 2. 'SeedTestData' used to be part of AppDbContext. Now it sets up the admin users and the first seeded data. 
 3. 'CsvHelperMap' helps map uploaded .csv data to the model. You can use it to reconstruct the order of columns in the .csv file. It is also easier than managing the data in the controllers. This feels more like a utility but oh well. 
+
+# Users
+The "superuser" is defined in AppSettings under the "AdminEmail" key. Whoever has access to the AdminEmail email address shall be the superuser. 
+
+The superuser is the only one who can create new admin users. The superuser cannot modify their own permissions. 
+
+Admin users can:
+1. Update records
+2. Upload new records
+3. Grant and revoke access to regular users. 
+
+Regular users can request and check out record items. 
  
 # Coming changes
 .NET 9 reaches EOL in November 2026. The app is now defaulting to .NET10 in RecordsMaster.csproj. To run in .NET 9:

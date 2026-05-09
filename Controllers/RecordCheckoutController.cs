@@ -109,7 +109,55 @@ namespace RecordsMaster.Controllers
             return RedirectToAction(nameof(CheckOut), new { id });
         }
 
-       [HttpPost]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelRequest(Guid id)
+        {
+            var recordItem = await _context.RecordItems.FindAsync(id);
+            if (recordItem == null)
+            {
+                return NotFound();
+            }
+
+            var user = recordItem.CheckedOutToId != null
+                ? await _userManager.FindByIdAsync(recordItem.CheckedOutToId)
+                : null;
+            var adminEmail = _config["Notification:NotificationMailbox"];
+            if (recordItem.CheckedOut == false)
+            {
+                recordItem.Requested = false;
+                recordItem.ReadyForPickup = false;
+                recordItem.CheckedOutToId = null;
+                recordItem.CheckedOutTo = null;
+
+                _context.Update(recordItem);
+                await _context.SaveChangesAsync();
+            }
+
+            var subject = $@"CANCELED REQUEST: {user?.Email} - {recordItem.BarCode}";
+            var message = $@"
+            <h2>Canceled Request</h2>
+            <p><strong>Record:</strong> {recordItem.BarCode}</p>
+            <p><strong>Requested by:</strong> {user?.Email}</p>
+            <p><strong>Time (UTC):</strong> {DateTime.UtcNow}</p>
+            <p><strong>This request has been removed from the RecordsMaster dashboard. Please re-shelve it.</p>";
+
+            try
+            {
+                await _emailSender.SendEmailAsync(adminEmail!, subject, message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(message);
+                _logger.LogError(ex, "Failed to pickup email to {adminEmail}", adminEmail);
+            }
+
+
+            TempData["Message"] = "Request canceled";
+            return RedirectToAction(nameof(CheckOut), new { id });
+        }
+
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReadyForPickup(Guid id)
         {

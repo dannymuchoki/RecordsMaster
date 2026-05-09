@@ -49,8 +49,14 @@ namespace RecordsMaster.Controllers
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user != null)
-            
+
             {
+                var adminEmail = _config["Notification:AdminEmail"];
+                if (user.Email == adminEmail)
+                {
+                    return RedirectToAction(nameof(UserRoles));
+                }
+
                 var currentRoles = await _userManager.GetRolesAsync(user);
 
 

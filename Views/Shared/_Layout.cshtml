@@ -42,13 +42,13 @@
                                 <li>
                                     <a class="@NavClass("UserRecords", "UserRecords")" asp-controller="UserRecords" asp-action="UserRecords">Currently Checked Out</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="@NavClass("Upload", "Upload")" asp-area="" asp-controller="Upload" asp-action="Upload">Upload New Records</a>
+                                </li>
                                  @if (User.Identity.Name == Config["Notification:AdminEmail"])
                                     {
                                 <li class="nav-item">
                                     <a class="@NavClass("RecordItems", "List")" asp-area="" asp-controller="RecordItems" asp-action="List">List</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="@NavClass("Upload", "Upload")" asp-area="" asp-controller="Upload" asp-action="Upload">Upload New Records</a>
                                 </li>
                                     <li class="nav-item">
                                         <a class="@NavClass("Account", "UserRoles")" asp-area="" asp-controller="Account" asp-action="UserRoles">Manage Users</a>

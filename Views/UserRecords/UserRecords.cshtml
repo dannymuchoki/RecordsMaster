@@ -60,15 +60,17 @@ else
                 <tr>
                     <th>Case#</th>
                     <th>BarCode</th>
-                    <th>Record Type</th>
+                    <th>Request</th>
                     @if (User.IsInRole("Admin"))
-                    {   
+                    { 
+                        <th>Record Type</th>  
                         <th>Location</th>
                         <th>Box Number</th>
                         <th>Digitized</th>
+                        <th>Closing Date</th>
+                        <th>Destroy Date</th>
                     }
-                    <th>Closing Date</th>
-                    <th>Destroy Date</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -77,14 +79,28 @@ else
                 <tr>
                     <td><a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS">@record.CIS</a></td>
                     <td>@record.BarCode</td>
-                    <td>@record.RecordType</td>
+                    <td>
+
+                            @if (record.CheckedOutTo?.UserName == User.Identity?.Name)
+                                {
+                                    using (Html.BeginForm("CancelRequest", "RecordCheckOut", new { id = record.ID }, FormMethod.Post, null, new { style = "display:inline", onsubmit = "return confirm('Are you sure you want to cancel this request?');" })) { @Html.AntiForgeryToken() <input type="submit" value="Cancel Request" class="btn btn-danger" /> }
+
+                                    if(record.ReadyForPickup)
+                                        {
+                                            <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS"><input type="submit" value="Check Out" class="btn btn-primary" /></a>
+                                    }
+                                
+                                }
+    
+                    </td>
                     @if (User.IsInRole("Admin")){
+                        <td>@record.RecordType</td>
                         <td>@record.Location</td>
                         <td>@(record.BoxNumber.HasValue ? record.BoxNumber.ToString() : "-")</td>
                         <td>@(record.Digitized ? "Yes" : "No")</td>
-                    }
-                    <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                         <td>@(record.ClosingDate?.ToString("MM/dd/yyyy") ?? "-")</td>
                     <td>@(record.DestroyDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                    }
                 </tr>
             }
             </tbody>

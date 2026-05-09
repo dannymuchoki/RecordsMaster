@@ -16,7 +16,7 @@ using System.Diagnostics;
 
 namespace RecordsMaster.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class UploadController : Controller
     {
         private readonly AppDbContext _context;
@@ -38,8 +38,7 @@ namespace RecordsMaster.Controllers
             return View();
         }
         
-        // This controller adds new record items via a CSV file. 
-        [Authorize]
+        // This controller adds new record items via a CSV file.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(IFormFile file)

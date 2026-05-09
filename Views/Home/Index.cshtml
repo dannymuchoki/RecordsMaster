@@ -33,45 +33,103 @@
      
         @if (!Model.Any())
             {
-               <!-- intentionally blank --> 
+               <!-- intentionally blank -->
             }
         else
             {
-                <h5 class="mt-5">Requested Records</h5>
+                var requestedRecords = Model.Where(r => !r.ReadyForPickup).ToList();
+                var readyForPickupRecords = Model.Where(r => r.ReadyForPickup).ToList();
 
-                <table class="table table-striped table-bordered"> 
-                    <thead class="table-dark">
-                    <tr>
-                        <th>Case#</th>
-                        <th>Barcode</th>
-                        <th>Record Type</th>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <th>Box Number</th>
-                                <th>Digitized</th>
-                            }
-                        <th>Closing Date</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                            { 
-                                <tr>
-                                    <td> <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@item.ID" asp-route-cis="@item.CIS">@item.CIS</a></td>
-                                    <td> @item.BarCode</td>
-                                    <td>@item.RecordType</td>
-                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <td>@item.BoxNumber</td>
-                                        <td>@(item.Digitized ? "Yes" : "No")</td>
-                                    }
-                                    <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>  
-                                </tr>
-                                
-                            }
-                    </tbody>
+                if (requestedRecords.Any())
+                {
+                    <h5 class="mt-5">Requested Records</h5>
+                    <p>
+                        Go pull these records from the shelves and, when that's done:
+                        <ul>
+                            <li>
+                                Click the case number link.
+                            </li>
+                            <li>
+                                Click the 'Ready for Pickup' button.
+                            </li>
+                        </ul>
 
-                </table>
+                    </p>
+
+                    <table class="table table-striped table-bordered">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Case#</th>
+                            <th>Barcode</th>
+                            <th>Record Type</th>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <th>Box Number</th>
+                                    <th>Digitized</th>
+                                }
+                            <th>Closing Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in requestedRecords)
+                                {
+                                    <tr>
+                                        <td> <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@item.ID" asp-route-cis="@item.CIS">@item.CIS</a></td>
+                                        <td> @item.BarCode</td>
+                                        <td>@item.RecordType</td>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <td>@item.BoxNumber</td>
+                                            <td>@(item.Digitized ? "Yes" : "No")</td>
+                                        }
+                                        <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
+                                    </tr>
+
+                                }
+                        </tbody>
+
+                    </table>
+                }
+
+                if (readyForPickupRecords.Any())
+                {
+                    <h5 class="mt-5">Ready for Pickup</h5>
+                    <p>These records have been pulled and are awaiting checkout by the requester.</p>
+
+                    <table class="table table-striped table-bordered">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Case#</th>
+                            <th>Barcode</th>
+                            <th>Record Type</th>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <th>Box Number</th>
+                                    <th>Digitized</th>
+                                }
+                            <th>Closing Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in readyForPickupRecords)
+                                {
+                                    <tr>
+                                        <td> <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@item.ID" asp-route-cis="@item.CIS">@item.CIS</a></td>
+                                        <td> @item.BarCode</td>
+                                        <td>@item.RecordType</td>
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <td>@item.BoxNumber</td>
+                                            <td>@(item.Digitized ? "Yes" : "No")</td>
+                                        }
+                                        <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
+                                    </tr>
+
+                                }
+                        </tbody>
+
+                    </table>
+                }
             }
          
     }
@@ -129,7 +187,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                        @foreach (var record in Model.Where(record => record.Requested && !record.CheckedOut))
+                        @foreach (var record in Model.Where(record => record.Requested && !record.CheckedOut && record.ReadyForPickup))
                             {
                                 <tr>
                                     <td>
@@ -138,6 +196,9 @@
                                     <td>@record.BarCode</td>
                                     <td>@record.RecordType</td>
                                     <td>
+
+                                    @using (Html.BeginForm("CancelRequest", "RecordCheckOut", new { id = record.ID }, FormMethod.Post, null, new { style = "display:inline", onsubmit = "return confirm('Are you sure you want to cancel this request?');" })) { @Html.AntiForgeryToken() <input type="submit" value="Cancel Request" class="btn btn-danger" /> }
+                                    
                                         <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@record.ID" asp-route-cis="@record.CIS"><button type="submit" class="btn btn-primary mx-auto">Check out</button></a>
                                     </td>
                                 </tr>
