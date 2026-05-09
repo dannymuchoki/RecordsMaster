@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using RecordsMaster.Models; // For ApplicationUser
 using RecordsMaster.Services;
@@ -112,9 +113,19 @@ namespace RecordsMaster.Controllers
 
         public IActionResult Register() => View();
 
+        private static readonly Regex EmailFormatRegex = new(
+            @"^[A-Za-z][A-Za-z\-]*\.[A-Za-z][A-Za-z\-]*@[A-Za-z0-9\-]+\.[A-Za-z]{2,}$",
+            RegexOptions.Compiled);
+
         [HttpPost]
         public async Task<IActionResult> Register(string email, string password)
         {
+            if (string.IsNullOrWhiteSpace(email) || !EmailFormatRegex.IsMatch(email))
+            {
+                ModelState.AddModelError("", "Email must be in the format firstname.lastname@domain.tld.");
+                return View();
+            }
+
             // Create a new ApplicationUser.
             var user = new ApplicationUser { UserName = email, Email = email };
             var result = await _userManager.CreateAsync(user, password);
