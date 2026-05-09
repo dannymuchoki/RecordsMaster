@@ -362,18 +362,28 @@ namespace RecordsMaster.Controllers
             return Ok();
         }
 
-        // POST: RecordItems/WipeRecords
+        /* POST: RecordItems/WipeRecords
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> WipeRecords()
         {
+            var adminEmail = _configuration["Notification:AdminEmail"];
+            var currentEmail = User.Identity?.Name;
+
+            if (string.IsNullOrWhiteSpace(adminEmail)
+                || string.IsNullOrWhiteSpace(currentEmail)
+                || !string.Equals(adminEmail, currentEmail, StringComparison.OrdinalIgnoreCase))
+            {
+                return Forbid();
+            }
+
             var allRecords = await _context.RecordItems.ToListAsync();
             _context.RecordItems.RemoveRange(allRecords);
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "All records have been wiped.";
             return RedirectToAction("List");
         }
-
+            */
     }
 }
