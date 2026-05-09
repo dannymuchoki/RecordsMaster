@@ -22,6 +22,7 @@ public class HomeController : Controller
         {
 
              var requestedRecords = await _context.RecordItems
+                .Include(r => r.CheckedOutTo)
                 .Where(r => r.Requested)
                 .ToListAsync();
 

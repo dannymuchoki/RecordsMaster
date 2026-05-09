@@ -68,6 +68,7 @@
                                     <th>Digitized</th>
                                 }
                             <th>Closing Date</th>
+                            <th>Requestor</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -83,6 +84,7 @@
                                             <td>@(item.Digitized ? "Yes" : "No")</td>
                                         }
                                         <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
+                                        <td>@item.CheckedOutTo?.Email</td>
                                     </tr>
 
                                 }
@@ -108,6 +110,7 @@
                                     <th>Digitized</th>
                                 }
                             <th>Closing Date</th>
+                            <th>Requestor</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -123,6 +126,7 @@
                                             <td>@(item.Digitized ? "Yes" : "No")</td>
                                         }
                                         <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
+                                        <td>@item.CheckedOutTo?.Email</td>
                                     </tr>
 
                                 }
