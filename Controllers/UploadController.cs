@@ -69,7 +69,8 @@ namespace RecordsMaster.Controllers
                     {
                         HasHeaderRecord = true,
                         HeaderValidated = null,
-                        MissingFieldFound = null
+                        MissingFieldFound = null,
+                        TrimOptions = TrimOptions.Trim
                     };
 
                     using (var csv = new CsvReader(stream, csvConfig))
@@ -84,7 +85,7 @@ namespace RecordsMaster.Controllers
                         while (csv.Read())
                         {
                             // Validation: first column must be integer
-                            string firstField = csv.GetField(0)!;
+                            string firstField = csv.GetField(0)?.Trim() ?? string.Empty;
                             if (!int.TryParse(firstField, out _))
                             {
                                 rowErrors.Add($"Row {rowNumber} error: The first column value ('{firstField}') is not a valid integer.");
@@ -93,7 +94,7 @@ namespace RecordsMaster.Controllers
                             }
 
                             // Validation: record type must be "PS", "FC", "EX"
-                            var recordTypeField = csv.GetField(2)!;
+                            var recordTypeField = csv.GetField(2)?.Trim() ?? string.Empty;
                             List<string> validValues = new List<string> { "PS", "FC", "EX", "FS" };
                             if (!validValues.Contains(recordTypeField))
                             {
@@ -107,10 +108,10 @@ namespace RecordsMaster.Controllers
                             }
 
                             // Location of the record
-                            var locationField = csv.GetField(3);
+                            var locationField = csv.GetField(3)?.Trim();
 
                             // Validation: the sixth column is a valid DateTime
-                            var dateField = csv.GetField(6);
+                            var dateField = csv.GetField(6)?.Trim();
                             if (!DateTime.TryParse(dateField, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
                             {
                                 rowErrors.Add($"Row {rowNumber} skipped: The sixth column item ('{dateField}') is not a valid date.");
