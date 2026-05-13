@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-@model List<RecordsMaster.Models.RecordItemModel>
+@model RecordsMaster.Models.HomeIndexViewModel
 
     @if (User.IsInRole("Admin"))
     {
@@ -31,14 +31,15 @@
         }
     
      
-        @if (!Model.Any())
+        @if (!Model.RequestedRecords.Any() && !Model.CanceledRequests.Any())
             {
                <!-- intentionally blank -->
             }
         else
             {
-                var requestedRecords = Model.Where(r => !r.ReadyForPickup).ToList();
-                var readyForPickupRecords = Model.Where(r => r.ReadyForPickup).ToList();
+                var requestedRecords = Model.RequestedRecords.Where(r => !r.ReadyForPickup).ToList();
+                var readyForPickupRecords = Model.RequestedRecords.Where(r => r.ReadyForPickup).ToList();
+                var canceledRequests = Model.CanceledRequests;
 
                 if (requestedRecords.Any())
                 {
@@ -134,8 +135,34 @@
 
                     </table>
                 }
+
+                if (canceledRequests.Any())
+                {
+                    <h5 class="mt-5">Canceled Requests</h5>
+                    <p>Put these back on the shelves</p>
+
+                    <table class="table table-striped table-bordered">
+                        <thead class="table-dark">
+                        <tr>
+                            <th>Record</th>
+                            <th>Cancellation Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in canceledRequests)
+                            {
+                                <tr>
+                                     <td>
+                                        <a asp-area="" asp-controller="RecordCheckout" asp-action="Checkout" asp-route-id="@item.RecordItem.ID" asp-route-cis="@item.RecordItem.CIS">@item.RecordItem?.BarCode</a>
+                                    </td>
+                                    <td>@item.DeliveryMessage</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
             }
-         
+
     }
 
     else if (User.IsInRole("User"))
@@ -175,10 +202,10 @@
             </script>
         }
 
-            if (Model.Any(record => record.ReadyForPickup))
-            {  
+            if (Model.RequestedRecords.Any(record => record.ReadyForPickup))
+            {
                 <div class="alert alert-success" role="alert">
-                    We've found these records. Please check them out. 
+                    We've found these records. Please check them out.
                 </div>
 
                         <table class="table table-striped">
@@ -191,7 +218,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                        @foreach (var record in Model.Where(record => record.Requested && !record.CheckedOut && record.ReadyForPickup))
+                        @foreach (var record in Model.RequestedRecords.Where(record => record.Requested && !record.CheckedOut && record.ReadyForPickup))
                             {
                                 <tr>
                                     <td>

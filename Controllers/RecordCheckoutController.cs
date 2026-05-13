@@ -125,6 +125,21 @@ namespace RecordsMaster.Controllers
             var adminEmail = _config["Notification:NotificationMailbox"];
             if (recordItem.CheckedOut == false)
             {
+                var today = DateTime.UtcNow;
+
+                if (user != null)
+                {
+                    var checkoutHistory = new CheckoutHistory
+                    {
+                        RecordItemId = recordItem.ID,
+                        UserId = user.Id,
+                        CheckedOutDate = today,
+                        ReturnedDate = today,
+                        DeliveryMessage = $"Canceled by {user.Email} on {today:yyyy-MM-dd}"
+                    };
+                    _context.CheckoutHistory.Add(checkoutHistory);
+                }
+
                 recordItem.Requested = false;
                 recordItem.ReadyForPickup = false;
                 recordItem.CheckedOutToId = null;

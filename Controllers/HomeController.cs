@@ -32,8 +32,25 @@ public class HomeController : Controller
                 ViewData["PasswordResetMessage"] = TempData["PasswordResetMessage"];
             }
 
-            return View("Index", requestedRecords);
+
+            // in dotnet you can't just send two models into a view (like in Django)
+            var fiveDaysAgo = DateTime.UtcNow.AddDays(-5);
+            var canceledRequests = await _context.CheckoutHistory
+            .Include(c => c.RecordItem)
+            .Where(c => EF.Functions.Like(c.DeliveryMessage, "Canceled by %@% on ____-__-__")
+                        && c.ReturnedDate >= fiveDaysAgo)
+            .ToListAsync();
+
+            // So you have to do a View model. 
+            var vm = new HomeIndexViewModel
+            {
+                RequestedRecords = requestedRecords,
+                CanceledRequests = canceledRequests
+            };
+
+            return View("Index", vm);
         }
+    
 
     public IActionResult Privacy()
     {

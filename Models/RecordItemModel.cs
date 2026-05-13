@@ -14,6 +14,13 @@ namespace RecordsMaster.Models
         public DateTime AppliedOn { get; set; }
     }
 
+    // The fix for sending two different models into a view is a ViewModel.
+    public class HomeIndexViewModel
+    {
+        public List<RecordItemModel> RequestedRecords { get; set; } = new();
+        public List<CheckoutHistory> CanceledRequests { get; set; } = new();
+    }
+
     // Good idea to keep track of who checked out what. 
     public class CheckoutHistory
     {
