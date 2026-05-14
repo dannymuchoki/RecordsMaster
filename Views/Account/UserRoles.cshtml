@@ -1,5 +1,6 @@
 @using SQLitePCL
 @model IEnumerable<(RecordsMaster.Models.ApplicationUser User, bool IsUserRole, bool IsAdminRole)>
+@inject IConfiguration Configuration
 
 @{
     ViewData["Title"] = "Manage Users";
@@ -7,8 +8,10 @@
 
 
  @if (User.IsInRole("Admin")){
-        var adminUsers = Model.Where(m => m.IsAdminRole);
-        var regularUsers = Model.Where(m => !m.IsAdminRole);
+        IEnumerable<(ApplicationUser User, bool IsUserRole, bool IsAdminRole)>? adminUsers = Model.Where(m => m.IsAdminRole);
+        List<string>? excludedUsers = Configuration.GetSection(key: "ExcludedUsers").Get<List<string>>();
+        // Exclude users who no longer need access from the view. The list is in the "ExcludedUsers" key of appsettings.
+        IEnumerable<(ApplicationUser User, bool IsUserRole, bool IsAdminRole)>? regularUsers = Model.Where(m => !m.IsAdminRole && !excludedUsers.Contains(m.User.Email));
 
         <h5>Admin Users</h5>
 
