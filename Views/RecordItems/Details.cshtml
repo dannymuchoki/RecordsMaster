@@ -47,7 +47,7 @@
                 <td>@(item.Location)</td>
             }
                 <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
-                <td>@item.DestroyDate?.ToString("yyyy-MM-dd")</td>
+                <td>@(item.DestroyDate.HasValue && item.DestroyDate.Value.Date <= DateTime.Today ? $"Expunged ({item.DestroyDate.Value:yyyy-MM-dd})" : item.DestroyDate?.ToString("yyyy-MM-dd"))</td>
                 <td>
                     @if (!item.CheckedOut)
                     {
@@ -61,12 +61,17 @@
                         }
                         if (User.IsInRole("User"))
                         {
-                            @if (!item.Requested)
+                            if (!item.Requested)
                             {
-                                using (Html.BeginForm("RequestRecord", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
-                                {
-                                    @Html.AntiForgeryToken()
-                                    <input type="submit" value="Request" class="btn btn-primary" />
+                                if (item.DestroyDate.HasValue && item.DestroyDate.Value.Date <= DateTime.Today){
+                                    <p>This item has been expunged</p>
+                                }
+                                else{
+                                    using (Html.BeginForm("RequestRecord", "RecordCheckOut", new { id = item.ID }, FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="submit" value="Request" class="btn btn-primary" />
+                                    }
                                 }
                             }
                             else

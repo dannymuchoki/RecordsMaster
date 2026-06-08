@@ -58,9 +58,18 @@ namespace RecordsMaster.Controllers
         public async Task<IActionResult> RequestRecord(Guid id)
         {
             var recordItem = await _context.RecordItems.FindAsync(id);
+
+            
             if (recordItem == null)
             {
                 return NotFound();
+            }
+
+            // Expunged records cannot be requested.
+            if (recordItem.DestroyDate.HasValue && recordItem.DestroyDate.Value.Date <= DateTime.Today)
+            {
+                TempData["Message"] = "Record has been expunged and cannot be requested.";
+                return RedirectToAction(nameof(CheckOut), new { id });
             }
 
             // Optional: if already checked out return an error message or redirect.
