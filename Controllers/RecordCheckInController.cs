@@ -10,7 +10,7 @@ using RecordsMaster.Services;
 
 namespace RecordsMaster.Controllers
 {
-    [Authorize] // Only authenticated users may check in/out records.
+    [Authorize(Roles = "Admin")] 
     public class RecordCheckInController : Controller
     {
         private readonly AppDbContext _context;

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RecordsMaster.Models;
 using RecordsMaster.Data;
 using RecordsMaster.Services;
+using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Printing;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace RecordsMaster.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class LabelsController : Controller
     {
         private readonly AppDbContext _context;
