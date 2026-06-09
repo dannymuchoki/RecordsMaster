@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore; // For ToListAsync
 using RecordsMaster.Data;
@@ -21,10 +22,18 @@ public class HomeController : Controller
      public async Task<IActionResult> Index()
         {
 
-             var requestedRecords = await _context.RecordItems
+             var requestedRecordsQuery = _context.RecordItems
                 .Include(r => r.CheckedOutTo)
-                .Where(r => r.Requested)
-                .ToListAsync();
+                .Where(r => r.Requested);
+
+            // Admins see every requested record. "User" and "Court Requestors" must only ever see records they themselves requested.
+            if (!User.IsInRole("Admin"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                requestedRecordsQuery = requestedRecordsQuery.Where(r => r.CheckedOutToId == userId);
+            }
+
+            var requestedRecords = await requestedRecordsQuery.ToListAsync();
 
             // The PasswordResetController sends messages to the index view.
             if (TempData.ContainsKey("PasswordResetMessage"))
@@ -33,7 +42,7 @@ public class HomeController : Controller
             }
 
 
-            // in dotnet you can't just send two models into a view (like in Django)
+            // in dotnet you can't just send two models into a view (like in Django). So this is how to show the admin user canceled records 
             var fiveDaysAgo = DateTime.UtcNow.AddDays(-5);
             var canceledRequests = await _context.CheckoutHistory
             .Include(c => c.RecordItem)
