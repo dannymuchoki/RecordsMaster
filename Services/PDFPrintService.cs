@@ -176,8 +176,9 @@ namespace RecordsMaster.Services
                         gfx.DrawRectangle(XPens.Black, x, y, labelWidth, labelHeight);
 
                         double padding = 5;
+                        double contentTopOffset = XUnit.FromCentimeter(0.4).Point; // nudge text down within the pre-printed label
                         double xText = x + padding;
-                        double yText = y + padding + fontSmall.Size;
+                        double yText = y + padding + contentTopOffset + fontSmall.Size;
 
                         gfx.DrawString($"Case#: {record.CIS}", fontSmall, XBrushes.Black, new XPoint(xText, yText));
 
@@ -267,8 +268,9 @@ namespace RecordsMaster.Services
                         gfx.DrawRectangle(XPens.Black, x, y, labelWidth, labelHeight);
 
                         double padding = 5;
+                        double contentTopOffset = XUnit.FromCentimeter(0.4).Point; // nudge text down within the pre-printed label
                         double xText = x + padding;
-                        double yText = y + padding + fontSmall.Size;
+                        double yText = y + padding + contentTopOffset + fontSmall.Size;
 
                         gfx.DrawString($"Case#: {record.CIS}", fontSmall, XBrushes.Black, new XPoint(xText, yText));
 

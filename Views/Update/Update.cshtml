@@ -2,96 +2,103 @@
     ViewData["Title"] = "Update Existing Record Items";
 }
 
-    <h5>Update Existing Records</h5>
+<h5>Update Existing Records</h5>
+
 <p>
-    Use the form below to update records in the database The file should be formatted with the following columns <b>in this order</b>:
-    <table class="table table-bordered mt-2">
+    Upload a CSV where each row has three values:
+    <strong>CIS/Case Number</strong>, <strong>Barcode</strong>, and the
+    <strong>new value</strong> for the single field you select below. Each row is matched
+    to a record by its CIS/Case Number and barcode, and only the selected field is updated.
+</p>
+
+<ol>
+    <li><a href="/files/update_records_template.csv" download>Download the CSV template</a></li>
+</ol>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning">@TempData["Warning"]</div>
+}
+
+@if (TempData["Errors"] != null)
+{
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach (var err in TempData["Errors"]!.ToString()!.Split('|'))
+            {
+                <li>@err</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form asp-action="Update" enctype="multipart/form-data" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <p class="mb-1 mt-3"><strong>1. Choose the field to update</strong> (the value in the CSV's third column):</p>
+    <table class="table table-bordered">
         <thead class="table-light">
             <tr>
-                <th style="vertical-align:top;">CIS</th>
-                <th style="vertical-align:top;">BarCode</th>
-                <th style="vertical-align:top;">RecordType</th>
-                <th style="vertical-align:top;">Location</th>
-                <th style="vertical-align:top;">Box Number</th>
-                <th style="vertical-align:top;">Digitized</th>
-                <th style="vertical-align:top;">ClosingDate</th>
-                <th style="vertical-align:top;">DestroyDate</th>
-                <th style="vertical-align:top;">CheckedOut</th>
-                <th style="vertical-align:top;">Requested</th>
-                <th style="vertical-align:top;">ReadyForPickup</th>
-                <th style="vertical-align:top;">CheckedOutTo</th>
+                <th style="width:3rem;"></th>
+                <th>Field</th>
+                <th>Expected value in the third CSV column</th>
             </tr>
         </thead>
+        <tbody>
+            <tr>
+                <td><input class="form-check-input" type="radio" name="updateField" value="Location" required /></td>
+                <td>Location</td>
+                <td>Any text (e.g. <code>Shelf A3</code>). Blank = no change.</td>
+            </tr>
+            <tr>
+                <td><input class="form-check-input" type="radio" name="updateField" value="BoxNumber" /></td>
+                <td>Box Number</td>
+                <td>A positive whole number (e.g. <code>42</code>). Blank = no change.</td>
+            </tr>
+            <tr>
+                <td><input class="form-check-input" type="radio" name="updateField" value="Digitized" /></td>
+                <td>Digitized</td>
+                <td><code>true</code> or <code>false</code> (also accepts yes/no, 1/0). Blank = false.</td>
+            </tr>
+            <tr>
+                <td><input class="form-check-input" type="radio" name="updateField" value="ClosingDate" /></td>
+                <td>Closing Date</td>
+                <td>A date (e.g. <code>2026-04-21</code>). Blank = no change.</td>
+            </tr>
+            <tr>
+                <td><input class="form-check-input" type="radio" name="updateField" value="DestroyDate" /></td>
+                <td>Destroy Date</td>
+                <td>A date (e.g. <code>2031-04-21</code>). Blank = no change.</td>
+            </tr>
+            <tr>
+                <td><input class="form-check-input" type="radio" name="updateField" value="Expunged" /></td>
+                <td>Expunged</td>
+                <td><code>true</code> or <code>false</code> (also accepts yes/no, 1/0). Blank = false.</td>
+            </tr>
+            <!--
+            <tr>
+                <td><input class="form-check-input" type="radio" name="updateField" value="CheckedOutTo" /></td>
+                <td>Checked Out To</td>
+                <td>Email of the user to check the record out to. Any current holder is checked in first, and both users are emailed. A new user is created and emailed a password-reset link if they don't exist yet. Blank = no change.</td>
+            </tr>
+            -->
+        </tbody>
     </table>
-</p>
- 
 
+    <p class="mb-1 mt-3"><strong>2. Upload your CSV</strong></p>
+    <div class="form-group">
+        <input type="file" class="form-control" id="file" name="file" accept=".csv" required />
+    </div>
 
-    <ol>
-        <li><a href="/files/update_records_template.csv" download>Download the Update Template</a></li>
-        <li>
-            <b>CIS</b> and <b>Barcode</b> are required. Without them, you cannot update a record. 
-        </li>
-        <li>
-            You can only update the following columns:
-            <ul>
-                <li>
-                    <b>Location</b>  must be blank <b>or</b> either Records Room or Archives. Leaving it blank means it's in the Records Room by default. 
-                </li>
-                <li>
-                    <b>Box number</b> with a whole integer (that means no decimals, dashes, commas, periods, or letters). Numbers only. 
-                </li>
-                <li>
-                    <b>Digitized</b> must be blank <b>or</b> TRUE or FALSE in all caps.<br/>Check the digital archive to make sure the record's barcode has been digitized before marking <b>Digitized</b> as TRUE.  
-                </li>
-                <li>
-                    <b>CheckedOut</b> and <b>CheckedOutTo</b> must be updated together. 
-                     <ol>
-                        <li> If <b>CheckedOut</b> is TRUE:</li>
-                        <li>Make sure the <b>CheckedOutTo</b> column contains a valid email address.</li>
-                    </ol>
-                </li>
-                <li>
-                     Otherwise <b>CheckedOut</b> and <b>CheckedOutTo</b> must both remain blank. 
-                </li>
-            </ul>
-
-        </li>
-    </ol>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-
-    @if (TempData["Warning"] != null)
-    {
-        <div class="alert alert-warning">@TempData["Warning"]</div>
-    }
-
-    @if (TempData["Errors"] != null)
-    {
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach (var err in TempData["Errors"]!.ToString()!.Split('|'))
-                {
-                    <li>@err</li>
-                }
-            </ul>
-        </div>
-    }
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
-
-    <form asp-action="Update" enctype="multipart/form-data" method="post">
-        <div asp-validation-summary="All" class="text-danger"></div>
-
-        <div class="form-group">
-            <input type="file" class="form-control" id="file" name="file" accept=".csv" />
-            
-        </div>
-        <button type="submit" class="btn btn-primary m-1">Update Existing Records</button>
-    </form>
+    <button type="submit" class="btn btn-primary m-1 mt-2">Update Existing Records</button>
+</form>

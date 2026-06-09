@@ -37,6 +37,10 @@ namespace RecordsMaster.Data
             {
                 await roleManager.CreateAsync(new IdentityRole("User"));
             }
+            if (!await roleManager.RoleExistsAsync("Court Requestors"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Court Requestors"));
+            }
         }
 
         // Class to model user seed info

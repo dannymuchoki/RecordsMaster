@@ -107,6 +107,9 @@ namespace RecordsMaster.Models
         // Navigation property: history of all checkouts and returns for this record
         public ICollection<CheckoutHistory> CheckoutHistoryRecords { get; set; } = new List<CheckoutHistory>();
 
+        //C# defaults to False 
+        public bool Expunged { get; set; }
+
     }
 
     /*

@@ -29,22 +29,23 @@ namespace RecordsMaster.Controllers
         // This action returns a view that lists all users and their roles.
         // It uses a tuple to pair each user with a boolean indicating if they are in the "User" role.
         // The view will display the user email and whether they are a regular user or not.
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UserRoles()
         {
             var users = _userManager.Users.ToList();
             var adminEmail = _config["Notification:AdminEmail"];
             ViewBag.AdminEmail = adminEmail; // used in the UserRoles.cshtml view.
-            var model = new List<(ApplicationUser User, bool IsUserRole, bool IsAdminRole)>();
+            var model = new List<(ApplicationUser User, bool IsUserRole, bool IsAdminRole, bool IsCourtRequestorRole)>();
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-                model.Add((user, roles.Contains("User"), roles.Contains("Admin")));
+                model.Add((user, roles.Contains("User"), roles.Contains("Admin"), roles.Contains("Court Requestors")));
             }
             return View(model);
         }
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> SetUserRole(string userId, string role)
         {
@@ -52,6 +53,7 @@ namespace RecordsMaster.Controllers
             if (user != null)
 
             {
+                // Cannot modify superuser.
                 var adminEmail = _config["Notification:AdminEmail"];
                 if (user.Email == adminEmail)
                 {
@@ -60,36 +62,20 @@ namespace RecordsMaster.Controllers
 
                 var currentRoles = await _userManager.GetRolesAsync(user);
 
+                // The app's roles are mutually exclusive: a user holds exactly one of these, or None.
+                var managedRoles = new[] { "Admin", "User", "Court Requestors" };
 
-                if (role == "None")
+                // Drop any managed role the user currently holds, except the one being assigned.
+                var rolesToRemove = currentRoles.Intersect(managedRoles).Where(r => r != role).ToList();
+                if (rolesToRemove.Count > 0)
                 {
-                    // Remove both roles
-                    if (currentRoles.Contains("Admin"))
-                        await _userManager.RemoveFromRoleAsync(user, "Admin");
-                    if (currentRoles.Contains("User"))
-                        await _userManager.RemoveFromRoleAsync(user, "User");
+                    await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
                 }
-                // If the user is in the Admin role and the requested role is "User", remove Admin and add User
-                else if (currentRoles.Contains("Admin") && role == "User")
+
+                // "None" just clears roles; otherwise add the requested role if valid and not already held.
+                if (role != "None" && managedRoles.Contains(role) && !currentRoles.Contains(role))
                 {
-                    await _userManager.RemoveFromRoleAsync(user, "Admin");
-                    await _userManager.AddToRoleAsync(user, "User");
-                }
-                // If the user is not in Admin, just ensure they are in User role
-                else if (role == "User")
-                {
-                    if (currentRoles.Contains("Admin"))
-                        await _userManager.RemoveFromRoleAsync(user, "Admin");
-                    if (!currentRoles.Contains("User"))
-                        await _userManager.AddToRoleAsync(user, "User");
-                }
-                // If the role is Admin, add Admin and remove User
-                else if (role == "Admin")
-                {
-                    if (currentRoles.Contains("User"))
-                        await _userManager.RemoveFromRoleAsync(user, "User");
-                    if (!currentRoles.Contains("Admin"))
-                        await _userManager.AddToRoleAsync(user, "Admin");
+                    await _userManager.AddToRoleAsync(user, role);
                 }
             }
             return RedirectToAction(nameof(UserRoles));

@@ -1,5 +1,5 @@
 @using SQLitePCL
-@model IEnumerable<(RecordsMaster.Models.ApplicationUser User, bool IsUserRole, bool IsAdminRole)>
+@model IEnumerable<(RecordsMaster.Models.ApplicationUser User, bool IsUserRole, bool IsAdminRole, bool IsCourtRequestorRole)>
 @inject IConfiguration Configuration
 
 @{
@@ -8,10 +8,11 @@
 
 
  @if (User.IsInRole("Admin")){
-        IEnumerable<(ApplicationUser User, bool IsUserRole, bool IsAdminRole)>? adminUsers = Model.Where(m => m.IsAdminRole);
-        List<string>? excludedUsers = Configuration.GetSection(key: "ExcludedUsers").Get<List<string>>();
+        IEnumerable<(ApplicationUser User, bool IsUserRole, bool IsAdminRole, bool IsCourtRequestorRole)>? adminUsers = Model.Where(m => m.IsAdminRole);
+        List<string> excludedUsers = Configuration.GetSection(key: "ExcludedUsers").Get<List<string>>() ?? new List<string>();
         // Exclude users who no longer need access from the view. The list is in the "ExcludedUsers" key of appsettings.
-        IEnumerable<(ApplicationUser User, bool IsUserRole, bool IsAdminRole)>? regularUsers = Model.Where(m => !m.IsAdminRole && !excludedUsers.Contains(m.User.Email));
+        IEnumerable<(ApplicationUser User, bool IsUserRole, bool IsAdminRole, bool IsCourtRequestorRole)>? courtRequestors = Model.Where(m => m.IsCourtRequestorRole && !excludedUsers.Contains(m.User.Email ?? string.Empty));
+        IEnumerable<(ApplicationUser User, bool IsUserRole, bool IsAdminRole, bool IsCourtRequestorRole)>? regularUsers = Model.Where(m => !m.IsAdminRole && !m.IsCourtRequestorRole && !excludedUsers.Contains(m.User.Email ?? string.Empty));
 
         <h5>Admin Users</h5>
 
@@ -41,6 +42,7 @@
                             {
                                 <button type="submit" name="role" value="User" class="btn btn-sm btn-primary" @(item.IsUserRole ? "disabled" : "")>Set as User</button>
                                 <button type="submit" name="role" value="Admin" class="btn btn-sm btn-warning" @(item.IsAdminRole ? "disabled" : "")>Set as Admin</button>
+                                <button type="submit" name="role" value="Court Requestors" class="btn btn-sm btn-info" @(item.IsCourtRequestorRole ? "disabled" : "")>Set as Court Requestor</button>
                             }
                             @if (item.User.Email == User.Identity?.Name)
                             {
@@ -48,8 +50,8 @@
                             }
                             else
                             {
-                                
-                                <button type="submit" name="role" value="None" class="btn btn-sm btn-danger" @((!item.IsUserRole && !item.IsAdminRole) ? "disabled" : "")>Remove Roles</button>
+
+                                <button type="submit" name="role" value="None" class="btn btn-sm btn-danger" @((!item.IsUserRole && !item.IsAdminRole && !item.IsCourtRequestorRole) ? "disabled" : "")>Remove Roles</button>
                             }
                                 
 
@@ -90,7 +92,47 @@
                                 <button type="submit" name="role" value="Admin" class="btn btn-sm btn-warning" @(item.IsAdminRole ? "disabled" : "")>Set as Admin</button>
                             }
                             <button type="submit" name="role" value="User" class="btn btn-sm btn-primary" @(item.IsUserRole ? "disabled" : "")>Set as User</button>
-                            <button type="submit" name="role" value="None" class="btn btn-sm btn-danger" @((!item.IsUserRole && !item.IsAdminRole) ? "disabled" : "")>Remove Roles</button>
+                            <button type="submit" name="role" value="Court Requestors" class="btn btn-sm btn-info" @(item.IsCourtRequestorRole ? "disabled" : "")>Set as Court Requestor</button>
+                            <button type="submit" name="role" value="None" class="btn btn-sm btn-danger" @((!item.IsUserRole && !item.IsAdminRole && !item.IsCourtRequestorRole) ? "disabled" : "")>Remove Roles</button>
+                        </form>
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <h5>Court Requestors</h5>
+
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in courtRequestors)
+            {
+                <tr>
+                    <td>
+                        <a asp-area="" asp-controller="UserRecords" asp-action="AdminViewUserRecords" asp-route-email="@item.User.Email"> @item.User.Email</a>
+                    </td>
+                    <td>
+                        @if (item.User.Email == ViewBag.AdminEmail)
+                        {
+                            <span>  This user's permissions cannot be modified. </span>
+                        }
+                        else{
+                        <form asp-action="SetUserRole" asp-controller="Account" method="post" style="display:inline;">
+                            <input type="hidden" name="userId" value="@item.User.Id" />
+                            @if (User.Identity?.Name == ViewBag.AdminEmail)
+                            {
+                                <button type="submit" name="role" value="Admin" class="btn btn-sm btn-warning" @(item.IsAdminRole ? "disabled" : "")>Set as Admin</button>
+                            }
+                            <button type="submit" name="role" value="User" class="btn btn-sm btn-primary" @(item.IsUserRole ? "disabled" : "")>Set as User</button>
+                            <button type="submit" name="role" value="Court Requestors" class="btn btn-sm btn-info" @(item.IsCourtRequestorRole ? "disabled" : "")>Set as Court Requestor</button>
+                            <button type="submit" name="role" value="None" class="btn btn-sm btn-danger" @((!item.IsUserRole && !item.IsAdminRole && !item.IsCourtRequestorRole) ? "disabled" : "")>Remove Roles</button>
                         </form>
                         }
                     </td>

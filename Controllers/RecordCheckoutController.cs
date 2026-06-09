@@ -66,7 +66,7 @@ namespace RecordsMaster.Controllers
             }
 
             // Expunged records cannot be requested.
-            if (recordItem.DestroyDate.HasValue && recordItem.DestroyDate.Value.Date <= DateTime.Today)
+            if (recordItem.Expunged)
             {
                 TempData["Message"] = "Record has been expunged and cannot be requested.";
                 return RedirectToAction(nameof(CheckOut), new { id });
