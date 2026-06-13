@@ -16,7 +16,7 @@ using Microsoft.Extensions.Configuration; // reads from appsettings.json
 
 namespace RecordsMaster.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,User,Court Requestors")]
     public class RecordItemsController : Controller
     {
         /* This was the first controller I wrote. It handles record item operations, such as searching and listing records.
