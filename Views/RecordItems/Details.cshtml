@@ -47,7 +47,7 @@
                 <td>@(item.Location)</td>
             }
                 <td>@item.ClosingDate?.ToString("yyyy-MM-dd")</td>
-                <td>@(item.DestroyDate.HasValue && item.DestroyDate.Value.Date <= DateTime.Today ? $"Expunged ({item.DestroyDate.Value:yyyy-MM-dd})" : item.DestroyDate?.ToString("yyyy-MM-dd"))</td>
+                <td>@(item.DestroyDate?.ToString("yyyy-MM-dd"))</td>
                 <td>
                     @if (!item.CheckedOut)
                     {

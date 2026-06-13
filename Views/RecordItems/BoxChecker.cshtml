@@ -6,11 +6,77 @@
     return;
 }
 
-<h5>Box Digitization Check</h5>
+@if (ViewData["ToBeDigitizedBoxes"] is Dictionary<int, List<RecordsMaster.Models.RecordItemModel>> allBoxes && allBoxes.Any())
+{
+    <h5 class="mt-4">These boxes should be sent in the next digitization shipment</h5>
+    <p>
+        This list updates automatically as new box numbers are entered via <a class="btn btn-link p-0" asp-area="" asp-controller="Update" asp-action="Update">Update Records</a>
+    </p>
+    <table class="mb-5 table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Box</th>
+                <th>Count</th>
+                <th>Confirm Shipment to DGS</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var box in allBoxes)
+            {
+                <tr>
+                    <td><strong>@box.Key</strong></td>
+                    <td>@box.Value.Count</td>
+                    <td>
+                        <form method="post" asp-action="ShippedForDigitization">
+                            <input type="hidden" name="boxNumber" value="@box.Key" />
+                            <button type="submit" class="btn btn-sm btn-success"
+                                    onclick="return confirm('Mark box @box.Key as shipped for digitization?');">
+                                Click to Confirm Shipment to DGS
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+<h5>
+    When a box returns from being digitized enter it into this form
+</h5>
+<form method="post" asp-action="ReturnedFromDigitization" class="border rounded p-3">
+    <p>
+    Enter a box number to confirm it has been returned from DGS digitization.<br/>
+    Note - this will not mark the records in the box as digitized. 
+</p>
+    <div class="input-group">
+        <input type="number" name="boxNumber" class="form-control" placeholder="Enter a box number" required />
+        <button type="submit" class="btn btn-success"
+                onclick="return confirm('Mark this box as returned from digitization?');">
+            Confirm Return
+        </button>
+    </div>
+</form>
+@if (ViewData["ReturnedBoxMessage"] != null)
+{
+    <div class="alert alert-primary text-center" role="alert">
+        @ViewData["ReturnedBoxMessage"]
+    </div>
+}
+
+<h5 class="mt-5">Box Digitization Check</h5>
 
 <form method="get" asp-action="BoxDigitizationCheck" class="border rounded p-3">
     <p>
-    Enter a box number. See which records in that box need to be digitized.
+    Enter a box number. See which records in that box need to be digitized. To update which records are digitized:
+    <ol>
+        <li>Go to KnowledgeLake</li>
+        <li>Download the list of records</li>
+        <li>Use that list to update the list of digitized records via
+         <a class="btn btn-link p-0" asp-area="" asp-controller="Update" asp-action="Update">Update Records</a>
+        </li>
+    </ol>
 </p>
     <div class="input-group">
         <input type="number" id="boxNumber" class="form-control" name="boxNumber" value="@ViewData["BoxNumber"]" placeholder="Enter a box number" />
@@ -18,13 +84,19 @@
     </div>
 </form>
 
+
 @if (ViewData["BoxMessage"] != null)
 {
-    <p><strong>@ViewData["BoxMessage"]</strong></p>
+    <div class="alert alert-primary text-center" role="alert">
+        @ViewData["BoxMessage"]
+    </div>
 }
 else if (Model.Any())
 {
     <br/>
+    <div class="alert alert-danger text-center" role="alert">
+        This box has undigitized records. 
+    </div>
     <p>The following records in box @ViewData["BoxNumber"] are not digitized:</p>
     <table class="table table-striped">
         <thead>
@@ -49,31 +121,3 @@ else if (Model.Any())
 
 }
 
-@if (ViewData["DigitizedBoxes"] is Dictionary<int, List<RecordsMaster.Models.RecordItemModel>> allBoxes && allBoxes.Any())
-{
-    <h4 class="mt-4">All Boxes</h4>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Box</th>
-                <th>Records</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var box in allBoxes)
-            {
-                var allDigitized = box.Value.All(r => r.Digitized);
-                var rowClass = allDigitized ? "table-success" : "table-warning";
-                <tr class="@rowClass">
-                    <td><strong>@box.Key</strong></td>
-                    <td>
-                        @foreach (var record in box.Value)
-                        {
-                            <span class="me-2">@record.BarCode</span>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}

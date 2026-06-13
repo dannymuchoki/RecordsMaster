@@ -24,6 +24,11 @@ This user will need to reset their password to get access to their account. See 
 
 Otherwise, the seeded data in Program.cs will populate the table. You can use the upload template to add more record items. 
 
+# Checkout History Note
+The superuser can download checkout history along with the entire database contents in a .zip file from the 'List' view. The button says 'Download All'
+
+You can use the two .csv files in the .zip archive to re-populate the database, users, and checkout history. This was useful in development and survives as a last-resort restore method. If you back up your database regularly, you should never need to use this. 
+
 # Set the development environment to Production or Development
 0. You can do this in launchsettings.json (for local development), or in the web.config (for production servers). 
 

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Security.Claims;
 using RecordsMaster.Models;
 using RecordsMaster.Data;
 using RecordsMaster.Utilities;
@@ -58,6 +59,7 @@ namespace RecordsMaster.Controllers
         }
 
         // GET: RecordItems/SearchRecords allows searching by case number (CIS) or barcode. 
+        [Authorize(Roles = "Admin,Court Requestors")]
         public async Task<IActionResult> SearchRecords(string? input)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -68,7 +70,8 @@ namespace RecordsMaster.Controllers
 
             input = input.Trim();
 
-            var barcodePattern = @"^\d{2}-\d{5}$";
+            //var barcodePattern = @"^\d{2}-\d{5}$";
+            var barcodePattern = @"^\d{2}(?:-?)\d{5}$"; //recognizes barcodes with/without hyphen. Easier for the user.
             bool isBarcode = Regex.IsMatch(input, barcodePattern);
 
             var query = _context.RecordItems
@@ -84,7 +87,7 @@ namespace RecordsMaster.Controllers
                 // Database values are messy. Thirty years of accumulated errors
                 var paddedInput = "0" + input; // sometimes there's a zero in front of the CIS number
                 var strippedInput = input.StartsWith("015") ? input[3..] : null; // sometimes the CIS number is missing the 015. 
-                var nozeroes = input.StartsWith('0') ? input[1..] : null;
+                var nozeroes = input.StartsWith('0') ? input[1..] : null; //strip out leading zeroes.
                 query = query.Where(r => r.CIS == input || r.CIS == paddedInput || (strippedInput != null && r.CIS == strippedInput) || (nozeroes != null && r.CIS == nozeroes));
             }
 
@@ -99,7 +102,7 @@ namespace RecordsMaster.Controllers
         }
 
         /* 
-            Case workers can only search for what they need to know, so they need to provide a closing date. 
+             workers can only search for what they need to know, so they need to provide a closing date. 
             Or a barcode. 
         */
         public async Task<IActionResult> CaseWorkerSearch(string? input, DateTime? closingDate)
@@ -156,21 +159,37 @@ namespace RecordsMaster.Controllers
             return View("Details", record);
         }
 
-        public IActionResult DigitizedBoxes()
+        
+        [Authorize(Roles = "Admin")]
+        public IActionResult BoxDigitizationCheck(int? boxNumber)
         {
-             var allBoxes = _context.RecordItems
-                .Where(r => r.BoxNumber != null)
+            // Surface any confirmation messages carried over from a redirect.
+            if (TempData["BoxMessage"] is string shipMessage)
+            {
+                ViewData["BoxMessage"] = shipMessage;
+            }
+            if (TempData["ReturnedBoxMessage"] is string returnMessage)
+            {
+                ViewData["ReturnedBoxMessage"] = returnMessage;
+            }
+
+            // A box cannot be shipped if ANY record in it is checked out.
+            var checkedOutBoxes = _context.RecordItems
+                .Where(r => r.BoxNumber != null && r.CheckedOut)
+                .Select(r => r.BoxNumber!.Value)
+                .Distinct()
+                .ToHashSet();
+
+            // Tell the records room team which next ten boxes can be shipped next.
+            ViewData["ToBeDigitizedBoxes"] = _context.RecordItems
+                .Where(r => r.BoxNumber != null && r.Digitized != true && r.ShippedForDigitization != true)
                 .OrderBy(r => r.BoxNumber)
                 .AsEnumerable()
                 .GroupBy(r => r.BoxNumber)
+                .Where(g => !checkedOutBoxes.Contains(g.Key!.Value))
+                .Take(10)
                 .ToDictionary(g => g.Key!.Value, g => g.ToList());
 
-             ViewData["DigitizedBoxes"] = allBoxes;
-             return View("BoxChecker", Enumerable.Empty<RecordItemModel>());
-        }
-
-        public IActionResult BoxDigitizationCheck(int? boxNumber)
-        {
             if (boxNumber == null)
             {
                 return View("BoxChecker", Enumerable.Empty<RecordItemModel>());
@@ -197,6 +216,77 @@ namespace RecordsMaster.Controllers
             return View("BoxChecker", undigitizedRecords);
         }
 
+        // POST: mark every checked-in record in a box as shipped to the digitization vendor.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ShippedForDigitization(int boxNumber)
+        {
+            var recordsInBox = await _context.RecordItems
+                .Where(r => r.BoxNumber == boxNumber && r.CheckedOut != true )
+                .ToListAsync();
+
+            if (!recordsInBox.Any())
+            {
+                TempData["BoxMessage"] = $"No records found in box {boxNumber}.";
+                return RedirectToAction(nameof(BoxDigitizationCheck));
+            }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier); // the admin confirming the shipment
+            var shippedOn = DateTime.UtcNow;
+
+            foreach (var record in recordsInBox)
+            {
+                record.ShippedForDigitization = true;
+
+                // Audit row (not an open checkout)
+                _context.CheckoutHistory.Add(new CheckoutHistory
+                {
+                    RecordItemId = record.ID,
+                    UserId = currentUserId!,
+                    CheckedOutDate = shippedOn,
+                    ReturnedDate = shippedOn,
+                    DeliveryMessage = $"Confirmed shipped for digitization on {shippedOn:yyyy-MM-dd}"
+                });
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["BoxMessage"] = $"Box {boxNumber} marked as shipped for digitization.";
+            return RedirectToAction(nameof(BoxDigitizationCheck));
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ReturnedFromDigitization(int boxNumber)
+        {
+            var recordsInBox = await _context.RecordItems
+                .Where(r => r.BoxNumber == boxNumber)
+                .ToListAsync();
+
+            if (!recordsInBox.Any())
+            {
+                TempData["ReturnedBoxMessage"] = $"No records found in box {boxNumber}.";
+                return RedirectToAction(nameof(BoxDigitizationCheck));
+            }
+
+            foreach (var record in recordsInBox)
+            {
+                record.ReturnedFromDigitization = true;
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["ReturnedBoxMessage"] = $"Box {boxNumber} marked as returned from digitization.";
+            return RedirectToAction(nameof(BoxDigitizationCheck));
+        }
+
+
+
+
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Labels(int? pageNumber)
         {
             int pageSize = 21; // Avery 5962: 21 labels per page. Leave this alone. 
@@ -205,6 +295,7 @@ namespace RecordsMaster.Controllers
             return View(pagedList);
         }
 
+        [Authorize(Roles = "Admin")]
         // Paginated list of records (only visible to the Admin user)
         public async Task<IActionResult> List(int pageNumber = 1)
         {
@@ -221,6 +312,7 @@ namespace RecordsMaster.Controllers
         }
 
         // Download a ZIP containing RecordItems.csv and CheckoutHistory.csv
+        [Authorize(Roles = "Admin")]
         public IActionResult DownloadCsv()
         {
             var records = _context.RecordItems.Include(r => r.CheckedOutTo).OrderBy(r => r.CreatedOn).ToList();

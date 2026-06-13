@@ -110,6 +110,10 @@ namespace RecordsMaster.Models
         //C# defaults to False 
         public bool Expunged { get; set; }
 
+        public bool ShippedForDigitization {get; set;}
+
+        public bool ReturnedFromDigitization {get; set;}
+
     }
 
     /*

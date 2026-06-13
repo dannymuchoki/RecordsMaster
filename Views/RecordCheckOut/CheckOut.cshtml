@@ -81,6 +81,18 @@
                         <input type="submit" value="Ready for Pickup" class="btn btn-success" />                   
                     }
             }
+            else if(Model.ShippedForDigitization && !Model.ReturnedFromDigitization){
+                <p>
+                    This record has been shipped to DGS for digitization. Contact them and ask them to digitize it and send it back as soon as possible. <br/> When you have the record back, click the 'Ready for Pickup' button below 
+                </p>
+                @using (Html.BeginForm("ReadyForPickup", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="submit" value="Ready for Pickup" class="btn btn-success" />                   
+                    }
+
+            }
+        
             else{
                 @using (Html.BeginForm("ReadyForPickup", "RecordCheckOut", new { id = Model.ID }, FormMethod.Post))
                 {

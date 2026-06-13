@@ -123,13 +123,16 @@ namespace RecordsMaster.Controllers
                             }
 
                             // Log each actual change as a history entry describing the former and new value.
+                            // These are audit rows, not open checkouts, so CheckedOutDate and ReturnedDate match. Only ApplyCheckedOutToUpdate leaves ReturnedDate null to mark a genuinely open checkout.
                             if (changeMessage != null)
                             {
+                                var loggedAt = DateTime.UtcNow;
                                 _context.CheckoutHistory.Add(new CheckoutHistory
                                 {
                                     RecordItemId = record.ID,
                                     UserId = currentUserId!,
-                                    CheckedOutDate = DateTime.UtcNow,
+                                    CheckedOutDate = loggedAt,
+                                    ReturnedDate = loggedAt,
                                     DeliveryMessage = changeMessage
                                 });
                                 updatedCount++;
@@ -246,6 +249,7 @@ namespace RecordsMaster.Controllers
                     if (digitized == record.Digitized) return (null, null);
                     var digMsg = $"Digitized changed from '{record.Digitized}' to '{digitized}'.";
                     record.Digitized = digitized;
+                    record.ReturnedFromDigitization = true;
                     return (null, digMsg);
 
                 case "Expunged":
