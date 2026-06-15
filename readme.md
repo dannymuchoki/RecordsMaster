@@ -96,7 +96,144 @@ The app has ten controllers. The controllers, as the name suggests, control what
 
 Admin users can see what each user has requested or checked out via the 'Manage Users' page. Click on the username hyperlink to access the user's record view. There is also a method that will wipe the database, but you must manually configure it. It is only useful in testing and activating it is left as an exercise for the reader (i.e. me when I forget how to call methods in .NET). 
 
-## RecordItemsController
+### AccountController
+This controller manages accounts, registration, and permissions. Only the superuser can create new admins. 
+
+#### Overall:
+                ┌─────────────────────┐
+                │   ASP.NET Identity  │
+                │ UserManager         │
+                │ SignInManager       │
+                └─────────┬───────────┘
+                          │
+                          ↓
+        ┌────────────────────────────────┐
+        │     AccountController         │
+        │                                │
+        │ Login / Register / Logout     │
+        │ Role Management (Admin only)  │
+        └─────────┬──────────────────────┘
+                  │
+     ┌────────────┼─────────────┐
+     ↓            ↓             ↓
+ Login        Register       Admin Roles
+ Flow         Flow           Flow
+
+#### Login
+User → /Account/Login (GET)
+          ↓
+   Login Page Rendered
+          ↓
+User submits email + password
+          ↓
+/Account/Login (POST)
+          ↓
+SignInManager.PasswordSignInAsync(email, password)
+          ↓
+   ┌───────────────┐
+   │ Success?       │
+   └──────┬────────┘
+          │Yes
+          ↓
+ Redirect → Home/Index
+
+          │No
+          ↓
+ ModelState error ("Invalid login attempt")
+          ↓
+ Return Login View
+
+ #### Registration
+
+ User → /Account/Register (GET)
+          ↓
+   Register Page Rendered
+          ↓
+User submits email + password
+          ↓
+/Account/Register (POST)
+          ↓
+Email format validation (Regex)
+          ↓
+   ┌───────────────┐
+   │ Valid email?   │
+   └──────┬────────┘
+          │No
+          ↓
+ Return Register View + error
+
+          │Yes
+          ↓
+UserManager.CreateAsync(user, password)
+          ↓
+   ┌───────────────┐
+   │ Create success?│
+   └──────┬────────┘
+          │No
+          ↓
+ Return View + Identity errors
+
+          │Yes
+          ↓
+SignInManager.SignInAsync(user)
+          ↓
+Fire-and-forget email to Admin
+(Task.Run → IEmailSender.SendEmailAsync)
+          ↓
+Redirect → Home/Index
+
+#### View user roles
+
+Admin → /Account/UserRoles (GET)
+          ↓
+[Authorize(Roles="Admin")]
+          ↓
+UserManager.Users (get all users)
+          ↓
+For each user:
+   GetRolesAsync(user)
+          ↓
+Build model:
+(User + IsUser + IsAdmin + IsCourtRequestor)
+          ↓
+ViewBag.AdminEmail loaded from config
+          ↓
+Return View (UserRoles.cshtml)
+
+#### Change user roles
+
+Admin submits role change
+→ /Account/SetUserRole (POST)
+          ↓
+Find user by ID
+          ↓
+Check if user is "super admin"
+(from config email)
+          ↓
+   ┌────────────────────┐
+   │ Is super admin?    │
+   └──────┬─────────────┘
+          │Yes
+          ↓
+Redirect back (no change)
+
+          │No
+          ↓
+Get current roles
+          ↓
+Define allowed roles:
+["Admin", "User", "Court Requestors"]
+          ↓
+Remove conflicting roles
+(except selected role)
+          ↓
+If role != "None"
+   AddToRoleAsync(user, role)
+          ↓
+Redirect → UserRoles
+
+### RecordItemsController
+This is the main controller. Use it to search, manage digitization, physical administration, and auditing.
 
 | Area                  | Actions                                                                      |
 | --------------------- | ---------------------------------------------------------------------------- |
@@ -104,6 +241,114 @@ Admin users can see what each user has requested or checked out via the 'Manage 
 | Digitization Workflow | `BoxDigitizationCheck`, `ShippedForDigitization`, `ReturnedFromDigitization` |
 | Administration        | `List`, `Labels`, `DownloadCsv`                                              |
 | Auditing & UI         | `CheckoutHistory`, `GetCheckedOutRecords`, `ClearPdfAlert`                   |
+
+### UploadController
+Admin users can upload a .csv of records. RecordsMaster automatically generates barcode labels. Only one admin should upload at a time. 
+
+Admin uploads CSV
+        ↓
+Validate CSV rows
+        ↓
+Create RecordItemModel objects
+        ↓
+Generate barcodes
+        ↓
+Save records to database
+        ↓
+Generate PDF labels
+        ↓
+Save PDF temporarily
+        ↓
+Redirect to Record List
+        ↓
+User downloads PDF
+
+### UpdateController
+Processes a CSV file and updates records in the database based on barcode matches. Valid rows save even if some rows fail.
+
+It supports:
+- Bulk metadata updates
+- Bulk checkout reassignment
+- Automatic user creation
+- Audit/history logging
+- Email notifications
+
+Fields you can update (defined in the UpdatableFields dictionary and selected by the user before uploading the CSV.)
+
+| Field        | Type       |
+| ------------ | ---------- |
+| Location     | String     |
+| BoxNumber    | Integer    |
+| Digitized    | Boolean    |
+| ClosingDate  | Date       |
+| DestroyDate  | Date       |
+| Expunged     | Boolean    |
+| CheckedOutTo | User Email |
+
+
+### RecordCheckoutController
+
+Flow goes like this:
+
+                ┌──────────────────┐
+                │  No Request      │
+                │ (initial state)  │
+                └────────┬─────────┘
+                         │ RequestRecord
+                         ▼
+                ┌──────────────────┐
+                │   Requested      │
+                │ Requested = true │
+                └───────┬──────────┘
+                        │ ReadyForPickup
+                        ▼
+                ┌──────────────────┐
+                │ Ready for Pickup │
+                │ Requested = true │
+                │ ReadyForPickup=1 │
+                └───────┬──────────┘
+                        │ Checkout
+                        ▼
+                ┌──────────────────┐
+                │   Checked Out    │
+                │ CheckedOut = true│
+                └──────────────────┘
+
+
+        ┌──────────────────────────────────────────┐
+        │              CancelRequest               │
+        │                                          │
+        │  from Requested or ReadyForPickup        │
+        │  → returns to No Request                 │
+        └──────────────────────────────────────────┘
+
+If/when I get better at C#, I'll turn this into a state machine. 
+
+### PasswordResetController
+
+Request Email
+   ↓
+Generate Token + Email Link
+   ↓
+Validate Link
+   ↓
+Set New Password
+
+### HomeController
+- Gets requested records from DB
+- Applies role-based filtering (Admin vs normal user)
+- Loads password reset messages (if any)
+- Fetches recent canceled checkout history (for admins)
+
+### UserRecordsController
+Uses the UserRecords view to show records checked out by the currently logged-in user. Admins can view  all checked-out records for each user. 
+
+### RecordCheckInController
+
+Undoes what RecordCheckout does. 
+
+### LabelsController
+Retrieve record from the database and sends them to PDFPrintService for download/printing. 
 
 
 ## 'Services' directory contains:
@@ -135,7 +380,7 @@ Admin users can:
 Regular users can request and check out record items. 
  
 # Coming changes
-.NET 9 reaches EOL in November 2026. The app is now defaulting to .NET10 in RecordsMaster.csproj. To run in .NET 9:
+.NET 9 reaches EOL in November 2026. The app defaults to .NET10 in RecordsMaster.csproj. To run in .NET 9, remove '.old' from the .Net9.csproj file. Then:
 
 > dotnet build RecordsMaster.Net9.csproj
 

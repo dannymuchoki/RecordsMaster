@@ -9,7 +9,7 @@ using RecordsMaster.Services;
 
 namespace RecordsMaster.Controllers
 {
-    // This controller handles user account management, including login, registration, and user roles. The views are in the Views/Account folder.
+    // This controller handles user account management, including login, registration, and user roles. The views are in the Views/Account folder. This is written pretty broadly - there are many security changes you can make depending on your situation. ƒ
     public class AccountController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;

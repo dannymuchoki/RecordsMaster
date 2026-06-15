@@ -31,6 +31,7 @@
                         <a asp-area="" asp-controller="UserRecords" asp-action="AdminViewUserRecords" asp-route-email="@item.User.Email"> @item.User.Email</a>
                     </td>
                     <td>
+                        <!-- Can probably use a view model for this -->
                         @if (item.User.Email == ViewBag.AdminEmail)
                         {
                             <span>  This user's permissions cannot be modified. </span>
