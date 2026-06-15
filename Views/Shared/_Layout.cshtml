@@ -70,7 +70,9 @@
                                 </li>
                             }
                             <li class="nav-item">
-                                <a class="@NavClass("Account", "Logout")" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="@NavClass("Account", "Logout") nav-link btn btn-link p-0 border-0" style="cursor:pointer;">Logout</button>
+                                </form>
                             </li>
                         </ul>
                     </div>

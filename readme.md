@@ -96,6 +96,16 @@ The app has ten controllers. The controllers, as the name suggests, control what
 
 Admin users can see what each user has requested or checked out via the 'Manage Users' page. Click on the username hyperlink to access the user's record view. There is also a method that will wipe the database, but you must manually configure it. It is only useful in testing and activating it is left as an exercise for the reader (i.e. me when I forget how to call methods in .NET). 
 
+## RecordItemsController
+
+| Area                  | Actions                                                                      |
+| --------------------- | ---------------------------------------------------------------------------- |
+| Searching             | `Search`, `SearchRecords`, `CaseWorkerSearch`, `Details`                     |
+| Digitization Workflow | `BoxDigitizationCheck`, `ShippedForDigitization`, `ReturnedFromDigitization` |
+| Administration        | `List`, `Labels`, `DownloadCsv`                                              |
+| Auditing & UI         | `CheckoutHistory`, `GetCheckedOutRecords`, `ClearPdfAlert`                   |
+
+
 ## 'Services' directory contains:
 1. The email sender. This is flexible and may require configuration to work with your SMTP setup. I recommend spending several hours with the C# [SMTP class documentation](https://learn.microsoft.com/en-us/dotnet/api/system.net.mail.smtpclient?view=net-9.0). Then ragequit and decide to use [MailKit](https://github.com/jstedfast/mailkit). In fact, that's what the .NET documentation tells you to do. 
 2. Three PDF printing services:

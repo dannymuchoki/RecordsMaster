@@ -37,6 +37,7 @@
                         }
                         else{
                         <form asp-action="SetUserRole" asp-controller="Account" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="userId" value="@item.User.Id" />
                             @if (User.Identity?.Name == ViewBag.AdminEmail)
                             {
@@ -86,6 +87,7 @@
                         }
                         else{
                         <form asp-action="SetUserRole" asp-controller="Account" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="userId" value="@item.User.Id" />
                             @if (User.Identity?.Name == ViewBag.AdminEmail)
                             {
@@ -125,6 +127,7 @@
                         }
                         else{
                         <form asp-action="SetUserRole" asp-controller="Account" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
                             <input type="hidden" name="userId" value="@item.User.Id" />
                             @if (User.Identity?.Name == ViewBag.AdminEmail)
                             {

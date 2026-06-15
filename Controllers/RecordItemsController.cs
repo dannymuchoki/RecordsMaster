@@ -152,7 +152,8 @@ namespace RecordsMaster.Controllers
         public async Task<IActionResult> Details(string id)
         {
             var record = await _context.RecordItems.Where(r => r.CIS == id).ToListAsync();
-            if (record == null)
+            //if (record == null)
+            if (!record.Any())
             {
                 return NotFound();
             }

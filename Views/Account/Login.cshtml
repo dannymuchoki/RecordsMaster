@@ -5,7 +5,7 @@
 <h2>Login</h2>
 
 <form method="post">
-    
+    @Html.AntiForgeryToken()
     <div class="form-group p-1">
         <label>Email</label>
         <input type="email" name="email" required  class="form-control"/>

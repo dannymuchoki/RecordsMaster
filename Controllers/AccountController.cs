@@ -16,9 +16,9 @@ namespace RecordsMaster.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _config;
         private readonly IEmailSender _emailSender;
-        private readonly ILogger<RecordCheckOutController> _logger;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IConfiguration config, ILogger<RecordCheckOutController> logger)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IConfiguration config, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -47,6 +47,7 @@ namespace RecordsMaster.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetUserRole(string userId, string role)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -84,6 +85,7 @@ namespace RecordsMaster.Controllers
         public IActionResult Login() => View();
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password)
         {
             var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
@@ -104,11 +106,12 @@ namespace RecordsMaster.Controllers
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(string email, string password)
         {
             if (string.IsNullOrWhiteSpace(email) || !EmailFormatRegex.IsMatch(email))
             {
-                ModelState.AddModelError("", "Email must be in the format firstname.lastname@gmail.com.");
+                ModelState.AddModelError("", "Email must be in the format firstname.lastname@domain.tld");
                 return View();
             }
 
@@ -148,6 +151,8 @@ namespace RecordsMaster.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
