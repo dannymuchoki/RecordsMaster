@@ -16,14 +16,15 @@
 
     <div class="form-group m-1">
         <label>Email</label>
+        <!-- You can disable the email naming convention in AccountController.cs and removing/commenting out the placeholder, pattern, and title values in this form. -->
         <input type="email"
                name="email"
                id="email"
                class="form-control"
-               placeholder="firstname.lastname@domain.tld"
+               placeholder="firstname.lastname@example.com"
                required
-               pattern="[A-Za-z][A-Za-z\-]*\.[A-Za-z][A-Za-z0-9\-]*&#64;doman.tld"
-               title="Email must be in the format firstname.lastname&#64;domain.tld" />
+               pattern="@ViewBag.EmailPattern"
+               title="Email must be in the format firstname.lastname&#64;example.com" />
 
         <label>Password</label>
         <input type="password" name="password" required  class="form-control" /> <br/>

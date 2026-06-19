@@ -17,14 +17,18 @@ namespace RecordsMaster.Controllers
         private readonly IConfiguration _config;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<AccountController> _logger;
+        private readonly Regex _emailFormatRegex;
 
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IConfiguration config, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
-             _config = config;
-             _logger = logger;
+            _config = config;
+            _logger = logger;
+            _emailFormatRegex = new Regex(
+                config["AccountSignupRegex"] ?? @"^[A-Za-z][A-Za-z0-9\-]*\.[A-Za-z][A-Za-z0-9\-]*@domain\.tld",
+                RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
         // This action returns a view that lists all users and their roles.
         // It uses a tuple to pair each user with a boolean indicating if they are in the "User" role.
@@ -99,19 +103,22 @@ namespace RecordsMaster.Controllers
             return View();
         }
 
-        public IActionResult Register() => View();
+        public IActionResult Register()
+        {
+            /* Pass the email regex to the view */
+            ViewBag.EmailPattern = _config["AccountSignupRegex"];
+            return View();
+        }
 
-        private static readonly Regex EmailFormatRegex = new(
-            @"^[A-Za-z][A-Za-z0-9\-]*\.[A-Za-z][A-Za-z0-9\-]*@domain\.tld",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(string email, string password)
         {
-            if (string.IsNullOrWhiteSpace(email) || !EmailFormatRegex.IsMatch(email))
+            /* Restrict usernames to fit a speecific regex. Comment this out if you'd rather not have this active. */
+            if (string.IsNullOrWhiteSpace(email) || !_emailFormatRegex.IsMatch(email))
             {
-                ModelState.AddModelError("", "Email must be in the format firstname.lastname@domain.tld");
+                ModelState.AddModelError("", "Email must be in the format firstname.lastname@example.com");
                 return View();
             }
 

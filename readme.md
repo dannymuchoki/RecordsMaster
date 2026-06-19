@@ -6,15 +6,28 @@
 
 I made RecordsMaster because I could not find anything on the market that met the records room's needs. I made the code public so that others who have similar challenges can reuse it for their purposes. This is partially a learning experience for me, and the best way to learn is to just go for it.
 
+This app was optimized for organizations that use Microsoft IIS servers, which is usually public service organizations. It should be possible to make this into a docker file or deploy it to the cloud. 
+
+# Overall setup steps:
+1. Rename appsettings-prod.json to appsettings.json. Replace the placeholder email address values, and modify the account signup regular expression. 
+2. (Optional) create a 'file.csv' using the original_data_template.csv for the data you want to migrate at initial setup.
+3. (Optional) use a backup checkout history by renaming it 'checkout_history_backup.csv' at initial setup. 
+4. Choose a development environment (Development or Production).
+4. Run the migrations.
+5. Build the application.
+6. Run the application. 
+
 # Before anything, rename 'appsettings-prod.json' to 'appsettings.json'
-0. Rename 'appsettings-prod.json' to 'appsettings.json' - this is a template appsettings file.
+0. Rename 'appsettings-prod.json' to 'appsettings.json' - this is a template appsettings file. The app won't run without this step. This step exists to make sure the user reads the instructions 🙂
 1. Modify the default admin and user email addresses in the 'UserSeedData' key in appsettings.
-2. Add the email boxes you'd like to use in appsettings.
+2. Add the email boxes you'd like to use in appsettings for notifications or test users. 
 3. The default admin user in appsettings under the "AdminEmail" key is referenced in the UserRoles.cshtml view. This is done to avoid accidentally self-nerfing the admin user. This user will see "this user's permissions cannot be modified".
 4. You will need to enter an SMTP server in appsettings for email to work. SMTP uses MailKit.
+5. You can specify users to exclude in the "ExcludedUsers" list. Why is this useful? If people leave the organization, you can remove their permissions in the Manage Users view. If you put them in the ExcludedUsers list, they won't show up in the Manage Users view at all. It just keeps the view neat. 
+6. The AccountSignupRegex enforces a firstname.lastname@example.com rule for user signups. You can disable this entirely if you want in AccountController.ccs, and make sure you modify the Register view form. The view has instructions on which elements of the form to disable. For a crash course on regex (i.e. regular expressions) [check out the Wikipedia article](https://en.wikipedia.org/wiki/Regular_expression) and experiment on [regex101](https://regex101.com/).  
 
-# Appsettings holds most of the configurations you need to change.
-You can use it to set up the admin users, mailboxes, how many pages the List view should have, and the database credentials.
+## Appsettings holds most of the configurations you need to change.
+You can use it to set up the admin users, mailboxes, how many pages the List view should have, and the (I highly discourage this!) database credentials.
 
 .NET supports having a Production appsettings (appsettings.Production.json) and a Development appsettings (appsettings.Development.json). I didn't do that here because the only environmental difference in RecordsMaster is the database.
 
@@ -28,7 +41,9 @@ Otherwise, the seeded data in Program.cs will populate the table. You can use th
 # Checkout History Note
 The superuser can download checkout history along with the entire database contents in a .zip file from the 'List' view. The button says 'Download All'.
 
-You can use the two .csv files in the .zip archive to re-populate the database, users, and checkout history. This was useful in development and survives as a last-resort restore method. If you back up your database regularly, you should never need to use this.
+You can use the two .csv files in the .zip archive to re-populate the database, users, and checkout history. Name the records database .csv as 'file.csv' and the record checkout .csv to 'checkout_history_backup.csv'. This will populate the database at initial setup. 
+
+This feature was useful in development and survives as a last-resort restore method. If you back up your database regularly, you should never need to use this.
 
 # Set the development environment to Production or Development
 0. You can do this in launchsettings.json (for local development), or in the web.config (for production servers).
@@ -36,7 +51,7 @@ You can use the two .csv files in the .zip archive to re-populate the database, 
 # In Development mode:
 Migrations will create the SQLite database with the admin user, a test user, and the seeded information.
 
-Migrations in Development:
+Migrations in Development (use --context SqliteAppDbContext)
 
 > dotnet ef migrations add MyChange --context SqliteAppDbContext
 
@@ -44,9 +59,9 @@ You need the --context flag because .NET doesn't read environment variables when
 
 .NET **does** read environment variables when loading or running the app in Program.cs though.
 
-In Development, the migrations will be in a subdirectory of 'Migrations' called 'SQLite'.
+In Development, the migrations will be in a subdirectory of 'Migrations' called 'SQLite' or 'SQLite Migrations'.
 
-If in Development, make sure to uncomment this in RecordsMaster.csproj.
+If in Development, make sure to uncomment this section of RecordsMaster.csproj.
 
 ```xml
 <Content Include="testdb.db">
@@ -123,6 +138,7 @@ This controller manages accounts, registration, and permissions. Only the superu
 ```
 
 #### Login
+This view logs users in. 
 
 ```
 User → /Account/Login (GET)
@@ -150,6 +166,7 @@ SignInManager.PasswordSignInAsync(email, password)
 ```
 
 #### Registration
+This view registers users. 
 
 ```
  User → /Account/Register (GET)
@@ -160,7 +177,7 @@ User submits email + password
           ↓
 /Account/Register (POST)
           ↓
-Email format validation (Regex)
+Email format validation (Regex) - can be disabled in the view and controller
           ↓
    ┌───────────────┐
    │ Valid email?   │
@@ -191,6 +208,7 @@ Redirect → Home/Index
 ```
 
 #### View user roles
+Admins can see each user's role. 
 
 ```
 Admin → /Account/UserRoles (GET)
@@ -211,6 +229,7 @@ Return View (UserRoles.cshtml)
 ```
 
 #### Change user roles
+Admins can change user roles from User to Court Requestors. Superuser can create new admins. 
 
 ```
 Admin submits role change
@@ -299,9 +318,18 @@ Fields you can update (defined in the UpdatableFields dictionary and selected by
 | Expunged     | Boolean    |
 | CheckedOutTo | User Email |
 
-### RecordCheckoutController
+Use the UpdateView and controller to update the database when:
 
-Flow goes like this:
+1. A record is boxed (or re-boxed)
+2. A record is digitized
+3. A record is expunged 
+4. A record is moved from one location to a different location
+5. A record needs an updated closing date or destructio date. 
+
+CheckedOutTo should be used incredibly rarely. It survives from the initial deployment when we assigned records to users and created their accounts at the same time. 
+
+### RecordCheckoutController
+Users can check out records. 
 
 ```
                 ┌──────────────────┐
@@ -340,6 +368,7 @@ Flow goes like this:
 If/when I get better at C#, I'll turn this into a state machine.
 
 ### PasswordResetController
+Users can reset their passwords.
 
 ```
 Request Email
@@ -361,10 +390,10 @@ Set New Password
 Uses the UserRecords view to show records checked out by the currently logged-in user. Admins can view all checked-out records for each user.
 
 ### RecordCheckInController
-Undoes what RecordCheckout does.
+Undoes what RecordCheckout does. Only admins can check in a record. 
 
 ### LabelsController
-Retrieves records from the database and sends them to PDFPrintService for download/printing.
+Retrieves records from the database and sends them to PDFPrintService for download/printing. Attach the labels to the actual records. 
 
 ## 'Services' directory contains:
 1. The email sender. This is flexible and may require configuration to work with your SMTP setup. I recommend spending several hours with the C# [SMTP class documentation](https://learn.microsoft.com/en-us/dotnet/api/system.net.mail.smtpclient?view=net-9.0). Then ragequit and decide to use [MailKit](https://github.com/jstedfast/mailkit). In fact, that's what the .NET documentation tells you to do.
